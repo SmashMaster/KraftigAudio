@@ -3,6 +3,7 @@ package kraftigaudio;
 import com.samrj.devil.display.HintSet;
 import com.samrj.devil.game.Game;
 import com.samrj.devil.game.GameConfig;
+import com.samrj.devil.gl.DGL;
 import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.GraphicsUtil;
 import com.samrj.devil.math.Mat3;
@@ -51,16 +52,21 @@ public class Main extends Game
         }
     }
     
+    private final UI ui;
+    
     private final Player player;
     private final Camera3D camera;
     private final Skybox skybox;
     private final FloorGrid floor;
     
-    private Main()
+    private Main() throws Exception
     {
         super("Kr\u00E4ftig Audio",  hints(), config());
         
+        DGL.init();
         mouse.setGrabbed(true);
+        
+        ui = new UI();
         
         player = new Player(keyboard, getResolution());
         camera = player.getCamera();
@@ -138,5 +144,6 @@ public class Main extends Game
     @Override
     public void onDestroy()
     {
+        DGL.destroy();
     }
 }

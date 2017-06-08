@@ -14,8 +14,8 @@ public class Player
     private static final float FOV = Util.toRadians(90.0f);
     private static final float SENSITIVTY = Util.toRadians(1.0f/8.0f);
     private static final float HEIGHT = 1.75f;
-    private static final float SPEED = 2.0f, ACC = 16.0f;
-    private static final float SPEED_SPRINT = 4.0f, ACC_SPRINT = 32.0f;
+    private static final float SPEED = 3.0f, ACC = 24.0f;
+    private static final float SPEED_SPRINT = 6.0f, ACC_SPRINT = 48.0f;
     
     private final Keyboard keyboard;
     
