@@ -1,4 +1,4 @@
-package kraftigaudio;
+package kraftig.game;
 
 import com.samrj.devil.ui.AtlasFont;
 
@@ -8,6 +8,6 @@ public class UI
     
     UI() throws Exception
     {
-        font = new AtlasFont("kraftigaudio/res/fonts/", "hud.fnt");
+        font = new AtlasFont("kraftig/res/fonts/", "hud.fnt");
     }
 }

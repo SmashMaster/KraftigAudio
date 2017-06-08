@@ -1,4 +1,4 @@
-package kraftigaudio;
+package kraftig.game;
 
 import org.lwjgl.opengl.GL11;
 

@@ -1,4 +1,4 @@
-package kraftigaudio;
+package kraftig.game;
 
 import com.samrj.devil.display.HintSet;
 import com.samrj.devil.game.Game;

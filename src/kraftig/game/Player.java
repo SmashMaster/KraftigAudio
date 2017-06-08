@@ -1,4 +1,4 @@
-package kraftigaudio;
+package kraftig.game;
 
 import com.samrj.devil.game.Keyboard;
 import com.samrj.devil.graphics.Camera3D;
