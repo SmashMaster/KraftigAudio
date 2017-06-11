@@ -8,16 +8,18 @@ import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.GraphicsUtil;
 import com.samrj.devil.math.Mat3;
 import com.samrj.devil.math.Quat;
+import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
+import com.samrj.devil.ui.Alignment;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.SourceDataLine;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 
 public class Main extends Game
 {
-    private static final int CROSSHAIR_WIDTH = 12;
-    private static final int CROSSHAIR_INNER_WIDTH = 4;
-    
     private static HintSet hints()
     {
         HintSet hints = new HintSet();
@@ -53,11 +55,19 @@ public class Main extends Game
     }
     
     private final UI ui;
-    
     private final Player player;
     private final Camera3D camera;
     private final Skybox skybox;
     private final FloorGrid floor;
+    
+//    private static final int SAMPLE_RATE = 48000;
+//    private static final double SAMPLE_DT = 1.0/SAMPLE_RATE;
+//    private static final double BUFFER_LATENCY = 0.03; //3ms of initial buffer.
+    
+//    private final SourceDataLine line;
+//    private final byte[] buffer;
+//    private double sampleRemainder = BUFFER_LATENCY*SAMPLE_RATE; //3ms of initial buffer.
+//    private double t;
     
     private Main() throws Exception
     {
@@ -67,7 +77,6 @@ public class Main extends Game
         mouse.setGrabbed(true);
         
         ui = new UI();
-        
         player = new Player(keyboard, getResolution());
         camera = player.getCamera();
         skybox = new Skybox();
@@ -76,6 +85,13 @@ public class Main extends Game
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL13.GL_MULTISAMPLE);
+        
+//        AudioFormat format = new AudioFormat(SAMPLE_RATE, 16, 2, true, false);
+//        line = AudioSystem.getSourceDataLine(format);
+//        line.open();
+//        line.start();
+//        
+//        buffer = new byte[line.getBufferSize()];
     }
     
     @Override
@@ -104,6 +120,37 @@ public class Main extends Game
     public void step(float dt)
     {
         player.step(dt);
+        
+//        double samplesExact = (double)dt*SAMPLE_RATE;
+//        int samples = (int)Math.round(samplesExact);
+//        sampleRemainder += samplesExact - samples;
+//        
+//        if (sampleRemainder >= 1.0)
+//        {
+//            int mod = (int)Math.floor(sampleRemainder);
+//            samples += mod;
+//            sampleRemainder -= mod;
+//        }
+//        
+//        int bi = 0;
+//        
+//        for (int i=0; i<samples; i++)
+//        {
+//            double d = keyboard.isKeyDown(GLFW.GLFW_KEY_SPACE) ? Math.sin(Math.PI*2.0*440.0*t)*0.25 : 0.0;
+//            
+//            short s = (short)Math.round(d*32767.5 - 0.5);
+//            byte b0 = (byte)(s & 0xff);
+//            byte b1 = (byte)((s >> 8) & 0xff);
+//            
+//            buffer[bi++] = b0; //Left channel
+//            buffer[bi++] = b1;
+//            buffer[bi++] = b0; //Right channel
+//            buffer[bi++] = b1;
+//            
+//            t += SAMPLE_DT;
+//        }
+//        
+//        line.write(buffer, 0, bi);
     }
     
     @Override
@@ -120,6 +167,15 @@ public class Main extends Game
         
         floor.render();
         
+//        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+//        GL11.glPushMatrix();
+//        GL11.glScalef(0.01f, 0.01f, 0.01f);
+//        
+//        GL11.glColor3f(1.0f, 1.0f, 1.0f);
+//        ui.getFont().drawDeprecated("This is some test text.", new Vec2(), Alignment.C);
+//        
+//        GL11.glPopMatrix();
+        
         //Load screen matrix to draw HUD.
         Vec2i res = getResolution();
         GL11.glMatrixMode(GL11.GL_PROJECTION);
@@ -128,17 +184,7 @@ public class Main extends Game
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glLoadIdentity();
         
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-        GL11.glBegin(GL11.GL_LINES);
-        GL11.glVertex2f(-CROSSHAIR_WIDTH, 0.0f);
-        GL11.glVertex2f(-CROSSHAIR_INNER_WIDTH, 0.0f);
-        GL11.glVertex2f(CROSSHAIR_WIDTH, 0.0f);
-        GL11.glVertex2f(CROSSHAIR_INNER_WIDTH, 0.0f);
-        GL11.glVertex2f(0.0f, -CROSSHAIR_WIDTH);
-        GL11.glVertex2f(0.0f, -CROSSHAIR_INNER_WIDTH);
-        GL11.glVertex2f(0.0f, CROSSHAIR_WIDTH);
-        GL11.glVertex2f(0.0f, CROSSHAIR_INNER_WIDTH);
-        GL11.glEnd();
+        ui.renderHUD();
     }
     
     @Override
