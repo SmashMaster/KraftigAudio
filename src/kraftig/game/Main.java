@@ -60,14 +60,7 @@ public class Main extends Game
     private final Skybox skybox;
     private final FloorGrid floor;
     
-//    private static final int SAMPLE_RATE = 48000;
-//    private static final double SAMPLE_DT = 1.0/SAMPLE_RATE;
-//    private static final double BUFFER_LATENCY = 0.03; //3ms of initial buffer.
-    
-//    private final SourceDataLine line;
-//    private final byte[] buffer;
-//    private double sampleRemainder = BUFFER_LATENCY*SAMPLE_RATE; //3ms of initial buffer.
-//    private double t;
+    private final SoundChainTest test;
     
     private Main() throws Exception
     {
@@ -86,12 +79,7 @@ public class Main extends Game
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL13.GL_MULTISAMPLE);
         
-//        AudioFormat format = new AudioFormat(SAMPLE_RATE, 16, 2, true, false);
-//        line = AudioSystem.getSourceDataLine(format);
-//        line.open();
-//        line.start();
-//        
-//        buffer = new byte[line.getBufferSize()];
+        test = new SoundChainTest();
     }
     
     @Override
@@ -120,37 +108,7 @@ public class Main extends Game
     public void step(float dt)
     {
         player.step(dt);
-        
-//        double samplesExact = (double)dt*SAMPLE_RATE;
-//        int samples = (int)Math.round(samplesExact);
-//        sampleRemainder += samplesExact - samples;
-//        
-//        if (sampleRemainder >= 1.0)
-//        {
-//            int mod = (int)Math.floor(sampleRemainder);
-//            samples += mod;
-//            sampleRemainder -= mod;
-//        }
-//        
-//        int bi = 0;
-//        
-//        for (int i=0; i<samples; i++)
-//        {
-//            double d = keyboard.isKeyDown(GLFW.GLFW_KEY_SPACE) ? Math.sin(Math.PI*2.0*440.0*t)*0.25 : 0.0;
-//            
-//            short s = (short)Math.round(d*32767.5 - 0.5);
-//            byte b0 = (byte)(s & 0xff);
-//            byte b1 = (byte)((s >> 8) & 0xff);
-//            
-//            buffer[bi++] = b0; //Left channel
-//            buffer[bi++] = b1;
-//            buffer[bi++] = b0; //Right channel
-//            buffer[bi++] = b1;
-//            
-//            t += SAMPLE_DT;
-//        }
-//        
-//        line.write(buffer, 0, bi);
+        test.step(dt);
     }
     
     @Override
@@ -166,15 +124,6 @@ public class Main extends Game
         GraphicsUtil.glLoadMatrix(camera.viewMat, GL11.GL_MODELVIEW);
         
         floor.render();
-        
-//        GL11.glMatrixMode(GL11.GL_MODELVIEW);
-//        GL11.glPushMatrix();
-//        GL11.glScalef(0.01f, 0.01f, 0.01f);
-//        
-//        GL11.glColor3f(1.0f, 1.0f, 1.0f);
-//        ui.getFont().drawDeprecated("This is some test text.", new Vec2(), Alignment.C);
-//        
-//        GL11.glPopMatrix();
         
         //Load screen matrix to draw HUD.
         Vec2i res = getResolution();
