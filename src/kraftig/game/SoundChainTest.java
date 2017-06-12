@@ -12,7 +12,7 @@ public class SoundChainTest
     private final TargetDataLine inputLine;
     private final byte[] buffer;
     private final float[] leftBuffer, rightBuffer;
-    private final LowPassFilter leftLPF, rightLPF;
+    private final BiquadFilter leftLPF, rightLPF;
     private final float[] leftOutBuffer, rightOutBuffer;
     private final SourceDataLine outputLine;
     
@@ -28,8 +28,8 @@ public class SoundChainTest
         leftBuffer = new float[buffer.length/4];
         rightBuffer = new float[buffer.length/4];
         
-        leftLPF = new LowPassFilter(SAMPLE_RATE, 2000f, 1.0f);
-        rightLPF = new LowPassFilter(SAMPLE_RATE, 2000f, 1.0f);
+        leftLPF = new BiquadFilter(SAMPLE_RATE, 100f, 1.0f);
+        rightLPF = new BiquadFilter(SAMPLE_RATE, 100f, 1.0f);
         leftOutBuffer = new float[buffer.length/4];
         rightOutBuffer = new float[buffer.length/4];
         

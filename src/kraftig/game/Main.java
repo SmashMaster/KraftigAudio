@@ -60,8 +60,6 @@ public class Main extends Game
     private final Skybox skybox;
     private final FloorGrid floor;
     
-    private final SoundChainTest test;
-    
     private Main() throws Exception
     {
         super("Kr\u00E4ftig Audio",  hints(), config());
@@ -78,8 +76,6 @@ public class Main extends Game
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL13.GL_MULTISAMPLE);
-        
-        test = new SoundChainTest();
     }
     
     @Override
@@ -108,7 +104,6 @@ public class Main extends Game
     public void step(float dt)
     {
         player.step(dt);
-        test.step(dt);
     }
     
     @Override
