@@ -8,8 +8,10 @@ import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.GraphicsUtil;
 import com.samrj.devil.math.Mat3;
 import com.samrj.devil.math.Quat;
+import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
+import com.samrj.devil.ui.Alignment;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -69,10 +71,13 @@ public class Main extends Game
         camera = player.getCamera();
         skybox = new Skybox();
         floor = new FloorGrid();
-        panel = new Panel(ui);
+        panel = new Panel();
         panel.setPosition(new Vec3(0.0f, 1.75f, -1.0f));
         panel.setSize(0.25f, 0.125f);
         panel.setYaw(0.0f);
+        
+        panel.getFrontInterface().add(new Label(ui, "Front", new Vec2(), Alignment.C));
+        panel.getRearInterface().add(new Label(ui, "Rear", new Vec2(), Alignment.C));
         
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

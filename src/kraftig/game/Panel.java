@@ -8,14 +8,13 @@ public class Panel
 {
     private final Vec3 pos = new Vec3();
     private float yaw;
-    private float sizeX, sizeY;
+    private float width, height;
     
-    private final Interface frontInterface, backInterface;
+    private final Interface frontInterface = new Interface();
+    private final Interface rearInterface = new Interface();
     
-    public Panel(UI ui)
+    public Panel()
     {
-        frontInterface = new Interface(ui);
-        backInterface = new Interface(ui);
     }
     
     public Panel setPosition(Vec3 pos)
@@ -30,10 +29,12 @@ public class Panel
         return this;
     }
     
-    public Panel setSize(float x, float y)
+    public Panel setSize(float w, float h)
     {
-        sizeX = x;
-        sizeY = y;
+        width = w;
+        height = h;
+        frontInterface.setSize(w, h);
+        rearInterface.setSize(w, h);
         return this;
     }
     
@@ -42,15 +43,15 @@ public class Panel
         return frontInterface;
     }
     
-    public Interface getBackInterface()
+    public Interface getRearInterface()
     {
-        return backInterface;
+        return rearInterface;
     }
     
     public void render(Vec3 cameraPos)
     {
-        Vec2 cameraDir = new Vec2(cameraPos.x, cameraPos.z).sub(new Vec2(pos.x, pos.z));
-        Vec2 frontDir = new Vec2((float)Math.cos(yaw), (float)Math.sin(yaw));
+        Vec2 cameraDir = new Vec2(pos.x, pos.z).sub(new Vec2(cameraPos.x, cameraPos.z));
+        Vec2 frontDir = new Vec2(-(float)Math.sin(yaw), -(float)Math.cos(yaw));
         boolean facingFront = cameraDir.dot(frontDir) >= 0.0f;
         
         GL11.glPushMatrix();
@@ -60,30 +61,34 @@ public class Panel
         //Shadow
         GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
         GL11.glBegin(GL11.GL_LINES);
-        GL11.glVertex3f(-sizeX, -pos.y, 0.0f);
-        GL11.glVertex3f(sizeX, -pos.y, 0.0f);
+        GL11.glVertex3f(-width, -pos.y, 0.0f);
+        GL11.glVertex3f(width, -pos.y, 0.0f);
         GL11.glEnd();
         
         //Background
         GL11.glColor4f(0.4375f, 0.4375f, 0.4375f, 0.875f);
         GL11.glBegin(GL11.GL_QUADS);
-        GL11.glVertex3f(-sizeX, -sizeY, 0.0f);
-        GL11.glVertex3f(-sizeX, sizeY, 0.0f);
-        GL11.glVertex3f(sizeX, sizeY, 0.0f);
-        GL11.glVertex3f(sizeX, -sizeY, 0.0f);
+        GL11.glVertex3f(-width, -height, 0.0f);
+        GL11.glVertex3f(-width, height, 0.0f);
+        GL11.glVertex3f(width, height, 0.0f);
+        GL11.glVertex3f(width, -height, 0.0f);
         GL11.glEnd();
         
         //Outline
         GL11.glColor3f(1.0f, 1.0f, 1.0f);
         GL11.glBegin(GL11.GL_LINE_LOOP);
-        GL11.glVertex3f(-sizeX, -sizeY, 0.0f);
-        GL11.glVertex3f(-sizeX, sizeY, 0.0f);
-        GL11.glVertex3f(sizeX, sizeY, 0.0f);
-        GL11.glVertex3f(sizeX, -sizeY, 0.0f);
+        GL11.glVertex3f(-width, -height, 0.0f);
+        GL11.glVertex3f(-width, height, 0.0f);
+        GL11.glVertex3f(width, height, 0.0f);
+        GL11.glVertex3f(width, -height, 0.0f);
         GL11.glEnd();
         
         if (facingFront) frontInterface.render();
-        else backInterface.render();
+        else
+        {
+            GL11.glScalef(-1.0f, 1.0f, 1.0f);
+            rearInterface.render();
+        }
         
         GL11.glPopMatrix();
     }
