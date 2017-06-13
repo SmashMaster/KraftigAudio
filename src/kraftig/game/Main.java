@@ -8,12 +8,8 @@ import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.GraphicsUtil;
 import com.samrj.devil.math.Mat3;
 import com.samrj.devil.math.Quat;
-import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
-import com.samrj.devil.ui.Alignment;
-import javax.sound.sampled.AudioFormat;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.SourceDataLine;
+import com.samrj.devil.math.Vec3;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -59,6 +55,7 @@ public class Main extends Game
     private final Camera3D camera;
     private final Skybox skybox;
     private final FloorGrid floor;
+    private final Panel panel;
     
     private Main() throws Exception
     {
@@ -72,6 +69,10 @@ public class Main extends Game
         camera = player.getCamera();
         skybox = new Skybox();
         floor = new FloorGrid();
+        panel = new Panel(ui);
+        panel.setPosition(new Vec3(0.0f, 1.75f, -1.0f));
+        panel.setSize(0.25f, 0.125f);
+        panel.setYaw(0.0f);
         
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -119,6 +120,8 @@ public class Main extends Game
         GraphicsUtil.glLoadMatrix(camera.viewMat, GL11.GL_MODELVIEW);
         
         floor.render();
+        
+        panel.render(camera.pos);
         
         //Load screen matrix to draw HUD.
         Vec2i res = getResolution();

@@ -14,8 +14,7 @@ public class Player
     private static final float FOV = Util.toRadians(90.0f);
     private static final float SENSITIVTY = Util.toRadians(1.0f/8.0f);
     private static final float HEIGHT = 1.75f;
-    private static final float SPEED = 3.0f, ACC = 24.0f;
-    private static final float SPEED_SPRINT = 6.0f, ACC_SPRINT = 48.0f;
+    private static final float SPEED = 1.5f, SPEED_SPRINT = 6.0f, ACC = 24.0f;
     
     private final Keyboard keyboard;
     
@@ -61,10 +60,9 @@ public class Player
         
         boolean sprinting = keyboard.isKeyDown(GLFW.GLFW_KEY_LEFT_SHIFT);
         float speed = sprinting ? SPEED_SPRINT : SPEED;
-        float acc = sprinting ? ACC_SPRINT : ACC;
         
         if (!desiredVel.isZero(0.0f)) desiredVel.normalize().mult(speed);
-        vel.move(desiredVel, dt*acc);
+        vel.move(desiredVel, dt*ACC);
         
         pos.madd(vel, dt);
         cameraController.update();
