@@ -3,6 +3,7 @@ package kraftig.game;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import com.samrj.devil.ui.AtlasFont;
+import org.lwjgl.opengl.GL11;
 
 public class Label implements InterfaceElement
 {
@@ -22,6 +23,7 @@ public class Label implements InterfaceElement
     @Override
     public void render()
     {
+        GL11.glColor3f(1.0f, 1.0f, 1.0f);
         font.drawDeprecated(text, pos, align);
     }
 }

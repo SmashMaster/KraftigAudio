@@ -76,7 +76,9 @@ public class Main extends Game
         panel.setSize(0.25f, 0.125f);
         panel.setYaw(0.0f);
         
-        panel.getFrontInterface().add(new Label(ui, "Front", new Vec2(), Alignment.C));
+        panel.getFrontInterface()
+                .add(new Knob(new Vec2(8.0f, 0.0f), Alignment.E, 32.0f))
+                .add(new Label(ui, "Front", new Vec2(-8.0f, 0.0f), Alignment.W));
         panel.getRearInterface().add(new Label(ui, "Rear", new Vec2(), Alignment.C));
         
         GL11.glEnable(GL11.GL_BLEND);
