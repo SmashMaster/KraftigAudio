@@ -8,6 +8,7 @@ import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.GraphicsUtil;
 import com.samrj.devil.math.Mat3;
 import com.samrj.devil.math.Quat;
+import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
@@ -59,6 +60,8 @@ public class Main extends Game
     private final FloorGrid floor;
     private final Panel panel;
     
+    private boolean mouseGrabbed = true;
+    
     private Main() throws Exception
     {
         super("Kr\u00E4ftig Audio",  hints(), config());
@@ -74,7 +77,7 @@ public class Main extends Game
         panel = new Panel();
         panel.setPosition(new Vec3(0.0f, 1.75f, -1.0f));
         panel.setSize(0.25f, 0.125f);
-        panel.setYaw(0.0f);
+        panel.setYaw(Util.toRadians(0.0f));
         
         panel.getFrontInterface()
                 .add(new Knob(new Vec2(8.0f, 0.0f), Alignment.E, 32.0f))
@@ -89,12 +92,28 @@ public class Main extends Game
     @Override
     public void onMouseMoved(float x, float y, float dx, float dy)
     {
-        player.onMouseMoved(x, y, dx, dy);
+        if (mouseGrabbed) player.onMouseMoved(x, y, dx, dy);
     }
 
     @Override
     public void onMouseButton(int button, int action, int mods)
     {
+        if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
+        {
+            Vec2 mPos = new Vec2();
+            
+            if (!mouseGrabbed)
+            {
+                Vec2i res = getResolution();
+                mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
+            }
+            
+            Vec3 dir = Vec3.madd(camera.forward, camera.right, mPos.x*camera.hSlope);
+            dir.madd(camera.up, mPos.y*camera.vSlope);
+            dir.normalize();
+            
+            panel.onClick(camera.pos, dir);
+        }
     }
     
     @Override
@@ -105,7 +124,20 @@ public class Main extends Game
     @Override
     public void onKey(int key, int action, int mods)
     {
-        if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_ESCAPE) stop();
+        if (action == GLFW.GLFW_PRESS)
+        {
+            if (key == GLFW.GLFW_KEY_ESCAPE) stop();
+            else if (key == GLFW.GLFW_KEY_TAB)
+            {
+                mouse.setGrabbed(mouseGrabbed = !mouseGrabbed);
+                if (!mouseGrabbed)
+                {
+                    Vec2i res = getResolution();
+                    GLFW.glfwSetCursorPos(window, res.x/2.0, res.y/2.0);
+                    mouse.cursorPos(res.x/2.0f, res.y/2.0f);
+                }
+            }
+        }
     }
     
     @Override
@@ -138,7 +170,7 @@ public class Main extends Game
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glLoadIdentity();
         
-        ui.renderHUD();
+        ui.renderHUD(mouseGrabbed);
     }
     
     @Override

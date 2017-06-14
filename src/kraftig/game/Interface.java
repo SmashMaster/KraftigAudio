@@ -37,6 +37,11 @@ public class Interface
         return this;
     }
     
+    public void onClick(float x, float y)
+    {
+        x /= INTERFACE_SCALE; y /= INTERFACE_SCALE;
+    }
+    
     public void render()
     {
         GL11.glPushMatrix();
