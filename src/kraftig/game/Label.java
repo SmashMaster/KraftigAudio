@@ -8,16 +8,31 @@ import org.lwjgl.opengl.GL11;
 public class Label implements InterfaceElement
 {
     private final AtlasFont font;
-    private final String text;
+    private String text;
     private final Vec2 pos = new Vec2();
     private final Alignment align;
     
     public Label(UI ui, String text, Vec2 pos, Alignment align)
     {
+        if (text == null) throw new NullPointerException();
+        
         font = ui.getFont();
         this.text = text;
         this.pos.set(pos);
         this.align = align;
+    }
+    
+    public void setText(String text)
+    {
+        if (text == null) throw new NullPointerException();
+        
+        this.text = text;
+    }
+    
+    @Override
+    public MouseCapture onClick(Vec2 mPos)
+    {
+        return null;
     }
     
     @Override

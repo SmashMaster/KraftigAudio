@@ -65,6 +65,7 @@ public class Main extends Game
     private final ArrayList<Panel> panels = new ArrayList<>();
     
     private boolean mouseGrabbed = true;
+    private MouseCapture mouseCapture = null;
     
     private Main() throws Exception
     {
@@ -83,9 +84,17 @@ public class Main extends Game
         panel.setPosition(new Vec3(0.0f, 1.75f, -1.0f));
         panel.setSize(0.25f, 0.125f);
         panel.setYaw(Util.toRadians(0.0f));
-        panel.getFrontInterface()
-                .add(new Knob(new Vec2(8.0f, 0.0f), Alignment.E, 32.0f))
-                .add(new Label(ui, "Front", new Vec2(-8.0f, 0.0f), Alignment.W));
+        {
+            Interface front = panel.getFrontInterface();
+            
+            Knob knob = new Knob(new Vec2(0.0f, 0.0f), Alignment.C, 32.0f);
+            Label vLabel = new Label(ui, "", new Vec2(40.0f, 0.0f), Alignment.E);
+            knob.onValueChanged(v -> vLabel.setText("" + Math.round(v*256.0f)));
+            
+            front.add(knob);
+            front.add(new Label(ui, "Value:", new Vec2(-40.0f, 0.0f), Alignment.W));
+            front.add(vLabel);
+        }
         panel.getRearInterface().add(new Label(ui, "Rear", new Vec2(), Alignment.C));
         panels.add(panel);
         
@@ -100,35 +109,56 @@ public class Main extends Game
         GL11.glEnable(GL13.GL_MULTISAMPLE);
     }
     
+    private boolean isMouseGrabbed()
+    {
+        return mouseGrabbed || mouseCapture != null;
+    }
+    
     @Override
     public void onMouseMoved(float x, float y, float dx, float dy)
     {
-        if (mouseGrabbed) player.onMouseMoved(x, y, dx, dy);
+        if (mouseCapture != null) mouseCapture.onMouseMoved(dx, dy);
+        else if (mouseGrabbed) player.onMouseMoved(x, y, dx, dy);
     }
-
+    
     @Override
     public void onMouseButton(int button, int action, int mods)
     {
-        if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
+        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
         {
-            Vec2 mPos = new Vec2();
-            
-            if (!mouseGrabbed)
+            if (action == GLFW.GLFW_PRESS && mouseCapture == null)
             {
-                Vec2i res = getResolution();
-                mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
+                Vec2 mPos = new Vec2();
+
+                if (!mouseGrabbed)
+                {
+                    Vec2i res = getResolution();
+                    mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
+                }
+
+                Vec3 dir = Vec3.madd(camera.forward, camera.right, mPos.x*camera.hSlope);
+                dir.madd(camera.up, mPos.y*camera.vSlope);
+                dir.normalize();
+
+                ListIterator<Panel> it = panels.listIterator(panels.size());
+                while (it.hasPrevious())
+                {
+                    Panel panel = it.previous();
+                    ClickResult result = panel.onClick(camera.pos, dir);
+
+                    if (result.mouseCapture != null)
+                    {
+                        mouseCapture = result.mouseCapture;
+                        mouse.setGrabbed(isMouseGrabbed());
+                    }
+                    
+                    if (result.hit) break;
+                }
             }
-            
-            Vec3 dir = Vec3.madd(camera.forward, camera.right, mPos.x*camera.hSlope);
-            dir.madd(camera.up, mPos.y*camera.vSlope);
-            dir.normalize();
-            
-            ListIterator<Panel> it = panels.listIterator(panels.size());
-            while (it.hasPrevious())
+            else if (action == GLFW.GLFW_RELEASE)
             {
-                Panel panel = it.previous();
-                ClickResult result = panel.onClick(camera.pos, dir);
-                if (result != ClickResult.MISSED) break;
+                mouseCapture = null;
+                mouse.setGrabbed(isMouseGrabbed());
             }
         }
     }
@@ -146,8 +176,9 @@ public class Main extends Game
             if (key == GLFW.GLFW_KEY_ESCAPE) stop();
             else if (key == GLFW.GLFW_KEY_TAB)
             {
-                mouse.setGrabbed(mouseGrabbed = !mouseGrabbed);
-                if (!mouseGrabbed)
+                mouseGrabbed = !mouseGrabbed;
+                mouse.setGrabbed(isMouseGrabbed());
+                if (!isMouseGrabbed())
                 {
                     Vec2i res = getResolution();
                     GLFW.glfwSetCursorPos(window, res.x/2.0, res.y/2.0);
@@ -188,7 +219,7 @@ public class Main extends Game
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glLoadIdentity();
         
-        ui.renderHUD(mouseGrabbed);
+        ui.renderHUD(mouseGrabbed && mouseCapture == null);
     }
     
     @Override

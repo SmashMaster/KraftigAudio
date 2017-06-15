@@ -1,5 +1,6 @@
 package kraftig.game;
 
+import com.samrj.devil.math.Vec2;
 import java.util.ArrayList;
 import java.util.List;
 import org.lwjgl.opengl.GL11;
@@ -37,9 +38,17 @@ public class Interface
         return this;
     }
     
-    public void onClick(float x, float y)
+    public MouseCapture onClick(float x, float y)
     {
-        x /= INTERFACE_SCALE; y /= INTERFACE_SCALE;
+        Vec2 mPos = new Vec2(x, y).div(INTERFACE_SCALE);
+        
+        for (InterfaceElement e : elements)
+        {
+            MouseCapture result = e.onClick(mPos);
+            if (result != null) return result;
+        }
+        
+        return null;
     }
     
     public void render()

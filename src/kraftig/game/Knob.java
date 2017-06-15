@@ -3,6 +3,7 @@ package kraftig.game;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.util.function.Consumer;
 import org.lwjgl.opengl.GL11;
 
 public class Knob implements InterfaceElement
@@ -17,11 +18,13 @@ public class Knob implements InterfaceElement
     private static final float NOTCH_DA = NOTCH_TOTAL_ANG/(NOTCHES - 1.0f);
     private static final float NOTCH_END = NOTCH_ANG0 + NOTCH_TOTAL_ANG + NOTCH_DA*0.5f;
     private static final float NOTCH_LENGTH = 6f;
+    private static final float SENSITIVITY = 1.0f/256.0f;
     
     private final Vec2 pos = new Vec2();
     private final float radius;
     
     private float value = 0.0f;
+    private Consumer<Float> callback;
     
     public Knob(Vec2 pos, Alignment align, float radius)
     {
@@ -29,6 +32,25 @@ public class Knob implements InterfaceElement
         Vec2 av = new Vec2(align.x, align.y).mult(radius);
         this.pos.set(pos).add(av);
         this.radius = radius;
+    }
+    
+    @Override
+    public MouseCapture onClick(Vec2 mPos)
+    {
+        float mr = mPos.squareDist(pos);
+        if (mr <= radius*radius) return (dx, dy) ->
+        {
+            value = Util.saturate(value + dy*SENSITIVITY);
+            if (callback != null) callback.accept(value);
+        };
+        else return null;
+    }
+    
+    public Knob onValueChanged(Consumer<Float> callback)
+    {
+        this.callback = callback;
+        callback.accept(value);
+        return this;
     }
     
     @Override

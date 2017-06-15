@@ -62,18 +62,16 @@ public class Panel
         if (Math.abs(camDot) < 0.001f) return ClickResult.HIT; //Hit edge of panel.
         
         float dist = -camDot/dir.dot(frontDir);
-        if (dist <= 0.0f) return ClickResult.MISSED; //Panel is behind us.
+        if (dist <= 0.0f) return new ClickResult(false); //Panel is behind us.
         
         Vec3 hitPos = Vec3.madd(camDir, dir, dist);
-        if (Math.abs(hitPos.y) > height) return ClickResult.MISSED;  //Hit above/below panel.
+        if (Math.abs(hitPos.y) > height) return ClickResult.MISSED; //Hit above/below panel.
         
         float x = hitPos.dot(new Vec3(-frontDir.z, 0.0f, frontDir.x));
         if (Math.abs(x) > width) return ClickResult.MISSED; //Hit left/right of panel.
         
-        if (camDot > 0.0f) frontInterface.onClick(-x, hitPos.y);
-        else rearInterface.onClick(x, hitPos.y);
-        
-        return ClickResult.HIT;
+        if (camDot > 0.0f) return new ClickResult(frontInterface.onClick(-x, hitPos.y));
+        else return new ClickResult(rearInterface.onClick(x, hitPos.y));
     }
     
     public void render(Vec3 cameraPos)
@@ -121,8 +119,24 @@ public class Panel
         GL11.glPopMatrix();
     }
     
-    public enum ClickResult
+    public static class ClickResult
     {
-        MISSED, HIT, CAPTURED;
+        public static final ClickResult HIT = new ClickResult(true);
+        public static final ClickResult MISSED = new ClickResult(false);
+        
+        public final boolean hit;
+        public final MouseCapture mouseCapture;
+        
+        ClickResult(boolean hit)
+        {
+            this.hit = hit;
+            mouseCapture = null;
+        }
+        
+        ClickResult(MouseCapture mouseCapture)
+        {
+            hit = true;
+            this.mouseCapture = mouseCapture;
+        }
     }
 }
