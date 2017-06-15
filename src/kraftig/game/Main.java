@@ -13,6 +13,9 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
 import com.samrj.devil.ui.Alignment;
+import java.util.ArrayList;
+import java.util.ListIterator;
+import kraftig.game.Panel.ClickResult;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -58,7 +61,8 @@ public class Main extends Game
     private final Camera3D camera;
     private final Skybox skybox;
     private final FloorGrid floor;
-    private final Panel panel;
+    
+    private final ArrayList<Panel> panels = new ArrayList<>();
     
     private boolean mouseGrabbed = true;
     
@@ -74,15 +78,22 @@ public class Main extends Game
         camera = player.getCamera();
         skybox = new Skybox();
         floor = new FloorGrid();
-        panel = new Panel();
+        
+        Panel panel = new Panel();
         panel.setPosition(new Vec3(0.0f, 1.75f, -1.0f));
         panel.setSize(0.25f, 0.125f);
         panel.setYaw(Util.toRadians(0.0f));
-        
         panel.getFrontInterface()
                 .add(new Knob(new Vec2(8.0f, 0.0f), Alignment.E, 32.0f))
                 .add(new Label(ui, "Front", new Vec2(-8.0f, 0.0f), Alignment.W));
         panel.getRearInterface().add(new Label(ui, "Rear", new Vec2(), Alignment.C));
+        panels.add(panel);
+        
+        panel = new Panel();
+        panel.setPosition(new Vec3(0.25f, 1.75f, -0.5f));
+        panel.setSize(0.25f, 0.125f);
+        panel.setYaw(Util.toRadians(-10.0f));
+        panels.add(panel);
         
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -112,7 +123,13 @@ public class Main extends Game
             dir.madd(camera.up, mPos.y*camera.vSlope);
             dir.normalize();
             
-            panel.onClick(camera.pos, dir);
+            ListIterator<Panel> it = panels.listIterator(panels.size());
+            while (it.hasPrevious())
+            {
+                Panel panel = it.previous();
+                ClickResult result = panel.onClick(camera.pos, dir);
+                if (result != ClickResult.MISSED) break;
+            }
         }
     }
     
@@ -144,6 +161,7 @@ public class Main extends Game
     public void step(float dt)
     {
         player.step(dt);
+        panels.sort((a, b) -> Util.compare(b.dist(camera.pos), a.dist(camera.pos)));
     }
     
     @Override
@@ -160,7 +178,7 @@ public class Main extends Game
         
         floor.render();
         
-        panel.render(camera.pos);
+        for (Panel panel : panels) panel.render(camera.pos);
         
         //Load screen matrix to draw HUD.
         Vec2i res = getResolution();

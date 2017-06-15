@@ -18,6 +18,11 @@ public class Panel
     {
     }
     
+    public float dist(Vec3 cameraPos)
+    {
+        return pos.squareDist(cameraPos);
+    }
+    
     public Panel setPosition(Vec3 pos)
     {
         this.pos.set(pos);
