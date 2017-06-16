@@ -54,12 +54,12 @@ public class Knob implements InterfaceElement
     }
     
     @Override
-    public void render()
+    public void render(float alpha)
     {
         GL11.glPushMatrix();
         GL11.glTranslatef(pos.x, pos.y, 0.0f);
         
-        GL11.glColor3f(1.0f, 1.0f, 1.0f);
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
         GL11.glBegin(GL11.GL_LINE_LOOP);
         for (float t = 0.0f; t < T_END; t += DT)
         {

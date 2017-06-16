@@ -36,9 +36,9 @@ public class Label implements InterfaceElement
     }
     
     @Override
-    public void render()
+    public void render(float alpha)
     {
-        GL11.glColor3f(1.0f, 1.0f, 1.0f);
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
         font.drawDeprecated(text, pos, align);
     }
 }

@@ -51,11 +51,11 @@ public class Interface
         return null;
     }
     
-    public void render()
+    public void render(float alpha)
     {
         GL11.glPushMatrix();
         GL11.glScalef(INTERFACE_SCALE, INTERFACE_SCALE, 0.0f);
-        for (InterfaceElement e : elements) e.render();
+        for (InterfaceElement e : elements) e.render(alpha);
         GL11.glPopMatrix();
     }
 }

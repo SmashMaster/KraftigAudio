@@ -20,21 +20,18 @@ public class UI
         return font;
     }
     
-    void renderHUD(boolean mouseGrabbed)
+    void renderCrosshair()
     {
-        if (mouseGrabbed)
-        {
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
-            GL11.glBegin(GL11.GL_LINES);
-            GL11.glVertex2f(-CROSSHAIR_WIDTH, 0.0f);
-            GL11.glVertex2f(-CROSSHAIR_INNER_WIDTH, 0.0f);
-            GL11.glVertex2f(CROSSHAIR_WIDTH, 0.0f);
-            GL11.glVertex2f(CROSSHAIR_INNER_WIDTH, 0.0f);
-            GL11.glVertex2f(0.0f, -CROSSHAIR_WIDTH);
-            GL11.glVertex2f(0.0f, -CROSSHAIR_INNER_WIDTH);
-            GL11.glVertex2f(0.0f, CROSSHAIR_WIDTH);
-            GL11.glVertex2f(0.0f, CROSSHAIR_INNER_WIDTH);
-            GL11.glEnd();
-        }
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
+        GL11.glBegin(GL11.GL_LINES);
+        GL11.glVertex2f(-CROSSHAIR_WIDTH, 0.0f);
+        GL11.glVertex2f(-CROSSHAIR_INNER_WIDTH, 0.0f);
+        GL11.glVertex2f(CROSSHAIR_WIDTH, 0.0f);
+        GL11.glVertex2f(CROSSHAIR_INNER_WIDTH, 0.0f);
+        GL11.glVertex2f(0.0f, -CROSSHAIR_WIDTH);
+        GL11.glVertex2f(0.0f, -CROSSHAIR_INNER_WIDTH);
+        GL11.glVertex2f(0.0f, CROSSHAIR_WIDTH);
+        GL11.glVertex2f(0.0f, CROSSHAIR_INNER_WIDTH);
+        GL11.glEnd();
     }
 }

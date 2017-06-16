@@ -74,7 +74,7 @@ public class Panel
         else return new ClickResult(rearInterface.onClick(x, hitPos.y));
     }
     
-    public void render(Vec3 cameraPos)
+    public void render(Vec3 cameraPos, float alpha)
     {
         Vec2 cameraDir = new Vec2(pos.x, pos.z).sub(new Vec2(cameraPos.x, cameraPos.z));
         Vec2 frontDir = new Vec2((float)Math.sin(yaw), (float)Math.cos(yaw));
@@ -85,14 +85,14 @@ public class Panel
         GL11.glRotatef(Util.toDegrees(yaw), 0.0f, 1.0f, 0.0f);
         
         //Shadow
-        GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+        GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.5f*alpha);
         GL11.glBegin(GL11.GL_LINES);
         GL11.glVertex3f(-width, -pos.y, 0.0f);
         GL11.glVertex3f(width, -pos.y, 0.0f);
         GL11.glEnd();
         
         //Background
-        GL11.glColor4f(0.4375f, 0.4375f, 0.4375f, 0.875f);
+        GL11.glColor4f(0.4375f, 0.4375f, 0.4375f, 0.875f*alpha);
         GL11.glBegin(GL11.GL_QUADS);
         GL11.glVertex3f(-width, -height, 0.0f);
         GL11.glVertex3f(-width, height, 0.0f);
@@ -101,7 +101,7 @@ public class Panel
         GL11.glEnd();
         
         //Outline
-        GL11.glColor3f(1.0f, 1.0f, 1.0f);
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
         GL11.glBegin(GL11.GL_LINE_LOOP);
         GL11.glVertex3f(-width, -height, 0.0f);
         GL11.glVertex3f(-width, height, 0.0f);
@@ -109,11 +109,11 @@ public class Panel
         GL11.glVertex3f(width, -height, 0.0f);
         GL11.glEnd();
         
-        if (facingFront) frontInterface.render();
+        if (facingFront) frontInterface.render(alpha);
         else
         {
             GL11.glScalef(-1.0f, 1.0f, 1.0f);
-            rearInterface.render();
+            rearInterface.render(alpha);
         }
         
         GL11.glPopMatrix();

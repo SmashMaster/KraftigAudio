@@ -31,6 +31,7 @@ public class Main extends Game
         hints.hint(GLFW.GLFW_ALPHA_BITS, 0);
         hints.hint(GLFW.GLFW_DEPTH_BITS, 0);
         hints.hint(GLFW.GLFW_STENCIL_BITS, 0);
+        hints.hint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
         return hints;
     }
     
@@ -64,7 +65,7 @@ public class Main extends Game
     
     private final ArrayList<Panel> panels = new ArrayList<>();
     
-    private boolean mouseGrabbed = true;
+    private boolean mouseAiming = true;
     private MouseCapture mouseCapture = null;
     
     private Main() throws Exception
@@ -111,14 +112,14 @@ public class Main extends Game
     
     private boolean isMouseGrabbed()
     {
-        return mouseGrabbed || mouseCapture != null;
+        return mouseAiming || mouseCapture != null;
     }
     
     @Override
     public void onMouseMoved(float x, float y, float dx, float dy)
     {
         if (mouseCapture != null) mouseCapture.onMouseMoved(dx, dy);
-        else if (mouseGrabbed) player.onMouseMoved(x, y, dx, dy);
+        else if (mouseAiming) player.onMouseMoved(x, y, dx, dy);
     }
     
     @Override
@@ -130,7 +131,7 @@ public class Main extends Game
             {
                 Vec2 mPos = new Vec2();
 
-                if (!mouseGrabbed)
+                if (!mouseAiming)
                 {
                     Vec2i res = getResolution();
                     mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
@@ -176,7 +177,7 @@ public class Main extends Game
             if (key == GLFW.GLFW_KEY_ESCAPE) stop();
             else if (key == GLFW.GLFW_KEY_TAB)
             {
-                mouseGrabbed = !mouseGrabbed;
+                mouseAiming = !mouseAiming;
                 mouse.setGrabbed(isMouseGrabbed());
                 if (!isMouseGrabbed())
                 {
@@ -209,7 +210,7 @@ public class Main extends Game
         
         floor.render();
         
-        for (Panel panel : panels) panel.render(camera.pos);
+        for (Panel panel : panels) panel.render(camera.pos, 1.0f);
         
         //Load screen matrix to draw HUD.
         Vec2i res = getResolution();
@@ -219,7 +220,7 @@ public class Main extends Game
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glLoadIdentity();
         
-        ui.renderHUD(mouseGrabbed && mouseCapture == null);
+        if (mouseAiming && mouseCapture == null) ui.renderCrosshair();
     }
     
     @Override
