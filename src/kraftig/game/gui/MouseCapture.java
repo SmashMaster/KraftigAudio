@@ -1,4 +1,4 @@
-package kraftig.game;
+package kraftig.game.gui;
 
 @FunctionalInterface
 public interface MouseCapture

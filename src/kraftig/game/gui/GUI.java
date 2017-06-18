@@ -1,16 +1,16 @@
-package kraftig.game;
+package kraftig.game.gui;
 
 import com.samrj.devil.ui.AtlasFont;
 import org.lwjgl.opengl.GL11;
 
-public class UI
+public class GUI
 {
     private static final int CROSSHAIR_WIDTH = 12;
     private static final int CROSSHAIR_INNER_WIDTH = 4;
     
     private final AtlasFont font;
     
-    UI() throws Exception
+    public GUI() throws Exception
     {
         font = new AtlasFont("kraftig/res/fonts/", "menu.fnt");
     }
@@ -20,7 +20,7 @@ public class UI
         return font;
     }
     
-    void renderCrosshair()
+    public void renderCrosshair()
     {
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
         GL11.glBegin(GL11.GL_LINES);

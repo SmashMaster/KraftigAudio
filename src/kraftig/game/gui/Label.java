@@ -1,4 +1,4 @@
-package kraftig.game;
+package kraftig.game.gui;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
@@ -12,7 +12,7 @@ public class Label implements InterfaceElement
     private final Vec2 pos = new Vec2();
     private final Alignment align;
     
-    public Label(UI ui, String text, Vec2 pos, Alignment align)
+    public Label(GUI ui, String text, Vec2 pos, Alignment align)
     {
         if (text == null) throw new NullPointerException();
         

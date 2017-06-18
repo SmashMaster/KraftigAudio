@@ -1,4 +1,4 @@
-package kraftig.game;
+package kraftig.game.gui;
 
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;

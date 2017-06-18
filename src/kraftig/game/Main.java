@@ -16,6 +16,11 @@ import com.samrj.devil.ui.Alignment;
 import java.util.ArrayList;
 import java.util.ListIterator;
 import kraftig.game.Panel.ClickResult;
+import kraftig.game.gui.GUI;
+import kraftig.game.gui.Interface;
+import kraftig.game.gui.Knob;
+import kraftig.game.gui.Label;
+import kraftig.game.gui.MouseCapture;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -29,7 +34,7 @@ public class Main extends Game
         hints.hint(GLFW.GLFW_GREEN_BITS, 8);
         hints.hint(GLFW.GLFW_BLUE_BITS, 8);
         hints.hint(GLFW.GLFW_ALPHA_BITS, 0);
-        hints.hint(GLFW.GLFW_DEPTH_BITS, 0);
+        hints.hint(GLFW.GLFW_DEPTH_BITS, 16);
         hints.hint(GLFW.GLFW_STENCIL_BITS, 0);
         hints.hint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
         return hints;
@@ -57,7 +62,7 @@ public class Main extends Game
         }
     }
     
-    private final UI ui;
+    private final GUI ui;
     private final Player player;
     private final Camera3D camera;
     private final Skybox skybox;
@@ -75,7 +80,7 @@ public class Main extends Game
         DGL.init();
         mouse.setGrabbed(true);
         
-        ui = new UI();
+        ui = new GUI();
         player = new Player(keyboard, getResolution());
         camera = player.getCamera();
         skybox = new Skybox();

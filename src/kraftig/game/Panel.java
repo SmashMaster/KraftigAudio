@@ -3,10 +3,14 @@ package kraftig.game;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
+import kraftig.game.gui.Interface;
+import kraftig.game.gui.MouseCapture;
 import org.lwjgl.opengl.GL11;
 
 public class Panel
 {
+    private static final float INTERFACE_SCALE = 1.0f/1024.0f; //Pixels per meter.
+    
     private final Vec3 pos = new Vec3();
     private float yaw;
     private float width, height;
@@ -39,8 +43,6 @@ public class Panel
     {
         width = w;
         height = h;
-        frontInterface.setSize(w, h);
-        rearInterface.setSize(w, h);
         return this;
     }
     
@@ -70,8 +72,16 @@ public class Panel
         float x = hitPos.dot(new Vec3(-frontDir.z, 0.0f, frontDir.x));
         if (Math.abs(x) > width) return ClickResult.MISSED; //Hit left/right of panel.
         
-        if (camDot > 0.0f) return new ClickResult(frontInterface.onClick(-x, hitPos.y));
-        else return new ClickResult(rearInterface.onClick(x, hitPos.y));
+        if (camDot > 0.0f)
+        {
+            Vec2 p = new Vec2(-x, hitPos.y).div(INTERFACE_SCALE);
+            return new ClickResult(frontInterface.onClick(p));
+        }
+        else
+        {
+            Vec2 p = new Vec2(x, hitPos.y).div(INTERFACE_SCALE);
+            return new ClickResult(rearInterface.onClick(p));
+        }
     }
     
     public void render(Vec3 cameraPos, float alpha)
@@ -109,6 +119,7 @@ public class Panel
         GL11.glVertex3f(width, -height, 0.0f);
         GL11.glEnd();
         
+        GL11.glScalef(INTERFACE_SCALE, INTERFACE_SCALE, 1.0f);
         if (facingFront) frontInterface.render(alpha);
         else
         {
