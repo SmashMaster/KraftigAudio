@@ -3,7 +3,7 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Vec2;
 import java.util.ArrayList;
 import java.util.List;
-import kraftig.game.InteractionMode;
+import kraftig.game.InteractionState;
 
 public class Interface
 {
@@ -19,11 +19,11 @@ public class Interface
         return this;
     }
     
-    public InteractionMode onClick(Vec2 p)
+    public InteractionState onClick(Vec2 p)
     {
         for (InterfaceElement e : elements)
         {
-            InteractionMode result = e.onClick(p);
+            InteractionState result = e.onClick(p);
             if (result != null) return result;
         }
         

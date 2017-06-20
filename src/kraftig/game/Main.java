@@ -66,88 +66,11 @@ public class Main extends Game
     private final Camera3D camera;
     private final Skybox skybox;
     private final FloorGrid floor;
-    
     private final ArrayList<Panel> panels = new ArrayList<>();
+    private final InteractionState defaultState;
     
     private boolean displayMouse = false;
-    
-    private final InteractionMode defaultInteractionMode = new InteractionMode()
-    {
-        @Override
-        public boolean isDead()
-        {
-            return false;
-        }
-
-        @Override
-        public boolean isCursorVisible()
-        {
-            return true;
-        }
-
-        @Override
-        public void onMouseMoved(float x, float y, float dx, float dy)
-        {
-            if (!displayMouse) player.onMouseMoved(x, y, dx, dy);
-        }
-
-        @Override
-        public void onMouseButton(int button, int action, int mods)
-        {
-            if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && action == GLFW.GLFW_PRESS)
-            {
-                Vec2 mPos = new Vec2();
-
-                if (displayMouse)
-                {
-                    Vec2i res = getResolution();
-                    mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
-                }
-
-                Vec3 dir = Vec3.madd(camera.forward, camera.right, mPos.x*camera.hSlope);
-                dir.madd(camera.up, mPos.y*camera.vSlope);
-                dir.normalize();
-
-                ListIterator<Panel> it = panels.listIterator(panels.size());
-                while (it.hasPrevious())
-                {
-                    Panel panel = it.previous();
-                    ClickResult result = panel.onClick(camera.pos, dir);
-
-                    if (result.interactionMode != null) setInteractionMode(result.interactionMode);
-                    if (result.hit) break;
-                }
-            }
-        }
-
-        @Override
-        public void onMouseScroll(float dx, float dy)
-        {
-        }
-
-        @Override
-        public void onKey(int key, int action, int mods)
-        {
-            if (action == GLFW.GLFW_PRESS)
-            {
-                if (key == GLFW.GLFW_KEY_ESCAPE) stop();
-                else if (key == GLFW.GLFW_KEY_TAB)
-                {
-                    displayMouse = !displayMouse;
-                    boolean display = displayMouse();
-                    mouse.setGrabbed(!display);
-                    if (display)
-                    {
-                        Vec2i res = getResolution();
-                        GLFW.glfwSetCursorPos(window, res.x/2.0, res.y/2.0);
-                        mouse.cursorPos(res.x/2.0f, res.y/2.0f);
-                    }
-                }
-            }
-        }
-    };
-    
-    private InteractionMode interactionMode = defaultInteractionMode;
+    private InteractionState interactionState;
     
     private Main() throws Exception
     {
@@ -189,45 +112,105 @@ public class Main extends Game
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         GL11.glEnable(GL13.GL_MULTISAMPLE);
+        
+        interactionState = defaultState = new InteractionState()
+        {
+            @Override
+            public void onMouseMoved(Main main, float x, float y, float dx, float dy)
+            {
+                if (!displayMouse) player.onMouseMoved(x, y, dx, dy);
+            }
+            
+            @Override
+            public void onMouseButton(Main main, int button, int action, int mods)
+            {
+                if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && action == GLFW.GLFW_PRESS)
+                {
+                    Vec2 mPos = new Vec2();
+
+                    if (displayMouse)
+                    {
+                        Vec2i res = getResolution();
+                        mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
+                    }
+
+                    Vec3 dir = Vec3.madd(camera.forward, camera.right, mPos.x*camera.hSlope);
+                    dir.madd(camera.up, mPos.y*camera.vSlope);
+                    dir.normalize();
+
+                    ListIterator<Panel> it = panels.listIterator(panels.size());
+                    while (it.hasPrevious())
+                    {
+                        Panel p = it.previous();
+                        ClickResult result = p.onClick(camera.pos, dir);
+
+                        if (result.newState != null) setState(result.newState);
+                        if (result.hit) break;
+                    }
+                }
+            }
+            
+            @Override
+            public void onKey(Main main, int key, int action, int mods)
+            {
+                if (action == GLFW.GLFW_PRESS)
+                {
+                    if (key == GLFW.GLFW_KEY_ESCAPE) stop();
+                    else if (key == GLFW.GLFW_KEY_TAB)
+                    {
+                        displayMouse = !displayMouse;
+                        boolean display = displayMouse();
+                        mouse.setGrabbed(!display);
+                        if (display)
+                        {
+                            Vec2i res = getResolution();
+                            GLFW.glfwSetCursorPos(window, res.x/2.0, res.y/2.0);
+                            mouse.cursorPos(res.x/2.0f, res.y/2.0f);
+                        }
+                    }
+                }
+            }
+        };
     }
     
     private boolean displayMouse()
     {
-        return displayMouse && interactionMode.isCursorVisible();
+        return displayMouse && interactionState.isCursorVisible(this);
     }
     
-    private void setInteractionMode(InteractionMode mode)
+    public void setState(InteractionState state)
     {
-        interactionMode = mode;
+        interactionState = state;
         mouse.setGrabbed(!displayMouse());
+    }
+    
+    public void setDefaultState()
+    {
+        setState(defaultState);
     }
     
     @Override
     public void onMouseMoved(float x, float y, float dx, float dy)
     {
-        interactionMode.onMouseMoved(x, y, dx, dy);
-        if (interactionMode.isDead()) setInteractionMode(defaultInteractionMode);
+        interactionState.onMouseMoved(this, x, y, dx, dy);
     }
     
     @Override
     public void onMouseButton(int button, int action, int mods)
     {
-        interactionMode.onMouseButton(button, action, mods);
-        if (interactionMode.isDead()) setInteractionMode(defaultInteractionMode);
+        interactionState.onMouseButton(this, button, action, mods);
     }
     
     @Override
     public void onMouseScroll(float dx, float dy)
     {
-        interactionMode.onMouseScroll(dx, dy);
-        if (interactionMode.isDead()) setInteractionMode(defaultInteractionMode);
+        interactionState.onMouseScroll(this, dx, dy);
     }
 
     @Override
     public void onKey(int key, int action, int mods)
     {
-        interactionMode.onKey(key, action, mods);
-        if (interactionMode.isDead()) setInteractionMode(defaultInteractionMode);
+        interactionState.onKey(this, key, action, mods);
     }
     
     @Override
@@ -261,7 +244,7 @@ public class Main extends Game
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glLoadIdentity();
         
-        if (!displayMouse && interactionMode == defaultInteractionMode) ui.renderCrosshair();
+        if (!displayMouse && interactionState == defaultState) ui.renderCrosshair();
     }
     
     @Override

@@ -3,7 +3,7 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import com.samrj.devil.ui.AtlasFont;
-import kraftig.game.InteractionMode;
+import kraftig.game.InteractionState;
 import org.lwjgl.opengl.GL11;
 
 public class Label implements InterfaceElement
@@ -31,7 +31,7 @@ public class Label implements InterfaceElement
     }
     
     @Override
-    public InteractionMode onClick(Vec2 mPos)
+    public InteractionState onClick(Vec2 mPos)
     {
         return null;
     }

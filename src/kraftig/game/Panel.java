@@ -135,18 +135,18 @@ public class Panel
         public static final ClickResult MISSED = new ClickResult(false);
         
         public final boolean hit;
-        public final InteractionMode interactionMode;
+        public final InteractionState newState;
         
         ClickResult(boolean hit)
         {
             this.hit = hit;
-            interactionMode = null;
+            newState = null;
         }
         
-        ClickResult(InteractionMode mouseCapture)
+        ClickResult(InteractionState mouseCapture)
         {
             hit = true;
-            this.interactionMode = mouseCapture;
+            this.newState = mouseCapture;
         }
     }
 }
