@@ -4,6 +4,8 @@ import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.util.function.Consumer;
+import kraftig.game.InteractionMode;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 public class Knob implements InterfaceElement
@@ -35,13 +37,47 @@ public class Knob implements InterfaceElement
     }
     
     @Override
-    public MouseCapture onClick(Vec2 mPos)
+    public InteractionMode onClick(Vec2 mPos)
     {
         float mr = mPos.squareDist(pos);
-        if (mr <= radius*radius) return (dx, dy) ->
+        if (mr <= radius*radius) return new InteractionMode()
         {
-            value = Util.saturate(value + dy*SENSITIVITY);
-            if (callback != null) callback.accept(value);
+            private boolean isDead;
+            
+            @Override
+            public boolean isDead()
+            {
+                return isDead;
+            }
+
+            @Override
+            public boolean isCursorVisible()
+            {
+                return false;
+            }
+
+            @Override
+            public void onMouseMoved(float x, float y, float dx, float dy)
+            {
+                value = Util.saturate(value + dy*SENSITIVITY);
+                if (callback != null) callback.accept(value);
+            }
+
+            @Override
+            public void onMouseButton(int button, int action, int mods)
+            {
+                if (action == GLFW.GLFW_RELEASE && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) isDead = true;
+            }
+
+            @Override
+            public void onMouseScroll(float dx, float dy)
+            {
+            }
+
+            @Override
+            public void onKey(int key, int action, int mods)
+            {
+            }
         };
         else return null;
     }

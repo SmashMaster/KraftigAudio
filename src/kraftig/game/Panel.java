@@ -4,7 +4,6 @@ import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
 import kraftig.game.gui.Interface;
-import kraftig.game.gui.MouseCapture;
 import org.lwjgl.opengl.GL11;
 
 public class Panel
@@ -136,18 +135,18 @@ public class Panel
         public static final ClickResult MISSED = new ClickResult(false);
         
         public final boolean hit;
-        public final MouseCapture mouseCapture;
+        public final InteractionMode interactionMode;
         
         ClickResult(boolean hit)
         {
             this.hit = hit;
-            mouseCapture = null;
+            interactionMode = null;
         }
         
-        ClickResult(MouseCapture mouseCapture)
+        ClickResult(InteractionMode mouseCapture)
         {
             hit = true;
-            this.mouseCapture = mouseCapture;
+            this.interactionMode = mouseCapture;
         }
     }
 }

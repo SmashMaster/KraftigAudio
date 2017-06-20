@@ -3,6 +3,7 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Vec2;
 import java.util.ArrayList;
 import java.util.List;
+import kraftig.game.InteractionMode;
 
 public class Interface
 {
@@ -18,11 +19,11 @@ public class Interface
         return this;
     }
     
-    public MouseCapture onClick(Vec2 p)
+    public InteractionMode onClick(Vec2 p)
     {
         for (InterfaceElement e : elements)
         {
-            MouseCapture result = e.onClick(p);
+            InteractionMode result = e.onClick(p);
             if (result != null) return result;
         }
         
