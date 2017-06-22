@@ -13,10 +13,11 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
 import com.samrj.devil.ui.Alignment;
+import com.samrj.devil.ui.AtlasFont;
 import java.util.ArrayList;
 import java.util.ListIterator;
 import kraftig.game.Panel.ClickResult;
-import kraftig.game.gui.GUI;
+import kraftig.game.gui.Crosshair;
 import kraftig.game.gui.Interface;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
@@ -61,7 +62,8 @@ public class Main extends Game
         }
     }
     
-    private final GUI ui;
+    private final AtlasFont font;
+    private final Crosshair crosshair;
     private final Player player;
     private final Camera3D camera;
     private final Skybox skybox;
@@ -80,7 +82,8 @@ public class Main extends Game
         DGL.init();
         mouse.setGrabbed(!displayMouse());
         
-        ui = new GUI();
+        font = new AtlasFont("kraftig/res/fonts/", "menu.fnt");
+        crosshair = new Crosshair();
         player = new Player(keyboard, getResolution());
         camera = player.getCamera();
         skybox = new Skybox();
@@ -94,14 +97,14 @@ public class Main extends Game
             Interface front = panel.getFrontInterface();
             
             Knob knob = new Knob(new Vec2(0.0f, 0.0f), Alignment.C, 32.0f);
-            Label vLabel = new Label(ui, "", new Vec2(40.0f, 0.0f), Alignment.E);
+            Label vLabel = new Label(font, "", new Vec2(40.0f, 0.0f), Alignment.E);
             knob.onValueChanged(v -> vLabel.setText("" + Math.round(v*256.0f)));
             
             front.add(knob);
-            front.add(new Label(ui, "Value:", new Vec2(-40.0f, 0.0f), Alignment.W));
+            front.add(new Label(font, "Value:", new Vec2(-40.0f, 0.0f), Alignment.W));
             front.add(vLabel);
         }
-        panel.getRearInterface().add(new Label(ui, "Rear", new Vec2(), Alignment.C));
+        panel.getRearInterface().add(new Label(font, "Rear", new Vec2(), Alignment.C));
         panels.add(panel);
         
         panel = new Panel();
@@ -245,7 +248,7 @@ public class Main extends Game
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glLoadIdentity();
         
-        if (!displayMouse && interactionState == defaultState) ui.renderCrosshair();
+        if (!displayMouse && interactionState == defaultState) crosshair.renderCrosshair();
     }
     
     @Override

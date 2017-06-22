@@ -13,11 +13,11 @@ public class Label implements InterfaceElement
     private final Vec2 pos = new Vec2();
     private final Alignment align;
     
-    public Label(GUI ui, String text, Vec2 pos, Alignment align)
+    public Label(AtlasFont font, String text, Vec2 pos, Alignment align)
     {
         if (text == null) throw new NullPointerException();
         
-        font = ui.getFont();
+        this.font = font;
         this.text = text;
         this.pos.set(pos);
         this.align = align;
