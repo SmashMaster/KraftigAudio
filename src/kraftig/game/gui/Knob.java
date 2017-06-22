@@ -38,7 +38,7 @@ public class Knob implements InterfaceElement
     }
     
     @Override
-    public InteractionState onClick(Vec2 mPos)
+    public InteractionState onMouseButton(Vec2 mPos, int button, int action, int mods)
     {
         float mr = mPos.squareDist(pos);
         if (mr <= radius*radius) return new InteractionState()

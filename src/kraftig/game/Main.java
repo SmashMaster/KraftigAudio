@@ -116,58 +116,33 @@ public class Main extends Game
         interactionState = defaultState = new InteractionState()
         {
             @Override
-            public void onMouseMoved(Main main, float x, float y, float dx, float dy)
+            public boolean canPlayerAim()
             {
-                if (!displayMouse) player.onMouseMoved(x, y, dx, dy);
+                return true;
             }
             
             @Override
             public void onMouseButton(Main main, int button, int action, int mods)
             {
-                if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && action == GLFW.GLFW_PRESS)
+                Vec2 mPos = new Vec2();
+                if (displayMouse)
                 {
-                    Vec2 mPos = new Vec2();
-
-                    if (displayMouse)
-                    {
-                        Vec2i res = getResolution();
-                        mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
-                    }
-
-                    Vec3 dir = Vec3.madd(camera.forward, camera.right, mPos.x*camera.hSlope);
-                    dir.madd(camera.up, mPos.y*camera.vSlope);
-                    dir.normalize();
-
-                    ListIterator<Panel> it = panels.listIterator(panels.size());
-                    while (it.hasPrevious())
-                    {
-                        Panel p = it.previous();
-                        ClickResult result = p.onClick(camera.pos, dir);
-
-                        if (result.newState != null) setState(result.newState);
-                        if (result.hit) break;
-                    }
+                    Vec2i res = getResolution();
+                    mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
                 }
-            }
-            
-            @Override
-            public void onKey(Main main, int key, int action, int mods)
-            {
-                if (action == GLFW.GLFW_PRESS)
+
+                Vec3 dir = Vec3.madd(camera.forward, camera.right, mPos.x*camera.hSlope);
+                dir.madd(camera.up, mPos.y*camera.vSlope);
+                dir.normalize();
+
+                ListIterator<Panel> it = panels.listIterator(panels.size());
+                while (it.hasPrevious())
                 {
-                    if (key == GLFW.GLFW_KEY_ESCAPE) stop();
-                    else if (key == GLFW.GLFW_KEY_TAB)
-                    {
-                        displayMouse = !displayMouse;
-                        boolean display = displayMouse();
-                        mouse.setGrabbed(!display);
-                        if (display)
-                        {
-                            Vec2i res = getResolution();
-                            GLFW.glfwSetCursorPos(window, res.x/2.0, res.y/2.0);
-                            mouse.cursorPos(res.x/2.0f, res.y/2.0f);
-                        }
-                    }
+                    Panel p = it.previous();
+                    ClickResult result = p.onMouseButton(camera.pos, dir, button, action, mods);
+
+                    if (result.newState != null) setState(result.newState);
+                    if (result.hit) break;
                 }
             }
         };
@@ -192,6 +167,7 @@ public class Main extends Game
     @Override
     public void onMouseMoved(float x, float y, float dx, float dy)
     {
+        if (!displayMouse && interactionState.canPlayerAim()) player.onMouseMoved(x, y, dx, dy);
         interactionState.onMouseMoved(this, x, y, dx, dy);
     }
     
@@ -210,6 +186,23 @@ public class Main extends Game
     @Override
     public void onKey(int key, int action, int mods)
     {
+        if (action == GLFW.GLFW_PRESS)
+        {
+            if (key == GLFW.GLFW_KEY_ESCAPE) stop();
+            else if (key == GLFW.GLFW_KEY_TAB)
+            {
+                displayMouse = !displayMouse;
+                boolean display = displayMouse();
+                mouse.setGrabbed(!display);
+                if (display)
+                {
+                    Vec2i res = getResolution();
+                    GLFW.glfwSetCursorPos(window, res.x/2.0, res.y/2.0);
+                    mouse.cursorPos(res.x/2.0f, res.y/2.0f);
+                }
+            }
+        }
+        
         interactionState.onKey(this, key, action, mods);
     }
     
@@ -218,6 +211,7 @@ public class Main extends Game
     {
         player.step(dt);
         panels.sort((a, b) -> Util.compare(b.dist(camera.pos), a.dist(camera.pos)));
+        interactionState.step(this, dt);
     }
     
     @Override

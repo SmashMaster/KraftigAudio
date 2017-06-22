@@ -31,7 +31,7 @@ public class Label implements InterfaceElement
     }
     
     @Override
-    public InteractionState onClick(Vec2 mPos)
+    public InteractionState onMouseButton(Vec2 mPos, int button, int action, int mods)
     {
         return null;
     }

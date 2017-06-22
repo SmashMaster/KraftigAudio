@@ -4,6 +4,7 @@ import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
 import kraftig.game.gui.Interface;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 public class Panel
@@ -55,12 +56,11 @@ public class Panel
         return rearInterface;
     }
     
-    public ClickResult onClick(Vec3 cameraPos, Vec3 dir)
+    public ClickResult onMouseButton(Vec3 cameraPos, Vec3 dir, int button, int action, int mods)
     {
         Vec3 frontDir = new Vec3((float)Math.sin(yaw), 0.0f, (float)Math.cos(yaw));
         Vec3 camDir = Vec3.sub(cameraPos, pos);
         float camDot = camDir.dot(frontDir);
-        if (Math.abs(camDot) < 0.001f) return ClickResult.HIT; //Hit edge of panel.
         
         float dist = -camDot/dir.dot(frontDir);
         if (dist <= 0.0f) return new ClickResult(false); //Panel is behind us.
@@ -71,15 +71,27 @@ public class Panel
         float x = hitPos.dot(new Vec3(-frontDir.z, 0.0f, frontDir.x));
         if (Math.abs(x) > width) return ClickResult.MISSED; //Hit left/right of panel.
         
+        //Panel drag.
+        if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+        {
+            System.out.println("Dragging!");
+            return new ClickResult(new InteractionState()
+        {
+            
+        });
+        }
+        
+        if (Math.abs(camDot) < 0.001f) return ClickResult.HIT;
+        
         if (camDot > 0.0f)
         {
             Vec2 p = new Vec2(-x, hitPos.y).div(INTERFACE_SCALE);
-            return new ClickResult(frontInterface.onClick(p));
+            return new ClickResult(frontInterface.onMouseButton(p, button, action, mods));
         }
         else
         {
             Vec2 p = new Vec2(x, hitPos.y).div(INTERFACE_SCALE);
-            return new ClickResult(rearInterface.onClick(p));
+            return new ClickResult(rearInterface.onMouseButton(p, button, action, mods));
         }
     }
     

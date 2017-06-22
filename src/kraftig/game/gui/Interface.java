@@ -19,11 +19,11 @@ public class Interface
         return this;
     }
     
-    public InteractionState onClick(Vec2 p)
+    public InteractionState onMouseButton(Vec2 p, int button, int action, int mods)
     {
         for (InterfaceElement e : elements)
         {
-            InteractionState result = e.onClick(p);
+            InteractionState result = e.onMouseButton(p, button, action, mods);
             if (result != null) return result;
         }
         

@@ -5,6 +5,6 @@ import kraftig.game.InteractionState;
 
 public interface InterfaceElement
 {
-    public InteractionState onClick(Vec2 p);
+    public InteractionState onMouseButton(Vec2 p, int button, int action, int mods);
     public void render(float alpha);
 }
