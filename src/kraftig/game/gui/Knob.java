@@ -40,6 +40,8 @@ public class Knob implements InterfaceElement
     @Override
     public InteractionState onMouseButton(Vec2 mPos, int button, int action, int mods)
     {
+        if (action != GLFW.GLFW_PRESS || button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return null;
+        
         float mr = mPos.squareDist(pos);
         if (mr <= radius*radius) return new InteractionState()
         {

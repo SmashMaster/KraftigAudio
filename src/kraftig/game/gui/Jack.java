@@ -4,6 +4,7 @@ import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import kraftig.game.InteractionState;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 public class Jack implements InterfaceElement
@@ -25,6 +26,8 @@ public class Jack implements InterfaceElement
     @Override
     public InteractionState onMouseButton(Vec2 mPos, int button, int action, int mods)
     {
+        if (action != GLFW.GLFW_PRESS || button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return null;
+        
         return null;
     }
 

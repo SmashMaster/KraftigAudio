@@ -1,8 +1,10 @@
 package kraftig.game;
 
+import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
+import java.util.function.Consumer;
 import kraftig.game.gui.Interface;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
@@ -17,6 +19,8 @@ public class Panel
     
     private final Interface frontInterface = new Interface();
     private final Interface rearInterface = new Interface();
+    
+    private boolean dragged;
     
     public Panel()
     {
@@ -56,10 +60,10 @@ public class Panel
         return rearInterface;
     }
     
-    public ClickResult onMouseButton(Vec3 cameraPos, Vec3 dir, int button, int action, int mods)
+    public ClickResult onMouseButton(Player player, Vec3 dir, int button, int action, int mods)
     {
         Vec3 frontDir = new Vec3((float)Math.sin(yaw), 0.0f, (float)Math.cos(yaw));
-        Vec3 camDir = Vec3.sub(cameraPos, pos);
+        Vec3 camDir = Vec3.sub(player.getCamera().pos, pos);
         float camDot = camDir.dot(frontDir);
         
         float dist = -camDot/dir.dot(frontDir);
@@ -74,11 +78,47 @@ public class Panel
         //Panel drag.
         if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
         {
-            System.out.println("Dragging!");
-            return new ClickResult(new InteractionState()
-        {
+            dragged = true;
+            float relYaw = Util.reduceAngle(yaw - player.getYaw());
             
-        });
+            Consumer<Main> updater = (main) ->
+            {
+                yaw = Util.reduceAngle(player.getYaw() + relYaw);
+                pos.set(player.getCamera().pos);
+                pos.madd(main.getMouseDir(), dist);
+                pos.madd(new Vec3((float)Math.cos(yaw), 0.0f, -(float)Math.sin(yaw)), x);
+                pos.y -= hitPos.y;
+            };
+            
+            return new ClickResult(new InteractionState()
+            {
+                @Override
+                public boolean canPlayerAim()
+                {
+                    return true;
+                }
+                
+                @Override
+                public void onMouseMoved(Main main, float x, float y, float dx, float dy)
+                {
+                    updater.accept(main);
+                }
+                
+                @Override
+                public void onMouseButton(Main main, int button, int action, int mods)
+                {
+                    if (action != GLFW.GLFW_PRESS || button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
+                    
+                    dragged = false;
+                    main.setDefaultState();
+                }
+                
+                @Override
+                public void step(Main main, float dt)
+                {
+                    updater.accept(main);
+                }
+            });
         }
         
         if (Math.abs(camDot) < 0.001f) return ClickResult.HIT;
@@ -97,6 +137,8 @@ public class Panel
     
     public void render(Vec3 cameraPos, float alpha)
     {
+        if (dragged) alpha *= 0.5f;
+        
         Vec2 cameraDir = new Vec2(pos.x, pos.z).sub(new Vec2(cameraPos.x, cameraPos.z));
         Vec2 frontDir = new Vec2((float)Math.sin(yaw), (float)Math.cos(yaw));
         boolean facingFront = cameraDir.dot(frontDir) <= 0.0f;

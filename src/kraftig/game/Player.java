@@ -43,6 +43,11 @@ public class Player
         cameraController.onMouseMoved(x, y, dx, dy);
     }
     
+    float getYaw()
+    {
+        return cameraController.getYaw();
+    }
+    
     void step(float dt)
     {
         float yaw = cameraController.getYaw();

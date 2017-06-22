@@ -70,6 +70,7 @@ public class Main extends Game
     private final InteractionState defaultState;
     
     private boolean displayMouse = false;
+    private final Vec3 mouseDir = new Vec3(0.0f, 0.0f, -1.0f);
     private InteractionState interactionState;
     
     private Main() throws Exception
@@ -124,22 +125,11 @@ public class Main extends Game
             @Override
             public void onMouseButton(Main main, int button, int action, int mods)
             {
-                Vec2 mPos = new Vec2();
-                if (displayMouse)
-                {
-                    Vec2i res = getResolution();
-                    mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
-                }
-
-                Vec3 dir = Vec3.madd(camera.forward, camera.right, mPos.x*camera.hSlope);
-                dir.madd(camera.up, mPos.y*camera.vSlope);
-                dir.normalize();
-
                 ListIterator<Panel> it = panels.listIterator(panels.size());
                 while (it.hasPrevious())
                 {
                     Panel p = it.previous();
-                    ClickResult result = p.onMouseButton(camera.pos, dir, button, action, mods);
+                    ClickResult result = p.onMouseButton(player, mouseDir, button, action, mods);
 
                     if (result.newState != null) setState(result.newState);
                     if (result.hit) break;
@@ -164,10 +154,27 @@ public class Main extends Game
         setState(defaultState);
     }
     
+    public Vec3 getMouseDir()
+    {
+        return new Vec3(mouseDir);
+    }
+    
     @Override
     public void onMouseMoved(float x, float y, float dx, float dy)
     {
         if (!displayMouse && interactionState.canPlayerAim()) player.onMouseMoved(x, y, dx, dy);
+        
+        Vec2 mPos = new Vec2();
+        if (displayMouse)
+        {
+            Vec2i res = getResolution();
+            mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
+        }
+
+        Vec3.madd(camera.forward, camera.right, mPos.x*camera.hSlope, mouseDir);
+        mouseDir.madd(camera.up, mPos.y*camera.vSlope);
+        mouseDir.normalize();
+        
         interactionState.onMouseMoved(this, x, y, dx, dy);
     }
     
