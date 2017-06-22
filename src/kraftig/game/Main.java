@@ -19,6 +19,7 @@ import java.util.ListIterator;
 import kraftig.game.Panel.ClickResult;
 import kraftig.game.gui.Crosshair;
 import kraftig.game.gui.Interface;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import org.lwjgl.glfw.GLFW;
@@ -90,9 +91,9 @@ public class Main extends Game
         floor = new FloorGrid();
         
         Panel panel = new Panel();
-        panel.setPosition(new Vec3(0.0f, 1.75f, -1.0f));
+        panel.setPosition(new Vec3(0.25f, 1.75f, -1.0f));
         panel.setSize(0.25f, 0.125f);
-        panel.setYaw(Util.toRadians(0.0f));
+        panel.setYaw(Util.toRadians(-20.0f));
         {
             Interface front = panel.getFrontInterface();
             
@@ -103,14 +104,16 @@ public class Main extends Game
             front.add(knob);
             front.add(new Label(font, "Value:", new Vec2(-40.0f, 0.0f), Alignment.W));
             front.add(vLabel);
+            front.add(new Jack(new Vec2(0.0f, -40.0f), Alignment.S));
         }
         panel.getRearInterface().add(new Label(font, "Rear", new Vec2(), Alignment.C));
         panels.add(panel);
         
         panel = new Panel();
-        panel.setPosition(new Vec3(0.25f, 1.75f, -0.5f));
+        panel.setPosition(new Vec3(-0.25f, 1.75f, -1.0f));
         panel.setSize(0.25f, 0.125f);
-        panel.setYaw(Util.toRadians(-10.0f));
+        panel.setYaw(Util.toRadians(20.0f));
+        panel.getFrontInterface().add(new Jack(new Vec2(), Alignment.C));
         panels.add(panel);
         
         GL11.glEnable(GL11.GL_BLEND);
