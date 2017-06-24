@@ -17,11 +17,9 @@ import com.samrj.devil.ui.Alignment;
 import com.samrj.devil.ui.AtlasFont;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import kraftig.game.Panel.ClickResult;
-import kraftig.game.Panel.Overlap;
 import kraftig.game.gui.Crosshair;
 import kraftig.game.gui.Interface;
 import kraftig.game.gui.Jack;
@@ -242,9 +240,12 @@ public class Main extends Game
         for (int i=0; i<panels.size(); i++) for (int j=i+1; j<panels.size(); j++)
         {
             Panel a = panels.get(i), b = panels.get(j);
-            LinkedList<Overlap> overlap = a.getOverlap(b);
-            if (overlap.size() > 1) continue; //Intersection. Prevent cycles.
-            for (Overlap o : overlap) overlapGraph.addEdge(o.behind, o.front);
+            
+            switch (a.getOverlap(b, camera))
+            {
+                case BEHIND: overlapGraph.addEdge(a, b); break;
+                case IN_FRONT: overlapGraph.addEdge(b, a); break;
+            }
         }
         
         sortedPanels = overlapGraph.sort();

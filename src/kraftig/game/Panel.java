@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 import kraftig.game.gui.Interface;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
-import java.util.LinkedList;
 
 public class Panel
 {
@@ -56,17 +55,39 @@ public class Panel
         return Math.signum(dr.dot(d));
     }
     
-    public LinkedList<Overlap> getOverlap(Panel other)
+    public Overlap getOverlap(Panel other, Camera3D camera)
     {
-        LinkedList<Overlap> out = new LinkedList<>();
         float da = other.rayHit(a, aCam);
         float db = other.rayHit(b, bCam);
         float doa = rayHit(other.a, other.aCam);
         float dob = rayHit(other.b, other.bCam);
         
-        if (da < 0.0f || db < 0.0f || doa > 0.0f || dob > 0.0f) out.add(new Overlap(this, other));
-        if (da > 0.0f || db > 0.0f || doa < 0.0f || dob < 0.0f) out.add(new Overlap(other, this));
-        return out;
+        boolean behind = da < 0.0f || db < 0.0f || doa > 0.0f || dob > 0.0f;
+        boolean inFront = da > 0.0f || db > 0.0f || doa < 0.0f || dob < 0.0f;
+        
+        if (behind && inFront)
+        {
+            //Figure out which is above/below.
+            Panel above = pos.y > other.pos.y ? this : other;
+            Panel below = pos.y > other.pos.y ? other : this;
+            
+            //y1 > b.y0 && b.y1 > y0
+            float aboveY0 = above.pos.y - above.height;
+            float aboveY1 = above.pos.y + above.height;
+            float belowY0 = below.pos.y - below.height;
+            float belowY1 = below.pos.y + below.height;
+            
+            //Check if vertically intersecting. If not, resolve by vertical position.
+            if (aboveY1 > belowY0 && belowY1 > aboveY0) return Overlap.INTERSECTION;
+            else if (aboveY0 > camera.pos.y && belowY1 > camera.pos.y)
+                return below == this ? Overlap.IN_FRONT : Overlap.BEHIND;
+            else if (aboveY0 < camera.pos.y && belowY1 < camera.pos.y)
+                return above == this ? Overlap.IN_FRONT : Overlap.BEHIND;
+            else return Overlap.NONE;
+        }
+        else if (behind) return Overlap.BEHIND;
+        else if (inFront) return Overlap.IN_FRONT;
+        else return Overlap.NONE;
     }
     
     public Panel setPosition(Vec3 pos)
@@ -242,14 +263,8 @@ public class Panel
         }
     }
     
-    public static class Overlap
+    public enum Overlap
     {
-        public final Panel behind, front;
-        
-        public Overlap(Panel behind, Panel front)
-        {
-            this.behind = behind;
-            this.front = front;
-        }
+        NONE, IN_FRONT, BEHIND, INTERSECTION;
     }
 }
