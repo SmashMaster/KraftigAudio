@@ -1,5 +1,6 @@
 package kraftig.game;
 
+import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
@@ -7,6 +8,7 @@ import java.util.function.Consumer;
 import kraftig.game.gui.Interface;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
+import java.util.LinkedList;
 
 public class Panel
 {
@@ -15,6 +17,10 @@ public class Panel
     private final Vec3 pos = new Vec3();
     private float yaw;
     private float width, height;
+    
+    private final Vec2 a = new Vec2(), b = new Vec2();
+    private final Vec2 ab = new Vec2();
+    private final Vec2 aCam = new Vec2(), bCam = new Vec2();
     
     private final Interface frontInterface = new Interface();
     private final Interface rearInterface = new Interface();
@@ -25,9 +31,42 @@ public class Panel
     {
     }
     
-    public float dist(Vec3 cameraPos)
+    public void calcEdge(Camera3D camera)
     {
-        return pos.squareDist(cameraPos);
+        Vec2 edge = new Vec2((float)Math.cos(yaw), -(float)Math.sin(yaw)).mult(width);
+        Vec2 p2 = new Vec2(pos.x, pos.z);
+        Vec2.sub(p2, edge, a);
+        Vec2.add(p2, edge, b);
+        Vec2.mult(edge, -2.0f, ab);
+        
+        Vec2 cam = new Vec2(camera.pos.x, camera.pos.z);
+        Vec2.sub(cam, a, aCam);
+        Vec2.sub(cam, b, bCam);
+    }
+    
+    private float rayHit(Vec2 p, Vec2 d)
+    {
+        //Calculate hit position and return zero if missed.
+        Vec2 pa = Vec2.sub(p, a);
+        float t = (d.x*pa.y - d.y*pa.x)/(d.y*ab.x - d.x*ab.y);
+        if (t < 0.0f || t > 1.0f) return 0.0f;
+        
+        //Return direction of hit.
+        Vec2 dr = Vec2.madd(pa, ab, t);
+        return Math.signum(dr.dot(d));
+    }
+    
+    public LinkedList<Overlap> getOverlap(Panel other)
+    {
+        LinkedList<Overlap> out = new LinkedList<>();
+        float da = other.rayHit(a, aCam);
+        float db = other.rayHit(b, bCam);
+        float doa = rayHit(other.a, other.aCam);
+        float dob = rayHit(other.b, other.bCam);
+        
+        if (da < 0.0f || db < 0.0f || doa > 0.0f || dob > 0.0f) out.add(new Overlap(this, other));
+        if (da > 0.0f || db > 0.0f || doa < 0.0f || dob < 0.0f) out.add(new Overlap(other, this));
+        return out;
     }
     
     public Panel setPosition(Vec3 pos)
@@ -200,6 +239,17 @@ public class Panel
         {
             hit = true;
             this.newState = mouseCapture;
+        }
+    }
+    
+    public static class Overlap
+    {
+        public final Panel behind, front;
+        
+        public Overlap(Panel behind, Panel front)
+        {
+            this.behind = behind;
+            this.front = front;
         }
     }
 }

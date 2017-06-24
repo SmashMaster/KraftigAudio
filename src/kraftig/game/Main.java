@@ -12,11 +12,16 @@ import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
+import com.samrj.devil.math.topo.DAG;
 import com.samrj.devil.ui.Alignment;
 import com.samrj.devil.ui.AtlasFont;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import kraftig.game.Panel.ClickResult;
+import kraftig.game.Panel.Overlap;
 import kraftig.game.gui.Crosshair;
 import kraftig.game.gui.Interface;
 import kraftig.game.gui.Jack;
@@ -71,6 +76,8 @@ public class Main extends Game
     private final FloorGrid floor;
     private final ArrayList<Panel> panels = new ArrayList<>();
     private final InteractionState defaultState;
+    
+    private List<Panel> sortedPanels = Collections.EMPTY_LIST;
     
     private boolean displayMouse = false;
     private final Vec3 mouseDir = new Vec3(0.0f, 0.0f, -1.0f);
@@ -131,7 +138,7 @@ public class Main extends Game
             @Override
             public void onMouseButton(Main main, int button, int action, int mods)
             {
-                ListIterator<Panel> it = panels.listIterator(panels.size());
+                ListIterator<Panel> it = sortedPanels.listIterator(sortedPanels.size());
                 while (it.hasPrevious())
                 {
                     Panel p = it.previous();
@@ -223,7 +230,25 @@ public class Main extends Game
     public void step(float dt)
     {
         player.step(dt);
-        panels.sort((a, b) -> Util.compare(b.dist(camera.pos), a.dist(camera.pos)));
+        
+        DAG<Panel> overlapGraph = new DAG<>();
+        
+        for (Panel panel : panels)
+        {
+            overlapGraph.add(panel);
+            panel.calcEdge(camera);
+        }
+        
+        for (int i=0; i<panels.size(); i++) for (int j=i+1; j<panels.size(); j++)
+        {
+            Panel a = panels.get(i), b = panels.get(j);
+            LinkedList<Overlap> overlap = a.getOverlap(b);
+            if (overlap.size() > 1) continue; //Intersection. Prevent cycles.
+            for (Overlap o : overlap) overlapGraph.addEdge(o.behind, o.front);
+        }
+        
+        sortedPanels = overlapGraph.sort();
+        
         interactionState.step(this, dt);
     }
     
@@ -241,7 +266,7 @@ public class Main extends Game
         
         floor.render();
         
-        for (Panel panel : panels) panel.render(camera.pos, 1.0f);
+        for (Panel panel : sortedPanels) panel.render(camera.pos, 1.0f);
         
         //Load screen matrix to draw HUD.
         Vec2i res = getResolution();
