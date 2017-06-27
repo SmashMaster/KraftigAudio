@@ -6,7 +6,7 @@ import com.samrj.devil.ui.AtlasFont;
 import kraftig.game.InteractionState;
 import org.lwjgl.opengl.GL11;
 
-public class Label implements InterfaceElement
+public class Label implements UIElement
 {
     private final AtlasFont font;
     private String text;

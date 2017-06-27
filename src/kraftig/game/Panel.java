@@ -5,7 +5,7 @@ import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
 import java.util.function.Consumer;
-import kraftig.game.gui.Interface;
+import kraftig.game.gui.UI;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -21,8 +21,8 @@ public class Panel
     private final Vec2 ab = new Vec2();
     private final Vec2 aCam = new Vec2(), bCam = new Vec2();
     
-    private final Interface frontInterface = new Interface();
-    private final Interface rearInterface = new Interface();
+    private final UI frontInterface = new UI();
+    private final UI rearInterface = new UI();
     
     private boolean dragged;
     
@@ -109,12 +109,12 @@ public class Panel
         return this;
     }
     
-    public Interface getFrontInterface()
+    public UI getFrontInterface()
     {
         return frontInterface;
     }
     
-    public Interface getRearInterface()
+    public UI getRearInterface()
     {
         return rearInterface;
     }

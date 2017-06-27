@@ -8,7 +8,7 @@ import kraftig.game.Main;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-public class Jack implements InterfaceElement
+public class Jack implements UIElement
 {
     private static final int SEGMENTS = 32;
     private static final float DT = 8.0f/(SEGMENTS - 1);

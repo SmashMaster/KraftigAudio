@@ -21,10 +21,10 @@ import java.util.List;
 import java.util.ListIterator;
 import kraftig.game.Panel.ClickResult;
 import kraftig.game.gui.Crosshair;
-import kraftig.game.gui.Interface;
 import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
+import kraftig.game.gui.UI;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -100,7 +100,7 @@ public class Main extends Game
         panel.setSize(0.25f, 0.125f);
         panel.setYaw(Util.toRadians(-20.0f));
         {
-            Interface front = panel.getFrontInterface();
+            UI front = panel.getFrontInterface();
             
             Knob knob = new Knob(new Vec2(0.0f, 0.0f), Alignment.C, 32.0f);
             Label vLabel = new Label(font, "", new Vec2(40.0f, 0.0f), Alignment.E);
@@ -168,6 +168,10 @@ public class Main extends Game
     public Vec3 getMouseDir()
     {
         return new Vec3(mouseDir);
+    }
+    
+    public void addWire()
+    {
     }
     
     @Override
