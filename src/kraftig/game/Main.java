@@ -100,7 +100,7 @@ public class Main extends Game
         panel.setSize(0.25f, 0.125f);
         panel.setYaw(Util.toRadians(-20.0f));
         {
-            UI front = panel.getFrontInterface();
+            UI front = panel.frontInterface;
             
             Knob knob = new Knob(new Vec2(0.0f, 0.0f), Alignment.C, 32.0f);
             Label vLabel = new Label(font, "", new Vec2(40.0f, 0.0f), Alignment.E);
@@ -111,14 +111,14 @@ public class Main extends Game
             front.add(vLabel);
             front.add(new Jack(new Vec2(0.0f, -40.0f), Alignment.S));
         }
-        panel.getRearInterface().add(new Label(font, "Rear", new Vec2(), Alignment.C));
+        panel.rearInterface.add(new Label(font, "Rear", new Vec2(), Alignment.C));
         panels.add(panel);
         
         panel = new Panel();
         panel.setPosition(new Vec3(-0.25f, 1.75f, -1.0f));
         panel.setSize(0.25f, 0.125f);
         panel.setYaw(Util.toRadians(20.0f));
-        panel.getFrontInterface().add(new Jack(new Vec2(), Alignment.C));
+        panel.rearInterface.add(new Jack(new Vec2(), Alignment.C));
         panels.add(panel);
         
         GL11.glEnable(GL11.GL_BLEND);
@@ -245,10 +245,10 @@ public class Main extends Game
         {
             Panel a = panels.get(i), b = panels.get(j);
             
-            switch (a.getOverlap(b, camera))
+            switch (Overlap.get(a, b, camera))
             {
-                case BEHIND: overlapGraph.addEdge(a, b); break;
-                case IN_FRONT: overlapGraph.addEdge(b, a); break;
+                case A_BEHIND_B: overlapGraph.addEdge(a, b); break;
+                case B_BEHIND_A: overlapGraph.addEdge(b, a); break;
             }
         }
         

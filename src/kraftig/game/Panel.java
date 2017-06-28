@@ -9,20 +9,20 @@ import kraftig.game.gui.UI;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-public class Panel
+public class Panel implements Drawable
 {
     private static final float INTERFACE_SCALE = 1.0f/1024.0f; //Pixels per meter.
     
-    private final Vec3 pos = new Vec3();
-    private float yaw;
-    private float width, height;
+    public final Vec3 pos = new Vec3();
+    public float yaw;
+    public float width, height;
     
-    private final Vec2 a = new Vec2(), b = new Vec2();
-    private final Vec2 ab = new Vec2();
-    private final Vec2 aCam = new Vec2(), bCam = new Vec2();
+    public final Vec2 a = new Vec2(), b = new Vec2();
+    public final Vec2 ab = new Vec2();
+    public final Vec2 aCam = new Vec2(), bCam = new Vec2();
     
-    private final UI frontInterface = new UI();
-    private final UI rearInterface = new UI();
+    public final UI frontInterface = new UI();
+    public final UI rearInterface = new UI();
     
     private boolean dragged;
     
@@ -43,7 +43,7 @@ public class Panel
         Vec2.sub(cam, b, bCam);
     }
     
-    private float rayHit(Vec2 p, Vec2 d)
+    public float rayHit(Vec2 p, Vec2 d)
     {
         //Calculate hit position and return zero if missed.
         Vec2 pa = Vec2.sub(p, a);
@@ -53,41 +53,6 @@ public class Panel
         //Return direction of hit.
         Vec2 dr = Vec2.madd(pa, ab, t);
         return Math.signum(dr.dot(d));
-    }
-    
-    public Overlap getOverlap(Panel other, Camera3D camera)
-    {
-        float da = other.rayHit(a, aCam);
-        float db = other.rayHit(b, bCam);
-        float doa = rayHit(other.a, other.aCam);
-        float dob = rayHit(other.b, other.bCam);
-        
-        boolean behind = da < 0.0f || db < 0.0f || doa > 0.0f || dob > 0.0f;
-        boolean inFront = da > 0.0f || db > 0.0f || doa < 0.0f || dob < 0.0f;
-        
-        if (behind && inFront)
-        {
-            //Figure out which is above/below.
-            Panel above = pos.y > other.pos.y ? this : other;
-            Panel below = pos.y > other.pos.y ? other : this;
-            
-            //y1 > b.y0 && b.y1 > y0
-            float aboveY0 = above.pos.y - above.height;
-            float aboveY1 = above.pos.y + above.height;
-            float belowY0 = below.pos.y - below.height;
-            float belowY1 = below.pos.y + below.height;
-            
-            //Check if vertically intersecting. If not, resolve by vertical position.
-            if (aboveY1 > belowY0 && belowY1 > aboveY0) return Overlap.INTERSECTION;
-            else if (aboveY0 > camera.pos.y && belowY1 > camera.pos.y)
-                return below == this ? Overlap.IN_FRONT : Overlap.BEHIND;
-            else if (aboveY0 < camera.pos.y && belowY1 < camera.pos.y)
-                return above == this ? Overlap.IN_FRONT : Overlap.BEHIND;
-            else return Overlap.NONE;
-        }
-        else if (behind) return Overlap.BEHIND;
-        else if (inFront) return Overlap.IN_FRONT;
-        else return Overlap.NONE;
     }
     
     public Panel setPosition(Vec3 pos)
@@ -107,16 +72,6 @@ public class Panel
         width = w;
         height = h;
         return this;
-    }
-    
-    public UI getFrontInterface()
-    {
-        return frontInterface;
-    }
-    
-    public UI getRearInterface()
-    {
-        return rearInterface;
     }
     
     public ClickResult onMouseButton(Player player, Vec3 dir, int button, int action, int mods)
@@ -194,6 +149,7 @@ public class Panel
         }
     }
     
+    @Override
     public void render(Vec3 cameraPos, float alpha)
     {
         if (dragged) alpha *= 0.5f;
@@ -261,10 +217,5 @@ public class Panel
             hit = true;
             this.newState = mouseCapture;
         }
-    }
-    
-    public enum Overlap
-    {
-        NONE, IN_FRONT, BEHIND, INTERSECTION;
     }
 }
