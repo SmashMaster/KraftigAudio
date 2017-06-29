@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import kraftig.game.Panel.ClickResult;
 import kraftig.game.gui.Crosshair;
 import kraftig.game.gui.Jack;
@@ -73,9 +75,10 @@ public class Main extends Game
     private final Skybox skybox;
     private final FloorGrid floor;
     private final ArrayList<Panel> panels = new ArrayList<>();
+    private final ArrayList<Wire> wires = new ArrayList<>();
     private final InteractionState defaultState;
     
-    private List<Panel> sortedPanels = Collections.EMPTY_LIST;
+    private List<DrawPlane> sortedPlanes = Collections.EMPTY_LIST;
     
     private boolean displayMouse = false;
     private final Vec3 mouseDir = new Vec3(0.0f, 0.0f, -1.0f);
@@ -136,14 +139,18 @@ public class Main extends Game
             @Override
             public void onMouseButton(Main main, int button, int action, int mods)
             {
-                ListIterator<Panel> it = sortedPanels.listIterator(sortedPanels.size());
+                ListIterator<DrawPlane> it = sortedPlanes.listIterator(sortedPlanes.size());
                 while (it.hasPrevious())
                 {
-                    Panel p = it.previous();
-                    ClickResult result = p.onMouseButton(player, mouseDir, button, action, mods);
+                    DrawPlane p = it.previous();
+                    if (p.drawable instanceof Panel)
+                    {
+                        Panel panel = (Panel)p.drawable;
+                        ClickResult result = panel.onMouseButton(player, mouseDir, button, action, mods);
 
-                    if (result.newState != null) setState(result.newState);
-                    if (result.hit) break;
+                        if (result.newState != null) setState(result.newState);
+                        if (result.hit) break;
+                    }
                 }
             }
         };
@@ -233,26 +240,29 @@ public class Main extends Game
     {
         player.step(dt);
         
-        DAG<Panel> overlapGraph = new DAG<>();
+        DAG<DrawPlane> drawGraph = new DAG<>();
+        List<DrawPlane> planes = Stream.concat(panels.stream(), wires.stream()).map(DrawPlane::new).collect(Collectors.toList());
         
-        for (Panel panel : panels)
+        for (DrawPlane plane : planes)
         {
-            overlapGraph.add(panel);
-            panel.calcEdge(camera);
+            plane.update(camera);
+            drawGraph.add(plane);
         }
         
-        for (int i=0; i<panels.size(); i++) for (int j=i+1; j<panels.size(); j++)
+        for (int i=0; i<planes.size(); i++) for (int j=i+1; j<planes.size(); j++)
         {
-            Panel a = panels.get(i), b = panels.get(j);
+            DrawPlane a = planes.get(i), b = planes.get(j);
             
             switch (Overlap.get(a, b, camera))
             {
-                case A_BEHIND_B: overlapGraph.addEdge(a, b); break;
-                case B_BEHIND_A: overlapGraph.addEdge(b, a); break;
+                case A_BEHIND_B: drawGraph.addEdge(a, b); break;
+                case B_BEHIND_A: drawGraph.addEdge(b, a); break;
             }
         }
         
-        sortedPanels = overlapGraph.sort();
+        System.out.println(drawGraph.getEdges().size());
+        
+        sortedPlanes = drawGraph.sort();
         
         interactionState.step(this, dt);
     }
@@ -271,7 +281,7 @@ public class Main extends Game
         
         floor.render();
         
-        for (Panel panel : sortedPanels) panel.render(camera.pos, 1.0f);
+        for (DrawPlane plane : sortedPlanes) plane.render(camera, 1.0f);
         
         //Load screen matrix to draw HUD.
         Vec2i res = getResolution();
