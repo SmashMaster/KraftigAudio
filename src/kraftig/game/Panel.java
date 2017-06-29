@@ -13,9 +13,13 @@ public class Panel implements Drawable
 {
     private static final float INTERFACE_SCALE = 1.0f/1024.0f; //Pixels per meter.
     
-    private final Vec3 pos = new Vec3();
-    private float yaw;
-    private float width, height;
+    public final Vec3 pos = new Vec3();
+    public float yaw;
+    public float width, height;
+    
+    public final Vec2 a = new Vec2(), b = new Vec2();
+    public final Vec2 ab = new Vec2();
+    public final Vec2 aCam = new Vec2(), bCam = new Vec2();
     
     public final UI frontInterface = new UI();
     public final UI rearInterface = new UI();
@@ -26,15 +30,29 @@ public class Panel implements Drawable
     {
     }
     
-    @Override
-    public void updatePlane(Camera3D camera, DrawPlane plane)
+    public void calcEdge(Camera3D camera)
     {
         Vec2 edge = new Vec2((float)Math.cos(yaw), -(float)Math.sin(yaw)).mult(width);
-        Vec2 p = new Vec2(pos.x, pos.z);
-        Vec2.sub(p, edge, plane.a);
-        Vec2.add(p, edge, plane.b);
-        plane.y = pos.y;
-        plane.height = height;
+        Vec2 p2 = new Vec2(pos.x, pos.z);
+        Vec2.sub(p2, edge, a);
+        Vec2.add(p2, edge, b);
+        Vec2.mult(edge, -2.0f, ab);
+        
+        Vec2 cam = new Vec2(camera.pos.x, camera.pos.z);
+        Vec2.sub(cam, a, aCam);
+        Vec2.sub(cam, b, bCam);
+    }
+    
+    public float rayHit(Vec2 p, Vec2 d)
+    {
+        //Calculate hit position and return zero if missed.
+        Vec2 pa = Vec2.sub(p, a);
+        float t = (d.x*pa.y - d.y*pa.x)/(d.y*ab.x - d.x*ab.y);
+        if (t < 0.0f || t > 1.0f) return 0.0f;
+        
+        //Return direction of hit.
+        Vec2 dr = Vec2.madd(pa, ab, t);
+        return Math.signum(dr.dot(d));
     }
     
     public Panel setPosition(Vec3 pos)
@@ -132,11 +150,11 @@ public class Panel implements Drawable
     }
     
     @Override
-    public void render(Camera3D camera, float alpha)
+    public void render(Vec3 cameraPos, float alpha)
     {
         if (dragged) alpha *= 0.5f;
         
-        Vec2 cameraDir = new Vec2(pos.x, pos.z).sub(new Vec2(camera.pos.x, camera.pos.z));
+        Vec2 cameraDir = new Vec2(pos.x, pos.z).sub(new Vec2(cameraPos.x, cameraPos.z));
         Vec2 frontDir = new Vec2((float)Math.sin(yaw), (float)Math.cos(yaw));
         boolean facingFront = cameraDir.dot(frontDir) <= 0.0f;
         
