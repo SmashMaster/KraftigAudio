@@ -29,14 +29,14 @@ public enum Overlap
         if (behind && inFront)
         {
             //Figure out which is above/below.
-            Panel above = a.pos.y > b.pos.y ? a : b;
-            Panel below = a.pos.y > b.pos.y ? b : a;
+            Panel above = a.getY() > b.getY() ? a : b;
+            Panel below = a.getY() > b.getY() ? b : a;
             
             //y1 > b.y0 && b.y1 > y0
-            float aboveY0 = above.pos.y - above.height;
-            float aboveY1 = above.pos.y + above.height;
-            float belowY0 = below.pos.y - below.height;
-            float belowY1 = below.pos.y + below.height;
+            float aboveY0 = above.getY() - above.getHeight();
+            float aboveY1 = above.getY() + above.getHeight();
+            float belowY0 = below.getY() - below.getHeight();
+            float belowY1 = below.getY() + below.getHeight();
             
             //Check if vertically intersecting. If not, resolve by vertical position.
             if (aboveY1 > belowY0 && belowY1 > aboveY0) return INTERSECTION;

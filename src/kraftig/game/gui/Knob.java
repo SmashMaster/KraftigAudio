@@ -1,5 +1,6 @@
 package kraftig.game.gui;
 
+import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
@@ -35,6 +36,11 @@ public class Knob implements UIElement
         Vec2 av = new Vec2(align.x, align.y).mult(radius);
         this.pos.set(pos).add(av);
         this.radius = radius;
+    }
+    
+    @Override
+    public void updateMatrix(Mat4 matrix)
+    {
     }
     
     @Override

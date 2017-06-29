@@ -1,5 +1,6 @@
 package kraftig.game.gui;
 
+import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import com.samrj.devil.ui.AtlasFont;
@@ -28,6 +29,11 @@ public class Label implements UIElement
         if (text == null) throw new NullPointerException();
         
         this.text = text;
+    }
+    
+    @Override
+    public void updateMatrix(Mat4 matrix)
+    {
     }
     
     @Override

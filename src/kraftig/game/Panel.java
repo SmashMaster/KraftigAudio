@@ -1,6 +1,7 @@
 package kraftig.game;
 
 import com.samrj.devil.graphics.Camera3D;
+import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
@@ -11,11 +12,12 @@ import org.lwjgl.opengl.GL11;
 
 public class Panel implements Drawable
 {
-    private static final float INTERFACE_SCALE = 1.0f/1024.0f; //Pixels per meter.
+    private static final float UI_SCALE = 1.0f/1024.0f; //Pixels per meter.
+    private static final float INV_UI_SCALE = 1.0f/UI_SCALE; //Meters per pixel.
     
-    public final Vec3 pos = new Vec3();
-    public float yaw;
-    public float width, height;
+    private final Vec3 pos = new Vec3();
+    private float yaw;
+    private float width, height;
     
     public final Vec2 a = new Vec2(), b = new Vec2();
     public final Vec2 ab = new Vec2();
@@ -28,6 +30,23 @@ public class Panel implements Drawable
     
     public Panel()
     {
+        updateMatrices();
+    }
+    
+    private void updateMatrices()
+    {
+        Mat4 rot = Mat4.rotation(new Vec3(0.0f, 1.0f, 0.0f), -yaw);
+        Vec3 tra = Vec3.negate(pos);
+        
+        Mat4 frontMatrix = Mat4.scaling(new Vec3(INV_UI_SCALE, INV_UI_SCALE, 1.0f));
+        frontMatrix.mult(rot);
+        frontMatrix.translate(tra);
+        frontInterface.updateMatrix(frontMatrix);
+        
+        Mat4 rearMatrix = Mat4.scaling(new Vec3(INV_UI_SCALE, INV_UI_SCALE, -1.0f));
+        rearMatrix.mult(rot);
+        rearMatrix.translate(tra);
+        rearInterface.updateMatrix(rearMatrix);
     }
     
     @Override
@@ -59,12 +78,24 @@ public class Panel implements Drawable
     public Panel setPosition(Vec3 pos)
     {
         this.pos.set(pos);
+        updateMatrices();
         return this;
+    }
+    
+    public float getY()
+    {
+        return pos.y;
+    }
+    
+    public float getHeight()
+    {
+        return height;
     }
     
     public Panel setYaw(float yaw)
     {
         this.yaw = yaw;
+        updateMatrices();
         return this;
     }
     
@@ -72,6 +103,7 @@ public class Panel implements Drawable
     {
         width = w;
         height = h;
+        updateMatrices();
         return this;
     }
     
@@ -103,6 +135,7 @@ public class Panel implements Drawable
                 pos.madd(main.getMouseDir(), dist);
                 pos.madd(new Vec3((float)Math.cos(yaw), 0.0f, -(float)Math.sin(yaw)), x);
                 pos.y -= hitPos.y;
+                updateMatrices();
             };
             
             return new ClickResult(new InteractionState()
@@ -140,12 +173,12 @@ public class Panel implements Drawable
         
         if (camDot > 0.0f)
         {
-            Vec2 p = new Vec2(-x, hitPos.y).div(INTERFACE_SCALE);
+            Vec2 p = new Vec2(-x, hitPos.y).div(UI_SCALE);
             return new ClickResult(frontInterface.onMouseButton(p, button, action, mods));
         }
         else
         {
-            Vec2 p = new Vec2(x, hitPos.y).div(INTERFACE_SCALE);
+            Vec2 p = new Vec2(x, hitPos.y).div(UI_SCALE);
             return new ClickResult(rearInterface.onMouseButton(p, button, action, mods));
         }
     }
@@ -188,7 +221,7 @@ public class Panel implements Drawable
         GL11.glVertex3f(width, -height, 0.0f);
         GL11.glEnd();
         
-        GL11.glScalef(INTERFACE_SCALE, INTERFACE_SCALE, 1.0f);
+        GL11.glScalef(UI_SCALE, UI_SCALE, 1.0f);
         if (facingFront) frontInterface.render(alpha);
         else
         {
