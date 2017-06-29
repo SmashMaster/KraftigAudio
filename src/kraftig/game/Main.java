@@ -25,6 +25,7 @@ import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.UI;
+import kraftig.game.util.ConcatList;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -73,9 +74,10 @@ public class Main extends Game
     private final Skybox skybox;
     private final FloorGrid floor;
     private final ArrayList<Panel> panels = new ArrayList<>();
+    private final ArrayList<Wire> wires = new ArrayList<>();
     private final InteractionState defaultState;
     
-    private List<Panel> sortedPanels = Collections.EMPTY_LIST;
+    private List<Drawable> drawSort = Collections.EMPTY_LIST;
     
     private boolean displayMouse = false;
     private final Vec3 mouseDir = new Vec3(0.0f, 0.0f, -1.0f);
@@ -136,10 +138,13 @@ public class Main extends Game
             @Override
             public void onMouseButton(Main main, int button, int action, int mods)
             {
-                ListIterator<Panel> it = sortedPanels.listIterator(sortedPanels.size());
+                ListIterator<Drawable> it = drawSort.listIterator(drawSort.size());
                 while (it.hasPrevious())
                 {
-                    Panel p = it.previous();
+                    Drawable d = it.previous();
+                    if (!(d instanceof Panel)) continue;
+                    
+                    Panel p  = (Panel)d;
                     ClickResult result = p.onMouseButton(player, mouseDir, button, action, mods);
 
                     if (result.newState != null) setState(result.newState);
@@ -233,17 +238,18 @@ public class Main extends Game
     {
         player.step(dt);
         
-        DAG<Panel> overlapGraph = new DAG<>();
+        ConcatList<Drawable> drawList = new ConcatList<>(panels, wires);
+        DAG<Drawable> overlapGraph = new DAG<>();
         
-        for (Panel panel : panels)
+        for (Drawable draw : drawList)
         {
-            overlapGraph.add(panel);
-            panel.calcEdge(camera);
+            overlapGraph.add(draw);
+            draw.updateEdge(camera);
         }
         
-        for (int i=0; i<panels.size(); i++) for (int j=i+1; j<panels.size(); j++)
+        for (int i=0; i<drawList.size(); i++) for (int j=i+1; j<drawList.size(); j++)
         {
-            Panel a = panels.get(i), b = panels.get(j);
+            Drawable a = drawList.get(i), b = drawList.get(j);
             
             switch (Overlap.get(a, b, camera))
             {
@@ -252,7 +258,7 @@ public class Main extends Game
             }
         }
         
-        sortedPanels = overlapGraph.sort();
+        drawSort = overlapGraph.sort();
         
         interactionState.step(this, dt);
     }
@@ -271,7 +277,7 @@ public class Main extends Game
         
         floor.render();
         
-        for (Panel panel : sortedPanels) panel.render(camera.pos, 1.0f);
+        for (Drawable draw : drawSort) draw.render(camera, 1.0f);
         
         //Load screen matrix to draw HUD.
         Vec2i res = getResolution();

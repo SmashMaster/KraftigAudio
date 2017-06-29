@@ -30,7 +30,8 @@ public class Panel implements Drawable
     {
     }
     
-    public void calcEdge(Camera3D camera)
+    @Override
+    public void updateEdge(Camera3D camera)
     {
         Vec2 edge = new Vec2((float)Math.cos(yaw), -(float)Math.sin(yaw)).mult(width);
         Vec2 p2 = new Vec2(pos.x, pos.z);
@@ -150,11 +151,11 @@ public class Panel implements Drawable
     }
     
     @Override
-    public void render(Vec3 cameraPos, float alpha)
+    public void render(Camera3D camera, float alpha)
     {
         if (dragged) alpha *= 0.5f;
         
-        Vec2 cameraDir = new Vec2(pos.x, pos.z).sub(new Vec2(cameraPos.x, cameraPos.z));
+        Vec2 cameraDir = new Vec2(pos.x, pos.z).sub(new Vec2(camera.pos.x, camera.pos.z));
         Vec2 frontDir = new Vec2((float)Math.sin(yaw), (float)Math.cos(yaw));
         boolean facingFront = cameraDir.dot(frontDir) <= 0.0f;
         
