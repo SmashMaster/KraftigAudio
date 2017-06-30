@@ -195,6 +195,7 @@ public class Panel implements Drawable
         GL11.glRotatef(Util.toDegrees(yaw), 0.0f, 1.0f, 0.0f);
         
         //Shadow
+        GL11.glLineWidth(0.5f);
         GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.5f*alpha);
         GL11.glBegin(GL11.GL_LINES);
         GL11.glVertex3f(-width, -pos.y, 0.0f);
@@ -211,6 +212,7 @@ public class Panel implements Drawable
         GL11.glEnd();
         
         //Outline
+        GL11.glLineWidth(1.0f);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
         GL11.glBegin(GL11.GL_LINE_LOOP);
         GL11.glVertex3f(-width, -height, 0.0f);

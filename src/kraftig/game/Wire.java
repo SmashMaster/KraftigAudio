@@ -30,7 +30,8 @@ public class Wire implements Drawable
     @Override
     public void render(Camera3D camera, float alpha)
     {
-        GL11.glColor4f(0.0f, 0.0f, 0.0f, alpha);
+        GL11.glLineWidth(2.0f);
+        GL11.glColor4f(0.0f, 0.0f, 0.0f, alpha*0.875f);
         GL11.glBegin(GL11.GL_LINE_STRIP);
         for (Wire n = this; n != null; n = n.next) GraphicsUtil.glVertex(n.pos);
         GL11.glEnd();

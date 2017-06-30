@@ -103,6 +103,7 @@ public class Jack implements UIElement
         GL11.glPushMatrix();
         GL11.glTranslatef(pos.x, pos.y, 0.0f);
         
+        GL11.glLineWidth(1.0f);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha*0.5f);
         GL11.glBegin(GL11.GL_LINE_LOOP);
         for (float t = 0.0f; t < T_END; t += DT)

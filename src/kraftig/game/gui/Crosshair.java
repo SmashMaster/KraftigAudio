@@ -9,6 +9,7 @@ public class Crosshair
     
     public void renderCrosshair()
     {
+        GL11.glLineWidth(1.0f);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 0.5f);
         GL11.glBegin(GL11.GL_LINES);
         GL11.glVertex2f(-CROSSHAIR_WIDTH, 0.0f);

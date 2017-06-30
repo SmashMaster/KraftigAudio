@@ -13,6 +13,7 @@ public class FloorGrid
     
     void render()
     {
+        GL11.glLineWidth(1.0f);
         GL11.glColor3f(COLOR, COLOR, COLOR);
         GL11.glBegin(GL11.GL_LINES);
         for (int x = -WIDTH; x <= WIDTH; x++)
