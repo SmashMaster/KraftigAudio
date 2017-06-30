@@ -52,7 +52,7 @@ public class Knob implements UIElement
         if (mr <= radius*radius) return new InteractionState()
         {
             @Override
-            public boolean isCursorVisible(Main main)
+            public boolean isCursorVisible()
             {
                 return false;
             }

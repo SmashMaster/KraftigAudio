@@ -13,7 +13,6 @@ import org.lwjgl.opengl.GL11;
 public class Panel implements Drawable
 {
     private static final float UI_SCALE = 1.0f/1024.0f; //Pixels per meter.
-    private static final float INV_UI_SCALE = 1.0f/UI_SCALE; //Meters per pixel.
     
     private final Vec3 pos = new Vec3();
     private float yaw;
@@ -35,17 +34,16 @@ public class Panel implements Drawable
     
     private void updateMatrices()
     {
-        Mat4 rot = Mat4.rotation(new Vec3(0.0f, 1.0f, 0.0f), -yaw);
-        Vec3 tra = Vec3.negate(pos);
+        Mat4 rot = Mat4.rotation(new Vec3(0.0f, 1.0f, 0.0f), yaw);
         
-        Mat4 frontMatrix = Mat4.scaling(new Vec3(INV_UI_SCALE, INV_UI_SCALE, 1.0f));
+        Mat4 frontMatrix = Mat4.translation(pos);
         frontMatrix.mult(rot);
-        frontMatrix.translate(tra);
+        frontMatrix.mult(new Vec3(UI_SCALE, UI_SCALE, UI_SCALE));
         frontInterface.updateMatrix(frontMatrix);
         
-        Mat4 rearMatrix = Mat4.scaling(new Vec3(INV_UI_SCALE, INV_UI_SCALE, -1.0f));
+        Mat4 rearMatrix = Mat4.translation(pos);
         rearMatrix.mult(rot);
-        rearMatrix.translate(tra);
+        rearMatrix.mult(new Vec3(-UI_SCALE, UI_SCALE, -UI_SCALE));
         rearInterface.updateMatrix(rearMatrix);
     }
     
@@ -221,11 +219,11 @@ public class Panel implements Drawable
         GL11.glVertex3f(width, -height, 0.0f);
         GL11.glEnd();
         
-        GL11.glScalef(UI_SCALE, UI_SCALE, 1.0f);
+        GL11.glScalef(UI_SCALE, UI_SCALE, UI_SCALE);
         if (facingFront) frontInterface.render(alpha);
         else
         {
-            GL11.glScalef(-1.0f, 1.0f, 1.0f);
+            GL11.glScalef(-1.0f, 1.0f, -1.0f);
             rearInterface.render(alpha);
         }
         

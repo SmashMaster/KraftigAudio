@@ -120,7 +120,7 @@ public class Main extends Game
         panel.setPosition(new Vec3(-0.25f, 1.75f, -1.0f));
         panel.setSize(0.25f, 0.125f);
         panel.setYaw(Util.toRadians(20.0f));
-        panel.rearInterface.add(new Jack(new Vec2(), Alignment.C));
+        panel.rearInterface.add(new Jack(new Vec2(128.0f, 0.0f), Alignment.C));
         panels.add(panel);
         
         GL11.glEnable(GL11.GL_BLEND);
@@ -156,12 +156,13 @@ public class Main extends Game
     
     private boolean displayMouse()
     {
-        return displayMouse && interactionState.isCursorVisible(this);
+        return displayMouse && interactionState.isCursorVisible();
     }
     
     public void setState(InteractionState state)
     {
         interactionState = state;
+        interactionState.init(this);
         mouse.setGrabbed(!displayMouse());
     }
     
@@ -170,13 +171,19 @@ public class Main extends Game
         setState(defaultState);
     }
     
+    public Camera3D getCamera()
+    {
+        return camera;
+    }
+    
     public Vec3 getMouseDir()
     {
         return new Vec3(mouseDir);
     }
     
-    public void addWire()
+    public void addWire(Wire wire)
     {
+        wires.add(wire);
     }
     
     @Override
