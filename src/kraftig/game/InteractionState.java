@@ -12,10 +12,9 @@ public interface InteractionState
         return false;
     }
     
-    public default void init(Main main) {}
-    public default void onMouseMoved(Main main, float x, float y, float dx, float dy) {}
-    public default void onMouseButton(Main main, int button, int action, int mods) {}
-    public default void onMouseScroll(Main main, float dx, float dy) {}
-    public default void onKey(Main main, int key, int action, int mods) {}
-    public default void step(Main main, float dt) {}
+    public default void onMouseMoved(float x, float y, float dx, float dy) {}
+    public default void onMouseButton(int button, int action, int mods) {}
+    public default void onMouseScroll(float dx, float dy) {}
+    public default void onKey(int key, int action, int mods) {}
+    public default void step(float dt) {}
 }

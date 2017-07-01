@@ -30,8 +30,15 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 
-public class Main extends Game
+public final class Main extends Game
 {
+    private static Main INSTANCE;
+    
+    public static Main instance()
+    {
+        return INSTANCE;
+    }
+    
     private static HintSet hints()
     {
         HintSet hints = new HintSet();
@@ -87,6 +94,9 @@ public class Main extends Game
     {
         super("Kr\u00E4ftig Audio",  hints(), config());
         
+        if (INSTANCE != null) throw new IllegalStateException();
+        INSTANCE = this;
+        
         DGL.init();
         mouse.setGrabbed(!displayMouse());
         
@@ -111,7 +121,7 @@ public class Main extends Game
             front.add(knob);
             front.add(new Label(font, "Value:", new Vec2(-40.0f, 0.0f), Alignment.W));
             front.add(vLabel);
-            front.add(new Jack(new Vec2(0.0f, -40.0f), Alignment.S));
+            front.add(new Jack(new Vec2(0.0f, -40.0f), Alignment.S, Jack.Type.OUTPUT));
         }
         panel.rearInterface.add(new Label(font, "Rear", new Vec2(), Alignment.C));
         panels.add(panel);
@@ -120,7 +130,7 @@ public class Main extends Game
         panel.setPosition(new Vec3(-0.25f, 1.75f, -1.0f));
         panel.setSize(0.25f, 0.125f);
         panel.setYaw(Util.toRadians(20.0f));
-        panel.rearInterface.add(new Jack(new Vec2(128.0f, 0.0f), Alignment.C));
+        panel.rearInterface.add(new Jack(new Vec2(128.0f, 0.0f), Alignment.C, Jack.Type.INPUT));
         panels.add(panel);
         
         GL11.glEnable(GL11.GL_BLEND);
@@ -136,7 +146,7 @@ public class Main extends Game
             }
             
             @Override
-            public void onMouseButton(Main main, int button, int action, int mods)
+            public void onMouseButton(int button, int action, int mods)
             {
                 ListIterator<Drawable> it = drawSort.listIterator(drawSort.size());
                 while (it.hasPrevious())
@@ -162,7 +172,6 @@ public class Main extends Game
     public void setState(InteractionState state)
     {
         interactionState = state;
-        interactionState.init(this);
         mouse.setGrabbed(!displayMouse());
     }
     
@@ -202,19 +211,19 @@ public class Main extends Game
         mouseDir.madd(camera.up, mPos.y*camera.vSlope);
         mouseDir.normalize();
         
-        interactionState.onMouseMoved(this, x, y, dx, dy);
+        interactionState.onMouseMoved(x, y, dx, dy);
     }
     
     @Override
     public void onMouseButton(int button, int action, int mods)
     {
-        interactionState.onMouseButton(this, button, action, mods);
+        interactionState.onMouseButton(button, action, mods);
     }
     
     @Override
     public void onMouseScroll(float dx, float dy)
     {
-        interactionState.onMouseScroll(this, dx, dy);
+        interactionState.onMouseScroll(dx, dy);
     }
 
     @Override
@@ -237,7 +246,7 @@ public class Main extends Game
             }
         }
         
-        interactionState.onKey(this, key, action, mods);
+        interactionState.onKey(key, action, mods);
     }
     
     @Override
@@ -267,7 +276,7 @@ public class Main extends Game
         
         drawSort = overlapGraph.sort();
         
-        interactionState.step(this, dt);
+        interactionState.step(dt);
     }
     
     @Override

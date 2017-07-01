@@ -58,16 +58,17 @@ public class Knob implements UIElement
             }
             
             @Override
-            public void onMouseMoved(Main main, float x, float y, float dx, float dy)
+            public void onMouseMoved(float x, float y, float dx, float dy)
             {
                 value = Util.saturate(value + dy*SENSITIVITY);
                 if (callback != null) callback.accept(value);
             }
             
             @Override
-            public void onMouseButton(Main main, int button, int action, int mods)
+            public void onMouseButton(int button, int action, int mods)
             {
-                if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && action == GLFW.GLFW_RELEASE) main.setDefaultState();
+                if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && action == GLFW.GLFW_RELEASE)
+                    Main.instance().setDefaultState();
             }
         };
         else return null;

@@ -8,18 +8,38 @@ import org.lwjgl.opengl.GL11;
 
 public class Wire implements Drawable
 {
-    public final Vec3 pos = new Vec3();
+    private WireNode first, last;
     
-    private Jack start, end;
-    private Wire prev, next;
-    
-    public Wire attachNext()
+    public Wire()
     {
-        if (next != null) throw new IllegalStateException();
-        next = new Wire();
-        next.prev = this;
-        next.start = start;
-        return next;
+        first = new WireNode();
+        last = new WireNode();
+        first.next = last;
+        last.prev = first;
+    }
+    
+    public WireNode getFirst()
+    {
+        return first;
+    }
+    
+    public WireNode getLast()
+    {
+        return last;
+    }
+    
+    public Wire connectIn(Jack jack)
+    {
+        if (jack.getType() != Jack.Type.OUTPUT) throw new IllegalArgumentException();
+        jack.connect(this);
+        return this;
+    }
+    
+    public Wire connectOut(Jack jack)
+    {
+        if (jack.getType() != Jack.Type.INPUT) throw new IllegalArgumentException();
+        jack.connect(this);
+        return this;
     }
     
     @Override
@@ -33,7 +53,14 @@ public class Wire implements Drawable
         GL11.glLineWidth(2.0f);
         GL11.glColor4f(0.0f, 0.0f, 0.0f, alpha*0.875f);
         GL11.glBegin(GL11.GL_LINE_STRIP);
-        for (Wire n = this; n != null; n = n.next) GraphicsUtil.glVertex(n.pos);
+        for (WireNode n = first; n != null; n = n.next) GraphicsUtil.glVertex(n.pos);
         GL11.glEnd();
+    }
+    
+    public class WireNode
+    {
+        public final Vec3 pos = new Vec3();
+        
+        private WireNode prev, next;
     }
 }

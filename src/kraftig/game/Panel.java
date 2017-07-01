@@ -126,18 +126,18 @@ public class Panel implements Drawable
             dragged = true;
             float relYaw = Util.reduceAngle(yaw - player.getYaw());
             
-            Consumer<Main> updater = (main) ->
-            {
-                yaw = Util.reduceAngle(player.getYaw() + relYaw);
-                pos.set(player.getCamera().pos);
-                pos.madd(main.getMouseDir(), dist);
-                pos.madd(new Vec3((float)Math.cos(yaw), 0.0f, -(float)Math.sin(yaw)), x);
-                pos.y -= hitPos.y;
-                updateMatrices();
-            };
-            
             return new ClickResult(new InteractionState()
             {
+                private void update()
+                {
+                    yaw = Util.reduceAngle(player.getYaw() + relYaw);
+                    pos.set(player.getCamera().pos);
+                    pos.madd(Main.instance().getMouseDir(), dist);
+                    pos.madd(new Vec3((float)Math.cos(yaw), 0.0f, -(float)Math.sin(yaw)), x);
+                    pos.y -= hitPos.y;
+                    updateMatrices();
+                }
+                
                 @Override
                 public boolean canPlayerAim()
                 {
@@ -145,24 +145,24 @@ public class Panel implements Drawable
                 }
                 
                 @Override
-                public void onMouseMoved(Main main, float x, float y, float dx, float dy)
+                public void onMouseMoved(float x, float y, float dx, float dy)
                 {
-                    updater.accept(main);
+                    update();
                 }
                 
                 @Override
-                public void onMouseButton(Main main, int button, int action, int mods)
+                public void onMouseButton(int button, int action, int mods)
                 {
                     if (action != GLFW.GLFW_PRESS || button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
                     
                     dragged = false;
-                    main.setDefaultState();
+                    Main.instance().setDefaultState();
                 }
                 
                 @Override
-                public void step(Main main, float dt)
+                public void step(float dt)
                 {
-                    updater.accept(main);
+                    update();
                 }
             });
         }
