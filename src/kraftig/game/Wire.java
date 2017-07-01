@@ -62,5 +62,27 @@ public class Wire implements Drawable
         public final Vec3 pos = new Vec3();
         
         private WireNode prev, next;
+        
+        public WireNode makeCorner()
+        {
+            if (prev == null && next == null) throw new IllegalStateException();
+            else if (prev == null)
+            {
+                prev = new WireNode();
+                prev.next = this;
+                prev.pos.set(pos);
+                first = prev;
+                return prev;
+            }
+            else if (next == null)
+            {
+                next = new WireNode();
+                next.prev = this;
+                next.pos.set(pos);
+                last = next;
+                return next;
+            }
+            else throw new IllegalStateException();
+        }
     }
 }

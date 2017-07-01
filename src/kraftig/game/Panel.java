@@ -5,7 +5,6 @@ import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
-import java.util.function.Consumer;
 import kraftig.game.gui.UI;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;

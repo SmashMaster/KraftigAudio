@@ -5,7 +5,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class WireDragState implements InteractionState
 {
-    private final WireNode node;
+    private WireNode node;
     private final float dist;
     
     public WireDragState(WireNode node)
@@ -35,8 +35,10 @@ public class WireDragState implements InteractionState
     @Override
     public void onMouseButton(int button, int action, int mods)
     {
-        if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
-            Main.instance().setDefaultState();
+        if (action != GLFW.GLFW_PRESS) return;
+        
+        if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) Main.instance().setDefaultState();
+        else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) node = node.makeCorner();
     }
 
     @Override

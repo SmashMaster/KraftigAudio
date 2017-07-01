@@ -1,6 +1,5 @@
 package kraftig.game.gui;
 
-import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
@@ -70,6 +69,8 @@ public class Jack implements UIElement
     {
         if (action != GLFW.GLFW_PRESS || button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return null;
         
+        if (mPos.squareDist(pos) > RADIUS_SQ) return null;
+        
         if (wire == null)
         {
             WireNode dragNode;
@@ -92,7 +93,20 @@ public class Jack implements UIElement
             Main.instance().addWire(wire);
             return new WireDragState(dragNode);
         }
-        else return null;
+        else
+        {
+            WireNode dragNode;
+            
+            switch (type)
+            {
+                case INPUT: dragNode = wire.getLast(); break;
+                case OUTPUT: dragNode = wire.getFirst(); break;
+                default: throw new IllegalArgumentException();
+            }
+            
+            wire = null;
+            return new WireDragState(dragNode);
+        }
     }
 
     @Override
