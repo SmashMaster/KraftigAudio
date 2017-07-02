@@ -63,6 +63,11 @@ public class Wire implements Drawable
         
         private WireNode prev, next;
         
+        public boolean isCorner()
+        {
+            return prev != null && next != null;
+        }
+        
         public WireNode makeCorner()
         {
             if (prev == null && next == null) throw new IllegalStateException();

@@ -60,7 +60,7 @@ public class Panel implements Drawable
         Vec2.sub(cam, b, bCam);
     }
     
-    public float rayHit(Vec2 p, Vec2 d)
+    public float edgeRayHit(Vec2 p, Vec2 d)
     {
         //Calculate hit position and return zero if missed.
         Vec2 pa = Vec2.sub(p, a);

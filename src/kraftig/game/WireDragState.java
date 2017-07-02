@@ -38,7 +38,8 @@ public class WireDragState implements InteractionState
         if (action != GLFW.GLFW_PRESS) return;
         
         if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) Main.instance().setDefaultState();
-        else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) node = node.makeCorner();
+        else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && !node.isCorner())
+            node = node.makeCorner();
     }
 
     @Override

@@ -18,10 +18,10 @@ public enum Overlap
     
     public static Overlap get(Panel a, Panel b, Camera3D camera)
     {
-        float da = b.rayHit(a.a, a.aCam);
-        float db = b.rayHit(a.b, a.bCam);
-        float doa = a.rayHit(b.a, b.aCam);
-        float dob = a.rayHit(b.b, b.bCam);
+        float da = b.edgeRayHit(a.a, a.aCam);
+        float db = b.edgeRayHit(a.b, a.bCam);
+        float doa = a.edgeRayHit(b.a, b.aCam);
+        float dob = a.edgeRayHit(b.b, b.bCam);
         
         boolean behind = da < 0.0f || db < 0.0f || doa > 0.0f || dob > 0.0f;
         boolean inFront = da > 0.0f || db > 0.0f || doa < 0.0f || dob < 0.0f;
