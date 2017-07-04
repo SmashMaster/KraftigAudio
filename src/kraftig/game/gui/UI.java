@@ -5,7 +5,6 @@ import com.samrj.devil.math.Vec2;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import kraftig.game.InteractionState;
 
 public class UI
 {
@@ -30,14 +29,13 @@ public class UI
         return Collections.unmodifiableList(elements);
     }
     
-    public InteractionState onMouseButton(Vec2 p, int button, int action, int mods)
+    public UIFocusQuery checkFocus(float dist, Vec2 p)
     {
         for (UIElement e : elements)
         {
-            InteractionState result = e.onMouseButton(p, button, action, mods);
-            if (result != null) return result;
+            UIFocusQuery query = e.checkFocus(dist, p);
+            if (query != null) return query;
         }
-        
         return null;
     }
     

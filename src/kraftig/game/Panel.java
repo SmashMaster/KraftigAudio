@@ -6,10 +6,11 @@ import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
 import kraftig.game.gui.UI;
+import kraftig.game.gui.UIFocusQuery;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-public class Panel implements Drawable
+public class Panel implements Drawable, Focusable
 {
     private static final float UI_SCALE = 1.0f/1024.0f; //Pixels per meter.
     
@@ -104,36 +105,39 @@ public class Panel implements Drawable
         return this;
     }
     
-    public ClickResult onMouseButton(Player player, Vec3 dir, int button, int action, int mods)
+    public class PanelFocusQuery extends FocusQuery
     {
-        Vec3 frontDir = new Vec3((float)Math.sin(yaw), 0.0f, (float)Math.cos(yaw));
-        Vec3 camDir = Vec3.sub(player.getCamera().pos, pos);
-        float camDot = camDir.dot(frontDir);
+        private final float x, y;
         
-        float dist = -camDot/dir.dot(frontDir);
-        if (dist <= 0.0f) return new ClickResult(false); //Panel is behind us.
-        
-        Vec3 hitPos = Vec3.madd(camDir, dir, dist);
-        if (Math.abs(hitPos.y) > height) return ClickResult.MISSED; //Hit above/below panel.
-        
-        float x = hitPos.dot(new Vec3(-frontDir.z, 0.0f, frontDir.x));
-        if (Math.abs(x) > width) return ClickResult.MISSED; //Hit left/right of panel.
+        private PanelFocusQuery(float dist, float x, float y)
+        {
+            super(Panel.this, dist);
+            
+            this.x = x; this.y = y;
+        }
+    }
+    
+    @Override
+    public void onMouseButton(FocusQuery query, int button, int action, int mods)
+    {
+        PanelFocusQuery q = (PanelFocusQuery)query;
         
         //Panel drag.
         if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
         {
             dragged = true;
+            Player player = Main.instance().getPlayer();
             float relYaw = Util.reduceAngle(yaw - player.getYaw());
             
-            return new ClickResult(new InteractionState()
+            Main.instance().setState(new InteractionState()
             {
                 private void update()
                 {
                     yaw = Util.reduceAngle(player.getYaw() + relYaw);
                     pos.set(player.getCamera().pos);
-                    pos.madd(Main.instance().getMouseDir(), dist);
-                    pos.madd(new Vec3((float)Math.cos(yaw), 0.0f, -(float)Math.sin(yaw)), x);
-                    pos.y -= hitPos.y;
+                    pos.madd(Main.instance().getMouseDir(), q.dist);
+                    pos.madd(new Vec3((float)Math.cos(yaw), 0.0f, -(float)Math.sin(yaw)), q.x);
+                    pos.y -= q.y;
                     updateMatrices();
                 }
                 
@@ -165,19 +169,32 @@ public class Panel implements Drawable
                 }
             });
         }
+    }
+    
+    public FocusQuery checkFocus(Vec3 pos, Vec3 dir)
+    {
+        Vec3 frontDir = new Vec3((float)Math.sin(yaw), 0.0f, (float)Math.cos(yaw));
+        Vec3 camDir = Vec3.sub(pos, this.pos);
+        float camDot = camDir.dot(frontDir);
         
-        if (Math.abs(camDot) < 0.001f) return ClickResult.HIT;
+        float dist = -camDot/dir.dot(frontDir);
+        if (dist <= 0.0f) return null; //Panel is behind us.
         
-        if (camDot > 0.0f)
-        {
-            Vec2 p = new Vec2(-x, hitPos.y).div(UI_SCALE);
-            return new ClickResult(frontInterface.onMouseButton(p, button, action, mods));
-        }
-        else
-        {
-            Vec2 p = new Vec2(x, hitPos.y).div(UI_SCALE);
-            return new ClickResult(rearInterface.onMouseButton(p, button, action, mods));
-        }
+        Vec3 hitPos = Vec3.madd(camDir, dir, dist);
+        if (Math.abs(hitPos.y) > height) return null; //Hit above/below panel.
+        
+        float x = hitPos.dot(new Vec3(-frontDir.z, 0.0f, frontDir.x));
+        if (Math.abs(x) > width) return null; //Hit left/right of panel.
+        
+        PanelFocusQuery panelFocus = new PanelFocusQuery(dist, x, hitPos.y);
+        UIFocusQuery uiFocus;
+        
+        if (Math.abs(camDot) < 0.001f) return panelFocus;
+        
+        if (camDot > 0.0f) uiFocus = frontInterface.checkFocus(dist, new Vec2(-x, hitPos.y).div(UI_SCALE));
+        else uiFocus = rearInterface.checkFocus(dist, new Vec2(x, hitPos.y).div(UI_SCALE));
+        
+        return uiFocus != null ? uiFocus : panelFocus;
     }
     
     @Override
@@ -229,26 +246,5 @@ public class Panel implements Drawable
         }
         
         GL11.glPopMatrix();
-    }
-    
-    public static class ClickResult
-    {
-        public static final ClickResult HIT = new ClickResult(true);
-        public static final ClickResult MISSED = new ClickResult(false);
-        
-        public final boolean hit;
-        public final InteractionState newState;
-        
-        ClickResult(boolean hit)
-        {
-            this.hit = hit;
-            newState = null;
-        }
-        
-        ClickResult(InteractionState mouseCapture)
-        {
-            hit = true;
-            this.newState = mouseCapture;
-        }
     }
 }

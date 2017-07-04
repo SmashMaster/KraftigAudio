@@ -4,7 +4,7 @@ import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import com.samrj.devil.ui.AtlasFont;
-import kraftig.game.InteractionState;
+import kraftig.game.FocusQuery;
 import org.lwjgl.opengl.GL11;
 
 public class Label implements UIElement
@@ -37,9 +37,14 @@ public class Label implements UIElement
     }
     
     @Override
-    public InteractionState onMouseButton(Vec2 mPos, int button, int action, int mods)
+    public UIFocusQuery checkFocus(float dist, Vec2 p)
     {
         return null;
+    }
+    
+    @Override
+    public void onMouseButton(FocusQuery query, int button, int action, int mods)
+    {
     }
     
     @Override

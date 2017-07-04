@@ -5,6 +5,7 @@ import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.util.function.Consumer;
+import kraftig.game.FocusQuery;
 import kraftig.game.InteractionState;
 import kraftig.game.Main;
 import org.lwjgl.glfw.GLFW;
@@ -44,12 +45,18 @@ public class Knob implements UIElement
     }
     
     @Override
-    public InteractionState onMouseButton(Vec2 mPos, int button, int action, int mods)
+    public UIFocusQuery checkFocus(float dist, Vec2 p)
     {
-        if (action != GLFW.GLFW_PRESS || button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return null;
+        if (p.squareDist(pos) <  radius*radius) return new UIFocusQuery(this, dist, p);
+        else return null;
+    }
+    
+    @Override
+    public void onMouseButton(FocusQuery query, int button, int action, int mods)
+    {
+        if (action != GLFW.GLFW_PRESS || button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return;
         
-        float mr = mPos.squareDist(pos);
-        if (mr <= radius*radius) return new InteractionState()
+        Main.instance().setState(new InteractionState()
         {
             @Override
             public boolean isCursorVisible()
@@ -70,8 +77,7 @@ public class Knob implements UIElement
                 if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && action == GLFW.GLFW_RELEASE)
                     Main.instance().setDefaultState();
             }
-        };
-        else return null;
+        });
     }
     
     public Knob onValueChanged(Consumer<Float> callback)

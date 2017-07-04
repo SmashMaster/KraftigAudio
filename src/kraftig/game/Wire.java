@@ -42,6 +42,11 @@ public class Wire implements Drawable
         return this;
     }
     
+    public FocusQuery checkFocus(Vec3 pos, Vec3 dir)
+    {
+        return null;
+    }
+    
     @Override
     public void updateEdge(Camera3D camera)
     {
@@ -63,7 +68,7 @@ public class Wire implements Drawable
         GL11.glEnd();
     }
     
-    public class WireNode
+    public class WireNode implements Focusable
     {
         public final Vec3 pos = new Vec3();
         
@@ -94,6 +99,11 @@ public class Wire implements Drawable
                 return next;
             }
             else throw new IllegalStateException();
+        }
+
+        @Override
+        public void onMouseButton(FocusQuery query, int button, int action, int mods)
+        {
         }
     }
 }

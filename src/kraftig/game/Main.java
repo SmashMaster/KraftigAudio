@@ -16,10 +16,7 @@ import com.samrj.devil.math.topo.DAG;
 import com.samrj.devil.ui.Alignment;
 import com.samrj.devil.ui.AtlasFont;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.ListIterator;
-import kraftig.game.Panel.ClickResult;
+import java.util.stream.Stream;
 import kraftig.game.gui.Crosshair;
 import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
@@ -84,10 +81,9 @@ public final class Main extends Game
     private final ArrayList<Wire> wires = new ArrayList<>();
     private final InteractionState defaultState;
     
-    private List<Drawable> drawSort = Collections.EMPTY_LIST;
-    
     private boolean displayMouse = false;
     private final Vec3 mouseDir = new Vec3(0.0f, 0.0f, -1.0f);
+    private FocusQuery focus;
     private InteractionState interactionState;
     
     private Main() throws Exception
@@ -145,21 +141,34 @@ public final class Main extends Game
                 return true;
             }
             
+            private void updateFocus()
+            {
+                focus = Stream.concat(panels.stream().map(p -> p.checkFocus(camera.pos, mouseDir)),
+                                      wires.stream().map(w -> w.checkFocus(camera.pos, mouseDir)))
+                        .filter(q -> q != null)
+                        .reduce((a, b) -> a.dist < b.dist ? a : b)
+                        .orElse(null);
+                
+            }
+            
+            @Override
+            public void onMouseMoved(float x, float y, float dx, float dy)
+            {
+                updateFocus();
+            }
+            
+            @Override
+            public void step(float dt)
+            {
+                updateFocus();
+                
+                System.out.println(focus);
+            }
+            
             @Override
             public void onMouseButton(int button, int action, int mods)
             {
-                ListIterator<Drawable> it = drawSort.listIterator(drawSort.size());
-                while (it.hasPrevious())
-                {
-                    Drawable d = it.previous();
-                    if (!(d instanceof Panel)) continue;
-                    
-                    Panel p  = (Panel)d;
-                    ClickResult result = p.onMouseButton(player, mouseDir, button, action, mods);
-
-                    if (result.newState != null) setState(result.newState);
-                    if (result.hit) break;
-                }
+                if (focus != null) focus.focus.onMouseButton(focus, button, action, mods);
             }
         };
     }
@@ -171,6 +180,7 @@ public final class Main extends Game
     
     public void setState(InteractionState state)
     {
+        if (state != defaultState) focus = null;
         interactionState = state;
         mouse.setGrabbed(!displayMouse());
     }
@@ -185,9 +195,19 @@ public final class Main extends Game
         return camera;
     }
     
+    public Player getPlayer()
+    {
+        return player;
+    }
+    
     public Vec3 getMouseDir()
     {
         return new Vec3(mouseDir);
+    }
+    
+    public Focusable getFocus()
+    {
+        return focus != null ? focus.focus : null;
     }
     
     public void addWire(Wire wire)
@@ -253,7 +273,24 @@ public final class Main extends Game
     public void step(float dt)
     {
         player.step(dt);
+        interactionState.step(dt);
+    }
+    
+    @Override
+    public void render()
+    {
+        //Make camera rotation matrix (no translation) to draw skybox.
+        GraphicsUtil.glLoadMatrix(camera.projMat, GL11.GL_PROJECTION);
+        GraphicsUtil.glLoadMatrix(Mat3.rotation(Quat.invert(camera.dir)), GL11.GL_MODELVIEW);
         
+        skybox.render();
+        
+        //Load proper camera matrix to draw world.
+        GraphicsUtil.glLoadMatrix(camera.viewMat, GL11.GL_MODELVIEW);
+        
+        floor.render();
+        
+        //Sort and draw world objects.
         ConcatList<Drawable> drawList = new ConcatList<>(panels, wires);
         DAG<Drawable> overlapGraph = new DAG<>();
         
@@ -274,26 +311,7 @@ public final class Main extends Game
             }
         }
         
-        drawSort = overlapGraph.sort();
-        
-        interactionState.step(dt);
-    }
-    
-    @Override
-    public void render()
-    {
-        //Make camera rotation matrix (no translation) to draw skybox.
-        GraphicsUtil.glLoadMatrix(camera.projMat, GL11.GL_PROJECTION);
-        GraphicsUtil.glLoadMatrix(Mat3.rotation(Quat.invert(camera.dir)), GL11.GL_MODELVIEW);
-        
-        skybox.render();
-        
-        //Load proper camera matrix to draw world.
-        GraphicsUtil.glLoadMatrix(camera.viewMat, GL11.GL_MODELVIEW);
-        
-        floor.render();
-        
-        for (Drawable draw : drawSort) draw.render(camera, 1.0f);
+        for (Drawable draw : overlapGraph.sort()) draw.render(camera, 1.0f);
         
         //Load screen matrix to draw HUD.
         Vec2i res = getResolution();

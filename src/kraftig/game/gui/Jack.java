@@ -4,7 +4,7 @@ import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
-import kraftig.game.InteractionState;
+import kraftig.game.FocusQuery;
 import kraftig.game.Main;
 import kraftig.game.Wire;
 import kraftig.game.Wire.WireNode;
@@ -65,11 +65,16 @@ public class Jack implements UIElement
     }
     
     @Override
-    public InteractionState onMouseButton(Vec2 mPos, int button, int action, int mods)
+    public UIFocusQuery checkFocus(float dist, Vec2 p)
     {
-        if (action != GLFW.GLFW_PRESS || button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return null;
-        
-        if (mPos.squareDist(pos) > RADIUS_SQ) return null;
+        if (p.squareDist(pos) <= RADIUS_SQ) return new UIFocusQuery(this, dist, p);
+        else return null;
+    }
+
+    @Override
+    public void onMouseButton(FocusQuery query, int button, int action, int mods)
+    {
+        if (action != GLFW.GLFW_PRESS || button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return;
         
         if (wire == null)
         {
@@ -91,7 +96,7 @@ public class Jack implements UIElement
             }
             
             Main.instance().addWire(wire);
-            return new WireDragState(dragNode);
+            Main.instance().setState(new WireDragState(dragNode));
         }
         else
         {
@@ -105,7 +110,7 @@ public class Jack implements UIElement
             }
             
             wire = null;
-            return new WireDragState(dragNode);
+            Main.instance().setState(new WireDragState(dragNode));
         }
     }
 
