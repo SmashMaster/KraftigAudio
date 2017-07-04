@@ -255,12 +255,10 @@ public final class Main extends Game
                 displayMouse = !displayMouse;
                 boolean display = displayMouse();
                 mouse.setGrabbed(!display);
-                if (display)
-                {
-                    Vec2i res = getResolution();
-                    GLFW.glfwSetCursorPos(window, res.x/2.0, res.y/2.0);
-                    mouse.cursorPos(res.x/2.0f, res.y/2.0f);
-                }
+                
+                Vec2i res = getResolution();
+                if (!display) mouse.setPosDirty();
+                mouse.setPos(res.x/2.0f, res.y/2.0f);
             }
         }
         
