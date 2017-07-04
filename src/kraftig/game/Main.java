@@ -161,8 +161,6 @@ public final class Main extends Game
             public void step(float dt)
             {
                 updateFocus();
-                
-                System.out.println(focus);
             }
             
             @Override

@@ -229,7 +229,8 @@ public class Panel implements Drawable, Focusable
         
         //Outline
         GL11.glLineWidth(1.0f);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
+        float color = Main.instance().getFocus() == this ? 0.75f : 1.0f;
+        GL11.glColor4f(color, color, 1.0f, alpha);
         GL11.glBegin(GL11.GL_LINE_LOOP);
         GL11.glVertex3f(-width, -height, 0.0f);
         GL11.glVertex3f(-width, height, 0.0f);

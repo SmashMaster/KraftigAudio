@@ -10,7 +10,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class Player
 {
-    private static final float Z_NEAR = 0.125f, Z_FAR = 128.0f;
+    private static final float Z_NEAR = 1.0f/64.0f, Z_FAR = 128.0f;
     private static final float FOV = Util.toRadians(90.0f);
     private static final float SENSITIVTY = Util.toRadians(1.0f/8.0f);
     private static final float HEIGHT = 1.75f;

@@ -2,12 +2,19 @@ package kraftig.game;
 
 import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.GraphicsUtil;
+import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec3;
 import kraftig.game.gui.Jack;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 public class Wire implements Drawable
 {
+    private static final float FOCUS_ANG_RADIUS = Util.toRadians(1.0f);
+    private static final float FOCUS_SIN = (float)Math.sin(FOCUS_ANG_RADIUS);
+    private static final float FOCUS_SIN_SQ = FOCUS_SIN*FOCUS_SIN;
+    
+    private Jack in, out;
     private WireNode first, last;
     
     public Wire()
@@ -23,28 +30,77 @@ public class Wire implements Drawable
         return first;
     }
     
+    public void connectIn(Jack jack)
+    {
+        if (jack == null) throw new NullPointerException();
+        if (in != null) throw new IllegalStateException();
+        if (jack.getType() != Jack.Type.OUTPUT) throw new IllegalArgumentException();
+        jack.connect(this);
+        in = jack;
+    }
+    
+    public Jack getIn()
+    {
+        return in;
+    }
+    
+    public void disconnectIn()
+    {
+        if (in == null) throw new IllegalStateException();
+        in.disconnect(this);
+        in = null;
+    }
+    
     public WireNode getLast()
     {
         return last;
     }
     
-    public Wire connectIn(Jack jack)
+    public void connectOut(Jack jack)
     {
-        if (jack.getType() != Jack.Type.OUTPUT) throw new IllegalArgumentException();
-        jack.connect(this);
-        return this;
-    }
-    
-    public Wire connectOut(Jack jack)
-    {
+        if (jack == null) throw new NullPointerException();
+        if (out != null) throw new IllegalStateException();
         if (jack.getType() != Jack.Type.INPUT) throw new IllegalArgumentException();
         jack.connect(this);
-        return this;
+        out = jack;
+    }
+    
+    public Jack getOut()
+    {
+        return out;
+    }
+    
+    public void disconnectOut()
+    {
+        if (out == null) throw new IllegalStateException();
+        out.disconnect(this);
+        out = null;
     }
     
     public FocusQuery checkFocus(Vec3 pos, Vec3 dir)
     {
-        return null;
+        float closeDist = Float.POSITIVE_INFINITY;
+        WireNode closest = null;
+        
+        float a = dir.squareLength();
+        
+        for (WireNode n = first; n != null; n = n.next)
+        {
+            Vec3 pp = Vec3.sub(pos, n.pos);
+            
+            float b = dir.dot(pp)*2.0f;
+            float c = pp.squareLength()*(1.0f - FOCUS_SIN_SQ);
+            
+            float t = (-b - (float)Math.sqrt(b*b - 4.0f*a*c))/(2.0f*a);
+            
+            if (t > 0.0f && Float.isFinite(t) && t < closeDist)
+            {
+                closeDist = t;
+                closest = n;
+            }
+        }
+        
+        return closest != null ? new FocusQuery(closest, closeDist) : null;
     }
     
     @Override
@@ -62,9 +118,13 @@ public class Wire implements Drawable
         GL11.glEnd();
         
         GL11.glPointSize(4.0f);
-        GL11.glColor4f(0.0f, 0.0f, 0.0f, alpha);
         GL11.glBegin(GL11.GL_POINTS);
-        for (WireNode n = first; n != null; n = n.next) GraphicsUtil.glVertex(n.pos);
+        for (WireNode n = first; n != null; n = n.next)
+        {
+            if (Main.instance().getFocus() == n) GL11.glColor4f(0.75f, 0.75f, 1.0f, alpha);
+            else GL11.glColor4f(0.0f, 0.0f, 0.0f, alpha);
+            GraphicsUtil.glVertex(n.pos);
+        }
         GL11.glEnd();
     }
     
@@ -73,6 +133,21 @@ public class Wire implements Drawable
         public final Vec3 pos = new Vec3();
         
         private WireNode prev, next;
+        
+        public Wire getWire()
+        {
+            return Wire.this;
+        }
+        
+        public boolean isFirst()
+        {
+            return first == this;
+        }
+        
+        public boolean isLast()
+        {
+            return last == this;
+        }
         
         public boolean isCorner()
         {
@@ -104,6 +179,8 @@ public class Wire implements Drawable
         @Override
         public void onMouseButton(FocusQuery query, int button, int action, int mods)
         {
+            if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
+                Main.instance().setState(new WireDragState(this));
         }
     }
 }

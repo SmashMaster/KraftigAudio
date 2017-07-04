@@ -12,6 +12,10 @@ public class WireDragState implements InteractionState
     {
         this.node = node;
         dist = Main.instance().getCamera().pos.dist(node.pos);
+        
+        Wire wire = node.getWire();
+        if (node.isFirst() && wire.getIn() != null) wire.disconnectIn();
+        if (node.isLast() && wire.getOut() != null) wire.disconnectOut();
     }
     
     private void update()

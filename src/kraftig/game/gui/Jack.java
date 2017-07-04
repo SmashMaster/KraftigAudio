@@ -48,9 +48,17 @@ public class Jack implements UIElement
     
     public void connect(Wire wire)
     {
+        if (wire == null) throw new NullPointerException();
         if (this.wire != null) throw new IllegalStateException();
         this.wire = wire;
         updateMatrix(matrix);
+    }
+    
+    public void disconnect(Wire wire)
+    {
+        if (wire == null) throw new NullPointerException();
+        if (this.wire != wire) throw new IllegalStateException();
+        this.wire = null;
     }
     
     @Override
@@ -67,7 +75,8 @@ public class Jack implements UIElement
     @Override
     public UIFocusQuery checkFocus(float dist, Vec2 p)
     {
-        if (p.squareDist(pos) <= RADIUS_SQ) return new UIFocusQuery(this, dist, p);
+        if (wire != null) return null;
+        else if (p.squareDist(pos) <= RADIUS_SQ) return new UIFocusQuery(this, dist, p);
         else return null;
     }
 
@@ -98,20 +107,6 @@ public class Jack implements UIElement
             Main.instance().addWire(wire);
             Main.instance().setState(new WireDragState(dragNode));
         }
-        else
-        {
-            WireNode dragNode;
-            
-            switch (type)
-            {
-                case INPUT: dragNode = wire.getLast(); break;
-                case OUTPUT: dragNode = wire.getFirst(); break;
-                default: throw new IllegalArgumentException();
-            }
-            
-            wire = null;
-            Main.instance().setState(new WireDragState(dragNode));
-        }
     }
 
     @Override
@@ -121,7 +116,8 @@ public class Jack implements UIElement
         GL11.glTranslatef(pos.x, pos.y, 0.0f);
         
         GL11.glLineWidth(1.0f);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha*0.5f);
+        float color = Main.instance().getFocus() == this ? 0.75f : 1.0f;
+        GL11.glColor4f(color, color, 1.0f, alpha*0.5f);
         GL11.glBegin(GL11.GL_LINE_LOOP);
         for (float t = 0.0f; t < T_END; t += DT)
         {
@@ -130,7 +126,7 @@ public class Jack implements UIElement
         }
         GL11.glEnd();
         
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
+        GL11.glColor4f(color, color, 1.0f, alpha);
         switch (type)
         {
             case INPUT:
