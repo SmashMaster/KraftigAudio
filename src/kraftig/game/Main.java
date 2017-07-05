@@ -55,7 +55,7 @@ public final class Main extends Game
         GameConfig config = new GameConfig();
         config.fullscreen = false;
         config.resolution.set(1600, 900);
-        config.msaa = 4;
+        config.msaa = 8;
         return config;
     }
     
@@ -321,7 +321,7 @@ public final class Main extends Game
         for (Drawable draw : drawList)
         {
             overlapGraph.add(draw);
-            draw.updateEdge(camera);
+            draw.updateEdge();
         }
         
         for (int i=0; i<drawList.size(); i++) for (int j=i+1; j<drawList.size(); j++)
@@ -335,7 +335,7 @@ public final class Main extends Game
             }
         }
         
-        for (Drawable draw : overlapGraph.sort()) draw.render(camera, 1.0f);
+        for (Drawable draw : overlapGraph.sort()) draw.render();
         
         //Load screen matrix to draw HUD.
         Vec2i res = getResolution();

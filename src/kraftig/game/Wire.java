@@ -1,6 +1,5 @@
 package kraftig.game;
 
-import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.GraphicsUtil;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec3;
@@ -111,16 +110,16 @@ public class Wire implements Drawable
     }
     
     @Override
-    public void updateEdge(Camera3D camera)
+    public void updateEdge()
     {
     }
 
     @Override
-    public void render(Camera3D camera, float alpha)
+    public void render()
     {
         //Lines
         GL11.glLineWidth(1.0f);
-        GL11.glColor4f(0.0f, 0.0f, 0.0f, alpha);
+        GL11.glColor3f(0.0f, 0.0f, 0.0f);
         GL11.glBegin(GL11.GL_LINE_STRIP);
         for (WireNode n = first; n != null; n = n.next) GraphicsUtil.glVertex(n.pos);
         GL11.glEnd();
@@ -128,7 +127,7 @@ public class Wire implements Drawable
         //Arrow
         {
             Vec3 d = Vec3.sub(last.prev.pos, last.pos).normalize();
-            Vec3 n = Vec3.sub(camera.pos, last.pos).cross(d).normalize();
+            Vec3 n = Vec3.sub(Main.instance().getCamera().pos, last.pos).cross(d).normalize();
 
             GL11.glBegin(GL11.GL_TRIANGLES);
             GraphicsUtil.glVertex(Vec3.madd(last.pos, n, ARROW_WIDTH).madd(d, ARROW_LENGTH));
@@ -142,8 +141,8 @@ public class Wire implements Drawable
         GL11.glBegin(GL11.GL_POINTS);
         for (WireNode n = first; n != null; n = n.next)
         {
-            if (Main.instance().getFocus() == n) GL11.glColor4f(0.75f, 0.75f, 1.0f, alpha);
-            else GL11.glColor4f(0.0f, 0.0f, 0.0f, alpha);
+            if (Main.instance().getFocus() == n) GL11.glColor3f(0.75f, 0.75f, 1.0f);
+            else GL11.glColor3f(0.0f, 0.0f, 0.0f);
             GraphicsUtil.glVertex(n.pos);
         }
         GL11.glEnd();
