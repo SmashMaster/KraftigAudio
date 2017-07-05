@@ -48,6 +48,11 @@ public class Label implements UIElement
     }
     
     @Override
+    public void delete()
+    {
+    }
+    
+    @Override
     public void render(float alpha)
     {
         GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);

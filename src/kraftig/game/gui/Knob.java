@@ -39,6 +39,13 @@ public class Knob implements UIElement
         this.radius = radius;
     }
     
+    public Knob onValueChanged(Consumer<Float> callback)
+    {
+        this.callback = callback;
+        callback.accept(value);
+        return this;
+    }
+    
     @Override
     public void updateMatrix(Mat4 matrix)
     {
@@ -80,11 +87,9 @@ public class Knob implements UIElement
         });
     }
     
-    public Knob onValueChanged(Consumer<Float> callback)
+    @Override
+    public void delete()
     {
-        this.callback = callback;
-        callback.accept(value);
-        return this;
     }
     
     @Override

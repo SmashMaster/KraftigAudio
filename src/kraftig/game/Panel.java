@@ -197,6 +197,12 @@ public class Panel implements Drawable, Focusable
         return uiFocus != null ? uiFocus : panelFocus;
     }
     
+    public void delete()
+    {
+        frontInterface.delete();
+        rearInterface.delete();
+    }
+    
     @Override
     public void render(Camera3D camera, float alpha)
     {

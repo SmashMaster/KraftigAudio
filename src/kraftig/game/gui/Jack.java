@@ -108,6 +108,17 @@ public class Jack implements UIElement
             Main.instance().setState(new WireDragState(dragNode));
         }
     }
+    
+    @Override
+    public void delete()
+    {
+        if (wire != null) switch (type)
+        {
+            case INPUT: wire.disconnectOut(); break;
+            case OUTPUT: wire.disconnectIn(); break;
+            default: throw new IllegalArgumentException();
+        }
+    }
 
     @Override
     public void render(float alpha)

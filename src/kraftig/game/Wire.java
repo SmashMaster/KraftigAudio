@@ -13,6 +13,8 @@ public class Wire implements Drawable
     private static final float FOCUS_ANG_RADIUS = Util.toRadians(1.0f);
     private static final float FOCUS_SIN = (float)Math.sin(FOCUS_ANG_RADIUS);
     private static final float FOCUS_SIN_SQ = FOCUS_SIN*FOCUS_SIN;
+    private static final float ARROW_LENGTH = 1.0f/48.0f;
+    private static final float ARROW_WIDTH = 1.0f/192.0f;
     
     private Jack in, out;
     private WireNode first, last;
@@ -77,6 +79,11 @@ public class Wire implements Drawable
         out = null;
     }
     
+    public boolean isDegenerate()
+    {
+        return first == last;
+    }
+    
     public FocusQuery checkFocus(Vec3 pos, Vec3 dir)
     {
         float closeDist = Float.POSITIVE_INFINITY;
@@ -111,12 +118,26 @@ public class Wire implements Drawable
     @Override
     public void render(Camera3D camera, float alpha)
     {
-        GL11.glLineWidth(1.5f);
-        GL11.glColor4f(0.0f, 0.0f, 0.0f, alpha*0.875f);
+        //Lines
+        GL11.glLineWidth(1.0f);
+        GL11.glColor4f(0.0f, 0.0f, 0.0f, alpha);
         GL11.glBegin(GL11.GL_LINE_STRIP);
         for (WireNode n = first; n != null; n = n.next) GraphicsUtil.glVertex(n.pos);
         GL11.glEnd();
         
+        //Arrow
+        {
+            Vec3 d = Vec3.sub(last.prev.pos, last.pos).normalize();
+            Vec3 n = Vec3.sub(camera.pos, last.pos).cross(d).normalize();
+
+            GL11.glBegin(GL11.GL_TRIANGLES);
+            GraphicsUtil.glVertex(Vec3.madd(last.pos, n, ARROW_WIDTH).madd(d, ARROW_LENGTH));
+            GraphicsUtil.glVertex(last.pos);
+            GraphicsUtil.glVertex(Vec3.madd(last.pos, n, -ARROW_WIDTH).madd(d, ARROW_LENGTH));
+            GL11.glEnd();
+        }
+        
+        //Nodes
         GL11.glPointSize(4.0f);
         GL11.glBegin(GL11.GL_POINTS);
         for (WireNode n = first; n != null; n = n.next)
@@ -176,6 +197,23 @@ public class Wire implements Drawable
             else throw new IllegalStateException();
         }
 
+        public void delete()
+        {
+            if (prev == null)
+            {
+                first = next;
+                if (in != null) disconnectIn();
+            }
+            else prev.next = next;
+            
+            if (next == null)
+            {
+                last = prev;
+                if (out != null) disconnectOut();
+            }
+            else next.prev = prev;
+        }
+        
         @Override
         public void onMouseButton(FocusQuery query, int button, int action, int mods)
         {

@@ -17,6 +17,7 @@ import com.samrj.devil.ui.Alignment;
 import com.samrj.devil.ui.AtlasFont;
 import java.util.ArrayList;
 import java.util.stream.Stream;
+import kraftig.game.Wire.WireNode;
 import kraftig.game.gui.Crosshair;
 import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
@@ -148,7 +149,6 @@ public final class Main extends Game
                         .filter(q -> q != null)
                         .reduce((a, b) -> a.dist < b.dist ? a : b)
                         .orElse(null);
-                
             }
             
             @Override
@@ -167,6 +167,34 @@ public final class Main extends Game
             public void onMouseButton(int button, int action, int mods)
             {
                 if (focus != null) focus.focus.onMouseButton(focus, button, action, mods);
+            }
+            
+            @Override
+            public void onKey(int key, int action, int mods)
+            {
+                if (action != GLFW.GLFW_PRESS || key != GLFW.GLFW_KEY_DELETE) return;
+                if (focus == null) return;
+                
+                if (focus.focus instanceof Panel)
+                {
+                    Panel p = (Panel)focus.focus;
+                    p.delete();
+                    panels.remove(p);
+                    focus = null;
+                }
+                else if (focus.focus instanceof WireNode)
+                {
+                    WireNode n = (WireNode)focus.focus;
+                    n.delete();
+                    Wire w = n.getWire();
+                    if (w.isDegenerate())
+                    {
+                        if (w.getIn() != null) w.disconnectIn();
+                        if (w.getOut() != null) w.disconnectOut();
+                        wires.remove(w);
+                    }
+                    focus = null;
+                }
             }
         };
     }

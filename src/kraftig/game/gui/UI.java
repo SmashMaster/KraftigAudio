@@ -24,6 +24,11 @@ public class UI
         return this;
     }
     
+    public void delete()
+    {
+        for (UIElement e : elements) e.delete();
+    }
+    
     public List<UIElement> getAll()
     {
         return Collections.unmodifiableList(elements);
