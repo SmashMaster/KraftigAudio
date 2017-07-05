@@ -16,6 +16,7 @@ import com.samrj.devil.math.topo.DAG;
 import com.samrj.devil.ui.Alignment;
 import com.samrj.devil.ui.AtlasFont;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 import kraftig.game.Wire.WireNode;
 import kraftig.game.gui.Crosshair;
@@ -314,15 +315,16 @@ public final class Main extends Game
         
         floor.render();
         
-        //Sort and draw world objects.
-        ConcatList<Drawable> drawList = new ConcatList<>(panels, wires);
-        DAG<Drawable> overlapGraph = new DAG<>();
+        //Update panel positions.
+        for (Panel p : panels) p.updateEdge();
         
-        for (Drawable draw : drawList)
-        {
-            overlapGraph.add(draw);
-            draw.updateEdge();
-        }
+        //Calculate wire splits.
+        List<? extends Drawable> drawList = panels;
+        for (Wire w : wires) drawList = new ConcatList<>(drawList, w.updateSplits(panels));
+        
+        //Sort and draw world objects.
+        DAG<Drawable> overlapGraph = new DAG<>();
+        for (Drawable draw : drawList) overlapGraph.add(draw);
         
         for (int i=0; i<drawList.size(); i++) for (int j=i+1; j<drawList.size(); j++)
         {

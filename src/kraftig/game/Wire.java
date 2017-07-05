@@ -1,13 +1,17 @@
 package kraftig.game;
 
+import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.GraphicsUtil;
 import com.samrj.devil.math.Util;
+import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
+import java.util.ArrayList;
+import java.util.List;
 import kraftig.game.gui.Jack;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-public class Wire implements Drawable
+public class Wire
 {
     private static final float FOCUS_ANG_RADIUS = Util.toRadians(1.0f);
     private static final float FOCUS_SIN = (float)Math.sin(FOCUS_ANG_RADIUS);
@@ -109,43 +113,17 @@ public class Wire implements Drawable
         return closest != null ? new FocusQuery(closest, closeDist) : null;
     }
     
-    @Override
-    public void updateEdge()
+    public List<WireSplit> updateSplits(List<Panel> panels)
     {
-    }
-
-    @Override
-    public void render()
-    {
-        //Lines
-        GL11.glLineWidth(1.0f);
-        GL11.glColor3f(0.0f, 0.0f, 0.0f);
-        GL11.glBegin(GL11.GL_LINE_STRIP);
-        for (WireNode n = first; n != null; n = n.next) GraphicsUtil.glVertex(n.pos);
-        GL11.glEnd();
+        ArrayList<WireSplit> splits = new ArrayList<>();
         
-        //Arrow
+        for (WireNode a = first, b = first.next; b != null; a = b, b = b.next)
         {
-            Vec3 d = Vec3.sub(last.prev.pos, last.pos).normalize();
-            Vec3 n = Vec3.sub(Main.instance().getCamera().pos, last.pos).cross(d).normalize();
-
-            GL11.glBegin(GL11.GL_TRIANGLES);
-            GraphicsUtil.glVertex(Vec3.madd(last.pos, n, ARROW_WIDTH).madd(d, ARROW_LENGTH));
-            GraphicsUtil.glVertex(last.pos);
-            GraphicsUtil.glVertex(Vec3.madd(last.pos, n, -ARROW_WIDTH).madd(d, ARROW_LENGTH));
-            GL11.glEnd();
+            WireSplit.Type type = b == last ? WireSplit.Type.END : WireSplit.Type.REGULAR;
+            splits.add(new WireSplit(type, a, b));
         }
         
-        //Nodes
-        GL11.glPointSize(4.0f);
-        GL11.glBegin(GL11.GL_POINTS);
-        for (WireNode n = first; n != null; n = n.next)
-        {
-            if (Main.instance().getFocus() == n) GL11.glColor3f(0.75f, 0.75f, 1.0f);
-            else GL11.glColor3f(0.0f, 0.0f, 0.0f);
-            GraphicsUtil.glVertex(n.pos);
-        }
-        GL11.glEnd();
+        return splits;
     }
     
     public class WireNode implements Focusable
@@ -218,6 +196,108 @@ public class Wire implements Drawable
         {
             if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
                 Main.instance().setState(new WireDragState(this));
+        }
+    }
+    
+    public static class WireSplit implements Drawable
+    {
+        public enum Type
+        {
+            REGULAR, SPLIT, END;
+        }
+        
+        public final WireNode a, b;
+        private final Type type;
+        
+        public final Vec3 ab;
+        public final float abLen;
+        
+        public final Vec2 ea, eb;
+        public final Vec2 eab;
+        public final Vec2 eaCam, ebCam;
+        
+        private WireSplit(Type type, WireNode a, WireNode b)
+        {
+            this.type = type;
+            this.a = a;
+            this.b = b;
+            
+            ab = Vec3.sub(b.pos, a.pos);
+            abLen = ab.length();
+            ab.div(abLen);
+            
+            ea = new Vec2(a.pos.x, a.pos.z);
+            eb = new Vec2(b.pos.x, b.pos.z);
+            eab = Vec2.sub(ea, eb);
+            
+            Camera3D camera = Main.instance().getCamera();
+            Vec2 cam = new Vec2(camera.pos.x, camera.pos.z);
+            eaCam = Vec2.sub(cam, ea);
+            ebCam = Vec2.sub(cam, eb);
+        }
+        
+        @Override
+        public float edgeRayHit(Vec2 p, Vec2 d)
+        {
+            //Calculate hit position and return zero if missed.
+            Vec2 pa = Vec2.sub(p, ea);
+            float t = (d.x*pa.y - d.y*pa.x)/(d.y*eab.x - d.x*eab.y);
+            if (t < 0.0f || t > 1.0f) return 0.0f;
+
+            //Return direction of hit.
+            Vec2 dr = Vec2.madd(pa, eab, t);
+            return Math.signum(dr.dot(d));
+        }
+        
+        @Override
+        public float getY()
+        {
+            return (a.pos.y + b.pos.y)*0.5f;
+        }
+        
+        @Override
+        public float getHeight()
+        {
+            return (b.pos.y - a.pos.y)*0.5f;
+        }
+        
+        @Override
+        public void render()
+        {
+            //Line
+            GL11.glLineWidth(1.0f);
+            GL11.glColor3f(0.0f, 0.0f, 0.0f);
+            GL11.glBegin(GL11.GL_LINES);
+            GraphicsUtil.glVertex(a.pos);
+            GraphicsUtil.glVertex(b.pos);
+            GL11.glEnd();
+            
+            //Arrow
+            if (type == Type.END && abLen > ARROW_LENGTH)
+            {
+                Vec3 n = Vec3.sub(Main.instance().getCamera().pos, b.pos).cross(ab).normalize();
+
+                GL11.glBegin(GL11.GL_TRIANGLES);
+                GraphicsUtil.glVertex(Vec3.madd(b.pos, n, ARROW_WIDTH).madd(ab, -ARROW_LENGTH));
+                GraphicsUtil.glVertex(b.pos);
+                GraphicsUtil.glVertex(Vec3.madd(b.pos, n, -ARROW_WIDTH).madd(ab, -ARROW_LENGTH));
+                GL11.glEnd();
+            }
+            
+            //Point
+            GL11.glPointSize(4.0f);
+            GL11.glBegin(GL11.GL_POINTS);
+            if (Main.instance().getFocus() == a) GL11.glColor3f(0.75f, 0.75f, 1.0f);
+            else GL11.glColor3f(0.0f, 0.0f, 0.0f);
+            GraphicsUtil.glVertex(a.pos);
+            
+            if (type == Type.END)
+            {
+                if (Main.instance().getFocus() == b) GL11.glColor3f(0.75f, 0.75f, 1.0f);
+                else GL11.glColor3f(0.0f, 0.0f, 0.0f);
+                GraphicsUtil.glVertex(b.pos);
+            }
+            GL11.glEnd();
         }
     }
 }

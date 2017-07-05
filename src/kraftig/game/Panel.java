@@ -14,13 +14,16 @@ public class Panel implements Drawable, Focusable
 {
     private static final float UI_SCALE = 1.0f/1024.0f; //Pixels per meter.
     
-    private final Vec3 pos = new Vec3();
+    public final Vec3 pos = new Vec3();
     private float yaw;
     private float width, height;
     
-    public final Vec2 a = new Vec2(), b = new Vec2();
-    public final Vec2 ab = new Vec2();
-    public final Vec2 aCam = new Vec2(), bCam = new Vec2();
+    public final Vec3 frontDir = new Vec3(), rightDir = new Vec3();
+    
+    //2D top-down edge data.
+    public final Vec2 ea = new Vec2(), eb = new Vec2();
+    public final Vec2 eab = new Vec2();
+    public final Vec2 eaCam = new Vec2(), ebCam = new Vec2();
     
     public final UI frontInterface = new UI();
     public final UI rearInterface = new UI();
@@ -47,31 +50,43 @@ public class Panel implements Drawable, Focusable
         rearInterface.updateMatrix(rearMatrix);
     }
     
-    @Override
     public void updateEdge()
     {
-        Vec2 edge = new Vec2((float)Math.cos(yaw), -(float)Math.sin(yaw)).mult(width);
+        Vec2 edge = new Vec2(rightDir.x, rightDir.z).mult(width);
         Vec2 p2 = new Vec2(pos.x, pos.z);
-        Vec2.sub(p2, edge, a);
-        Vec2.add(p2, edge, b);
-        Vec2.mult(edge, -2.0f, ab);
+        Vec2.sub(p2, edge, ea);
+        Vec2.add(p2, edge, eb);
+        Vec2.mult(edge, -2.0f, eab);
         
         Camera3D camera = Main.instance().getCamera();
         Vec2 cam = new Vec2(camera.pos.x, camera.pos.z);
-        Vec2.sub(cam, a, aCam);
-        Vec2.sub(cam, b, bCam);
+        Vec2.sub(cam, ea, eaCam);
+        Vec2.sub(cam, eb, ebCam);
     }
     
+    @Override
     public float edgeRayHit(Vec2 p, Vec2 d)
     {
         //Calculate hit position and return zero if missed.
-        Vec2 pa = Vec2.sub(p, a);
-        float t = (d.x*pa.y - d.y*pa.x)/(d.y*ab.x - d.x*ab.y);
+        Vec2 pa = Vec2.sub(p, ea);
+        float t = (d.x*pa.y - d.y*pa.x)/(d.y*eab.x - d.x*eab.y);
         if (t < 0.0f || t > 1.0f) return 0.0f;
         
         //Return direction of hit.
-        Vec2 dr = Vec2.madd(pa, ab, t);
+        Vec2 dr = Vec2.madd(pa, eab, t);
         return Math.signum(dr.dot(d));
+    }
+    
+    @Override
+    public float getY()
+    {
+        return pos.y;
+    }
+    
+    @Override
+    public float getHeight()
+    {
+        return height;
     }
     
     public Panel setPosition(Vec3 pos)
@@ -81,19 +96,11 @@ public class Panel implements Drawable, Focusable
         return this;
     }
     
-    public float getY()
-    {
-        return pos.y;
-    }
-    
-    public float getHeight()
-    {
-        return height;
-    }
-    
     public Panel setYaw(float yaw)
     {
         this.yaw = yaw;
+        frontDir.set((float)Math.sin(yaw), 0.0f, (float)Math.cos(yaw));
+        rightDir.set(-frontDir.z, 0.0f, frontDir.x);
         updateMatrices();
         return this;
     }
@@ -135,10 +142,14 @@ public class Panel implements Drawable, Focusable
                 private void update()
                 {
                     yaw = Util.reduceAngle(player.getYaw() + relYaw);
+                    frontDir.set((float)Math.sin(yaw), 0.0f, (float)Math.cos(yaw));
+                    rightDir.set(-frontDir.z, 0.0f, frontDir.x);
+                    
                     pos.set(player.getCamera().pos);
                     pos.madd(Main.instance().getMouseDir(), q.dist);
-                    pos.madd(new Vec3((float)Math.cos(yaw), 0.0f, -(float)Math.sin(yaw)), q.x);
+                    pos.madd(rightDir, -q.x);
                     pos.y -= q.y;
+                    
                     updateMatrices();
                 }
                 
@@ -174,7 +185,6 @@ public class Panel implements Drawable, Focusable
     
     public FocusQuery checkFocus(Vec3 pos, Vec3 dir)
     {
-        Vec3 frontDir = new Vec3((float)Math.sin(yaw), 0.0f, (float)Math.cos(yaw));
         Vec3 camDir = Vec3.sub(pos, this.pos);
         float camDot = camDir.dot(frontDir);
         
@@ -184,7 +194,7 @@ public class Panel implements Drawable, Focusable
         Vec3 hitPos = Vec3.madd(camDir, dir, dist);
         if (Math.abs(hitPos.y) > height) return null; //Hit above/below panel.
         
-        float x = hitPos.dot(new Vec3(-frontDir.z, 0.0f, frontDir.x));
+        float x = hitPos.dot(rightDir);
         if (Math.abs(x) > width) return null; //Hit left/right of panel.
         
         PanelFocusQuery panelFocus = new PanelFocusQuery(dist, x, hitPos.y);
@@ -211,8 +221,8 @@ public class Panel implements Drawable, Focusable
         
         Camera3D camera = Main.instance().getCamera();
         Vec2 cameraDir = new Vec2(pos.x, pos.z).sub(new Vec2(camera.pos.x, camera.pos.z));
-        Vec2 frontDir = new Vec2((float)Math.sin(yaw), (float)Math.cos(yaw));
-        boolean facingFront = cameraDir.dot(frontDir) <= 0.0f;
+        Vec2 frontDir2 = new Vec2(frontDir.x, frontDir.z);
+        boolean facingFront = cameraDir.dot(frontDir2) <= 0.0f;
         
         GL11.glPushMatrix();
         GL11.glTranslatef(pos.x, pos.y, pos.z);
