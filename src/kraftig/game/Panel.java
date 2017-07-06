@@ -74,7 +74,7 @@ public class Panel implements Drawable, Focusable
         
         //Return direction of hit.
         Vec2 dr = Vec2.madd(pa, eab, t);
-        return Math.signum(dr.dot(d));
+        return dr.dot(d);
     }
     
     @Override

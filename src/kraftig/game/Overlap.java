@@ -2,6 +2,7 @@ package kraftig.game;
 
 import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.math.Util;
+import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
 import kraftig.game.Wire.WireSplit;
 
@@ -21,15 +22,16 @@ public enum Overlap
     
     public static Overlap get(Panel a, Panel b, Camera3D camera)
     {
-        float daa = b.edgeRayHit(a.ea, a.eaCam);
-        float dab = b.edgeRayHit(a.eb, a.ebCam);
-        float dba = a.edgeRayHit(b.ea, b.eaCam);
-        float dbb = a.edgeRayHit(b.eb, b.ebCam);
+        float daa = Util.signum(b.edgeRayHit(a.ea, a.eaCam));
+        float dab = Util.signum(b.edgeRayHit(a.eb, a.ebCam));
+        float dba = Util.signum(a.edgeRayHit(b.ea, b.eaCam));
+        float dbb = Util.signum(a.edgeRayHit(b.eb, b.ebCam));
+        float count = daa + dab - dba - dbb;
         
-        boolean behind = daa < 0.0f || dab < 0.0f || dba > 0.0f || dbb > 0.0f;
-        boolean inFront = daa > 0.0f || dab > 0.0f || dba < 0.0f || dbb < 0.0f;
-        
-        if (behind && inFront)
+        if (daa == 0.0f && dab == 0.0f && dba == 0.0f && dbb == 0.0f) return NONE;
+        else if (count == -2.0f) return A_BEHIND_B;
+        else if (count == 2.0f) return B_BEHIND_A;
+        else
         {
             //Figure out which is above/below.
             Panel above = a.getY() > b.getY() ? a : b;
@@ -48,53 +50,51 @@ public enum Overlap
                 return above == a ? B_BEHIND_A : A_BEHIND_B;
             else return NONE;
         }
-        else if (behind) return A_BEHIND_B;
-        else if (inFront) return B_BEHIND_A;
-        else return NONE;
     }
     
     public static Overlap get(Panel a, WireSplit b, Camera3D camera)
     {
-        float daa = b.edgeRayHit(a.ea, a.eaCam);
-        float dab = b.edgeRayHit(a.eb, a.ebCam);
-        float dba = a.edgeRayHit(b.ea, b.eaCam);
-        float dbb = a.edgeRayHit(b.eb, b.ebCam);
+        float daa = Util.signum(b.edgeRayHit(a.ea, a.eaCam));
+        float dab = Util.signum(b.edgeRayHit(a.eb, a.ebCam));
+        float dba = Util.signum(a.edgeRayHit(b.ea, b.eaCam));
+        float dbb = Util.signum(a.edgeRayHit(b.eb, b.ebCam));
+        float count = daa + dab - dba - dbb;
         
-        boolean behind = daa < 0.0f || dab < 0.0f || dba > 0.0f || dbb > 0.0f;
-        boolean inFront = daa > 0.0f || dab > 0.0f || dba < 0.0f || dbb < 0.0f;
-        
-        if (behind && inFront)
+        if (daa == 0.0f && dab == 0.0f && dba == 0.0f && dbb == 0.0f) return NONE;
+        else if (count == -2.0f) return A_BEHIND_B;
+        else if (count == 2.0f) return B_BEHIND_A;
+        else
         {
-            //First check if we're definitely not intersecting.
-            float aY0 = a.getY() - a.getHeight();
-            float aY1 = a.getY() + a.getHeight();
-            float bY0 = b.getY() - b.getHeight();
-            float bY1 = b.getY() + b.getHeight();
-            
-            if (bY1 < aY0 || bY0 > aY1) return NONE;
-            
-            //Then check if we're actually intersecting.
+            //Make sure the wire isn't parallel to the plane.
             float denom = Vec3.dot(b.ab, a.frontDir);
-            if (denom < 0.001f) return NONE;
+            if (Math.abs(denom) < 0.001f) return NONE;
             
+            //Make sure the wire doesn't intersect the plane.
             float tIntersect = Vec3.dot(Vec3.sub(a.pos, b.a.pos), a.frontDir)/denom;
             float yIntersect = b.a.pos.y + b.ab.y*tIntersect;
             
-            if (yIntersect > aY0 && yIntersect < aY1) return INTERSECTION;
+            float ay0 = a.getY() - a.getHeight();
+            float ay1 = a.getY() + a.getHeight();
+            if (yIntersect > ay0 && yIntersect < ay1) return INTERSECTION;
             
-            //Then find an arbitrary overlapping spot and see which side it's on.
-            float y = (Math.min(aY1, bY1) + Math.max(aY0, bY0))*0.5f;
-            float t = (y - bY0)/(bY1 - bY0);
+            //Perform dark rituals to summon the elder god Linay Ar Al Gebbra,
+            //who then tells us whether the line is behind the panel.
+            float y = yIntersect > a.getY() ? ay1 : ay0;
             
-            float signP = Util.signum(Vec3.lerp(b.a.pos, b.b.pos, t).sub(a.pos).dot(a.frontDir));
-            float signCam = Util.signum(Vec3.dot(Vec3.sub(camera.pos, a.pos), a.frontDir));
+            Vec3 p0 = new Vec3(a.ea.x, y, a.ea.y);
+            Vec3 p1 = new Vec3(a.eb.x, y, a.eb.y);
             
-            if (signP == signCam) return A_BEHIND_B;
+            //Seriously I'm not completely sure how this works. Something about
+            //intersecting two planes to find a line.
+            Vec3 na = Vec3.sub(b.b.pos, camera.pos).cross(Vec3.sub(b.b.pos, b.a.pos));
+            Vec3 nb = Vec3.sub(p1, camera.pos).cross(Vec3.sub(p1, p0));
+            Vec3 dir = Vec3.cross(na, nb);
+            
+            if (denom < 0.0f) dir.negate();
+            
+            if (dir.y > 0.0f) return A_BEHIND_B;
             else return B_BEHIND_A;
         }
-        else if (behind) return A_BEHIND_B;
-        else if (inFront) return B_BEHIND_A;
-        else return NONE;
     }
     
     public static Overlap get(WireSplit a, Panel b, Camera3D camera)
