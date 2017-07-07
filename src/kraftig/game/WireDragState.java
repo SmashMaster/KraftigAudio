@@ -1,7 +1,9 @@
 package kraftig.game;
 
 import kraftig.game.Wire.WireNode;
+import kraftig.game.gui.InputJack;
 import kraftig.game.gui.Jack;
+import kraftig.game.gui.OutputJack;
 import org.lwjgl.glfw.GLFW;
 
 public class WireDragState implements InteractionState
@@ -36,8 +38,8 @@ public class WireDragState implements InteractionState
             if (focus instanceof Jack)
             {
                 Jack jack = (Jack)focus;
-                if (!jack.hasWire() && ((node.isLast() && jack.getType() == Jack.Type.INPUT) ||
-                                        (node.isFirst() && jack.getType() == Jack.Type.OUTPUT)))
+                if (!jack.hasWire() && ((node.isLast() && jack instanceof InputJack) ||
+                                        (node.isFirst() && jack instanceof OutputJack)))
                 {
                     connectJack = jack;
                     node.pos.set(jack.getWirePos());
@@ -73,8 +75,8 @@ public class WireDragState implements InteractionState
         {
             if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT || button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
             {
-                if (node.isFirst()) node.getWire().connectIn(connectJack);
-                else if (node.isLast()) node.getWire().connectOut(connectJack);
+                if (node.isLast()) node.getWire().connectOut((InputJack)connectJack);
+                else if (node.isFirst()) node.getWire().connectIn((OutputJack)connectJack);
                 Main.instance().setDefaultState();
             }
         }

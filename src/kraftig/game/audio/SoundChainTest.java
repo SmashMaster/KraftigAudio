@@ -1,4 +1,4 @@
-package kraftig.game;
+package kraftig.game.audio;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;

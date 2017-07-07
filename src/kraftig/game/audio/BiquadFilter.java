@@ -1,4 +1,4 @@
-package kraftig.game;
+package kraftig.game.audio;
 
 public class BiquadFilter
 {

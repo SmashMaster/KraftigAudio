@@ -13,17 +13,15 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
 import com.samrj.devil.math.topo.DAG;
-import com.samrj.devil.ui.Alignment;
 import com.samrj.devil.ui.AtlasFont;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import javax.sound.sampled.AudioFormat;
 import kraftig.game.Wire.WireNode;
+import kraftig.game.device.SystemInput;
+import kraftig.game.device.SystemOutput;
 import kraftig.game.gui.Crosshair;
-import kraftig.game.gui.Jack;
-import kraftig.game.gui.Knob;
-import kraftig.game.gui.Label;
-import kraftig.game.gui.UI;
 import kraftig.game.util.ConcatList;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
@@ -31,6 +29,9 @@ import org.lwjgl.opengl.GL13;
 
 public final class Main extends Game
 {
+    public static final int SAMPLE_RATE = 48000;
+    public static final AudioFormat AUDIO_FORMAT = new AudioFormat(SAMPLE_RATE, 16, 2, true, false);
+    
     private static Main INSTANCE;
     
     public static Main instance()
@@ -105,31 +106,13 @@ public final class Main extends Game
         skybox = new Skybox();
         floor = new FloorGrid();
         
-        Panel panel = new Panel();
-        panel.setPosition(new Vec3(0.25f, 1.75f, -1.0f));
-        panel.setSize(0.25f, 0.125f);
-        panel.setYaw(Util.toRadians(-20.0f));
-        {
-            UI front = panel.frontInterface;
-            
-            Knob knob = new Knob(new Vec2(0.0f, 0.0f), Alignment.C, 32.0f);
-            Label vLabel = new Label(font, "", new Vec2(40.0f, 0.0f), Alignment.E);
-            knob.onValueChanged(v -> vLabel.setText("" + Math.round(v*256.0f)));
-            
-            front.add(knob);
-            front.add(new Label(font, "Value:", new Vec2(-40.0f, 0.0f), Alignment.W));
-            front.add(vLabel);
-            front.add(new Jack(new Vec2(0.0f, -40.0f), Alignment.S, Jack.Type.OUTPUT));
-        }
-        panel.rearInterface.add(new Label(font, "Rear", new Vec2(), Alignment.C));
-        panels.add(panel);
+        panels.add(new SystemInput()
+                .setPosition(new Vec3(0.0f, 1.75f, -1.0f))
+                .setYaw(Util.toRadians(0.0f)));
         
-        panel = new Panel();
-        panel.setPosition(new Vec3(-0.25f, 1.75f, -1.0f));
-        panel.setSize(0.25f, 0.125f);
-        panel.setYaw(Util.toRadians(20.0f));
-        panel.rearInterface.add(new Jack(new Vec2(128.0f, 0.0f), Alignment.C, Jack.Type.INPUT));
-        panels.add(panel);
+        panels.add(new SystemOutput()
+                .setPosition(new Vec3(0.0f, 1.75f, -1.0f))
+                .setYaw(Util.toRadians(0.0f)));
         
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -203,6 +186,11 @@ public final class Main extends Game
     private boolean displayMouse()
     {
         return displayMouse && interactionState.isCursorVisible();
+    }
+    
+    public AtlasFont getFont()
+    {
+        return font;
     }
     
     public void setState(InteractionState state)

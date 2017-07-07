@@ -7,7 +7,9 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
 import java.util.ArrayList;
 import java.util.List;
+import kraftig.game.gui.InputJack;
 import kraftig.game.gui.Jack;
+import kraftig.game.gui.OutputJack;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -19,7 +21,8 @@ public class Wire
     private static final float ARROW_LENGTH = 1.0f/48.0f;
     private static final float ARROW_WIDTH = 1.0f/192.0f;
     
-    private Jack in, out;
+    private OutputJack in;
+    private InputJack out;
     private WireNode first, last;
     
     public Wire()
@@ -35,11 +38,10 @@ public class Wire
         return first;
     }
     
-    public void connectIn(Jack jack)
+    public void connectIn(OutputJack jack)
     {
         if (jack == null) throw new NullPointerException();
         if (in != null) throw new IllegalStateException();
-        if (jack.getType() != Jack.Type.OUTPUT) throw new IllegalArgumentException();
         jack.connect(this);
         in = jack;
     }
@@ -61,11 +63,10 @@ public class Wire
         return last;
     }
     
-    public void connectOut(Jack jack)
+    public void connectOut(InputJack jack)
     {
         if (jack == null) throw new NullPointerException();
         if (out != null) throw new IllegalStateException();
-        if (jack.getType() != Jack.Type.INPUT) throw new IllegalArgumentException();
         jack.connect(this);
         out = jack;
     }
@@ -85,6 +86,11 @@ public class Wire
     public boolean isDegenerate()
     {
         return first == last;
+    }
+    
+    public boolean isLive()
+    {
+        return in != null && out != null;
     }
     
     public FocusQuery checkFocus(Vec3 pos, Vec3 dir)
