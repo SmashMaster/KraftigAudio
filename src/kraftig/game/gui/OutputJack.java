@@ -9,24 +9,31 @@ import kraftig.game.Main;
 import kraftig.game.Wire;
 import kraftig.game.Wire.WireNode;
 import kraftig.game.WireDragState;
-import kraftig.game.device.Processor;
+import kraftig.game.device.Device;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 public class OutputJack extends Jack
 {
-    private final Processor processor;
+    private final Device device;
+    private float[][] buffer;
     
-    public OutputJack(Vec2 pos, Alignment align, Processor processor)
+    public OutputJack(Vec2 pos, Alignment align, Device device, float[][] buffer)
     {
         super(pos, align);
-        if (processor == null) throw new NullPointerException();
-        this.processor = processor;
+        if (device == null) throw new NullPointerException();
+        this.device = device;
+        this.buffer = buffer;
     }
     
-    public void process(float[][] buffer, int samples)
+    public Device getDevice()
     {
-        processor.process(buffer, samples);
+        return device;
+    }
+    
+    public float[][] getBuffer()
+    {
+        return buffer;
     }
     
     @Override

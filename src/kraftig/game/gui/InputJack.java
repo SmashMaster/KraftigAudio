@@ -3,12 +3,12 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
-import java.util.Arrays;
 import kraftig.game.FocusQuery;
 import kraftig.game.Main;
 import kraftig.game.Wire;
 import kraftig.game.Wire.WireNode;
 import kraftig.game.WireDragState;
+import kraftig.game.device.Device;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -19,14 +19,16 @@ public class InputJack extends Jack
         super(pos, align);
     }
     
-    public void process(float[][] buffer, int samples)
+    public Device getDevice()
     {
-        if (hasLiveWire()) getWire().getIn().process(buffer, samples);
-        else
-        {
-            Arrays.fill(buffer[0], 0, samples, 0.0f);
-            Arrays.fill(buffer[1], 0, samples, 0.0f);
-        }
+        if (hasLiveWire()) return getWire().getIn().getDevice();
+        else return null;
+    }
+    
+    public float[][] getBuffer()
+    {
+        if (hasLiveWire()) return getWire().getIn().getBuffer();
+        else return null;
     }
     
     @Override

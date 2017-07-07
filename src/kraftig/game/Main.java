@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import javax.sound.sampled.AudioFormat;
 import kraftig.game.Wire.WireNode;
+import kraftig.game.device.Device;
 import kraftig.game.device.SystemInput;
 import kraftig.game.device.SystemOutput;
 import kraftig.game.gui.Crosshair;
@@ -26,7 +27,6 @@ import kraftig.game.util.ConcatList;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
-import kraftig.game.device.SourceDevice;
 
 public final class Main extends Game
 {
@@ -298,6 +298,7 @@ public final class Main extends Game
         player.step(dt);
         interactionState.step(dt);
         
+        //Calculate number of samples to process.
         double exactSamples = dt*(double)SAMPLE_RATE;
         int samples = (int)Math.floor(exactSamples);
         sampleRemainder += exactSamples - samples;
@@ -308,17 +309,21 @@ public final class Main extends Game
             sampleRemainder -= extra;
         }
         
-        for (Panel panel : panels) if (panel instanceof SourceDevice)
-            ((SourceDevice)panel).startFrame();
-        
-        for (Panel panel : panels) if (panel instanceof SystemOutput)
-            ((SystemOutput)panel).process(samples);
-        
-        for (Panel panel : panels) if (panel instanceof SourceDevice)
+        //Sort devices by topological order.
+        DAG<Device> dag = new DAG<>();
+        for (Panel panel : panels) if (panel instanceof Device)
         {
-            SourceDevice device = (SourceDevice)panel;
-            if (!device.hasProcessedThisFrame()) device.flush();
+            Device device = (Device)panel;
+            dag.add(device);
+            device.getInputDevices().forEach(in ->
+            {
+                dag.add(in);
+                dag.addEdge(in, device);
+            });
         }
+        
+        //Update all devices.
+        for (Device device : dag.sort()) device.process(samples);
     }
     
     @Override

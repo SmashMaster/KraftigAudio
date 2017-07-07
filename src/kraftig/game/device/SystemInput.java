@@ -9,13 +9,12 @@ import kraftig.game.Panel;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.OutputJack;
 
-public class SystemInput extends Panel implements SourceDevice
+public class SystemInput extends Panel implements Device
 {
     private final TargetDataLine inputLine;
     private final byte[] rawBytes;
+    private final float[][] buffer;
     private final OutputJack outJack;
-    
-    private boolean processedThisFrame;
     
     public SystemInput() throws Exception
     {
@@ -24,16 +23,20 @@ public class SystemInput extends Panel implements SourceDevice
         inputLine.start();
         
         rawBytes = new byte[inputLine.getBufferSize()];
+        buffer = new float[2][rawBytes.length/4];
         
-        outJack = new OutputJack(new Vec2(), Alignment.C, this::process);
+        outJack = new OutputJack(new Vec2(), Alignment.C, this, buffer);
         
         setSize(0.125f, 0.0625f);
         rearInterface.add(outJack);
         frontInterface.add(new Label(Main.instance().getFont(), "System In", new Vec2(), Alignment.C));
     }
     
-    private void process(float[][] buffer, int samples)
+    @Override
+    public void process(int samples)
     {
+        System.out.println("in");
+        
         //Buffer input byte data.
         int available = Math.min(inputLine.available(), samples*4);
         inputLine.read(rawBytes, 0, available);
@@ -47,27 +50,6 @@ public class SystemInput extends Panel implements SourceDevice
             buffer[0][k] = (left + 0.5f)/32767.5f;
             buffer[1][k++] = (right + 0.5f)/32767.5f;
         }
-        
-        processedThisFrame = true;
-    }
-    
-    @Override
-    public void startFrame()
-    {
-        processedThisFrame = false;
-    }
-
-    @Override
-    public boolean hasProcessedThisFrame()
-    {
-        return processedThisFrame;
-    }
-
-    @Override
-    public void flush()
-    {
-        inputLine.flush();
-        processedThisFrame = true;
     }
     
     @Override
