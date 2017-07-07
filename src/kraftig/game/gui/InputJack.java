@@ -3,6 +3,7 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.util.Arrays;
 import kraftig.game.FocusQuery;
 import kraftig.game.Main;
 import kraftig.game.Wire;
@@ -16,6 +17,16 @@ public class InputJack extends Jack
     public InputJack(Vec2 pos, Alignment align)
     {
         super(pos, align);
+    }
+    
+    public void process(float[][] buffer, int samples)
+    {
+        if (hasLiveWire()) getWire().getIn().process(buffer, samples);
+        else
+        {
+            Arrays.fill(buffer[0], 0, samples, 0.0f);
+            Arrays.fill(buffer[1], 0, samples, 0.0f);
+        }
     }
     
     @Override

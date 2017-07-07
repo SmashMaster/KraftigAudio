@@ -14,6 +14,7 @@ public class SystemOutput extends Panel
     private final SourceDataLine outputLine;
     
     private final byte[] rawBytes;
+    private final float[][] buffer;
     
     private final InputJack inJack;
     
@@ -24,6 +25,7 @@ public class SystemOutput extends Panel
         outputLine.start();
         
         rawBytes = new byte[outputLine.getBufferSize()];
+        buffer = new float[2][rawBytes.length/4];
         
         inJack = new InputJack(new Vec2(), Alignment.C);
         
@@ -32,25 +34,30 @@ public class SystemOutput extends Panel
         frontInterface.add(new Label(Main.instance().getFont(), "System Out", new Vec2(), Alignment.C));
     }
     
+    private boolean first = true;
+    
     public void process(int samples)
     {
-//        //Convert back to byte data.
-//        for (int i=0, k=0; k<samples;)
-//        {
-//            float fLeft = Math.min(Math.max(buffer[0][k], -1.0f), 1.0f);
-//            float fRight = Math.min(Math.max(buffer[1][k++], -1.0f), 1.0f);
-//            
-//            short left = (short)Math.round(fLeft*32767.5f - 0.5f);
-//            short right = (short)Math.round(fRight*32767.5f - 0.5f);
-//            
-//            rawBytes[i++] = (byte)(left & 0xFF);
-//            rawBytes[i++] = (byte)((left >>> 8) & 0xFF);
-//            rawBytes[i++] = (byte)(right & 0xFF);
-//            rawBytes[i++] = (byte)((right >>> 8) & 0xFF);
-//        }
+        //Recursively process up device chain.
+        inJack.process(buffer, samples);
+        
+        //Convert back to byte data.
+        for (int i=0, k=0; k<samples;)
+        {
+            float fLeft = Math.min(Math.max(buffer[0][k], -1.0f), 1.0f);
+            float fRight = Math.min(Math.max(buffer[1][k++], -1.0f), 1.0f);
+            
+            short left = (short)Math.round(fLeft*32767.5f - 0.5f);
+            short right = (short)Math.round(fRight*32767.5f - 0.5f);
+            
+            rawBytes[i++] = (byte)(left & 0xFF);
+            rawBytes[i++] = (byte)((left >>> 8) & 0xFF);
+            rawBytes[i++] = (byte)(right & 0xFF);
+            rawBytes[i++] = (byte)((right >>> 8) & 0xFF);
+        }
         
         //Send to output.
-        outputLine.write(rawBytes, 0, samples);
+        outputLine.write(rawBytes, 0, samples*4);
     }
     
     @Override

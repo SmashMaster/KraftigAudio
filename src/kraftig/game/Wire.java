@@ -8,7 +8,6 @@ import com.samrj.devil.math.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 import kraftig.game.gui.InputJack;
-import kraftig.game.gui.Jack;
 import kraftig.game.gui.OutputJack;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
@@ -46,7 +45,7 @@ public class Wire
         in = jack;
     }
     
-    public Jack getIn()
+    public OutputJack getIn()
     {
         return in;
     }
@@ -71,7 +70,7 @@ public class Wire
         out = jack;
     }
     
-    public Jack getOut()
+    public InputJack getOut()
     {
         return out;
     }

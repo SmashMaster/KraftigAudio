@@ -26,6 +26,7 @@ import kraftig.game.util.ConcatList;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
+import kraftig.game.device.SourceDevice;
 
 public final class Main extends Game
 {
@@ -89,6 +90,8 @@ public final class Main extends Game
     private FocusQuery focus;
     private InteractionState interactionState;
     
+    private double sampleRemainder = 0.0f;
+    
     private Main() throws Exception
     {
         super("Kr\u00E4ftig Audio",  hints(), config());
@@ -107,11 +110,11 @@ public final class Main extends Game
         floor = new FloorGrid();
         
         panels.add(new SystemInput()
-                .setPosition(new Vec3(0.0f, 1.75f, -1.0f))
+                .setPosition(new Vec3(-0.25f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
         panels.add(new SystemOutput()
-                .setPosition(new Vec3(0.0f, 1.75f, -1.0f))
+                .setPosition(new Vec3(0.25f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
         GL11.glEnable(GL11.GL_BLEND);
@@ -294,6 +297,28 @@ public final class Main extends Game
     {
         player.step(dt);
         interactionState.step(dt);
+        
+        double exactSamples = dt*(double)SAMPLE_RATE;
+        int samples = (int)Math.floor(exactSamples);
+        sampleRemainder += exactSamples - samples;
+        if (sampleRemainder > 1.0)
+        {
+            int extra = (int)Math.floor(sampleRemainder);
+            samples += extra;
+            sampleRemainder -= extra;
+        }
+        
+        for (Panel panel : panels) if (panel instanceof SourceDevice)
+            ((SourceDevice)panel).startFrame();
+        
+        for (Panel panel : panels) if (panel instanceof SystemOutput)
+            ((SystemOutput)panel).process(samples);
+        
+        for (Panel panel : panels) if (panel instanceof SourceDevice)
+        {
+            SourceDevice device = (SourceDevice)panel;
+            if (!device.hasProcessedThisFrame()) device.flush();
+        }
     }
     
     @Override
