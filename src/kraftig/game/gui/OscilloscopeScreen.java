@@ -9,13 +9,13 @@ import org.lwjgl.opengl.GL11;
 
 public class OscilloscopeScreen implements UIElement
 {
-    private static final float BRIGHTNESS = 1.0f/32.0f;
-    
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
     
     private float[][] buffer;
     private int sampleCount;
+    
+    private float brightness;
     
     public OscilloscopeScreen(Vec2 pos, Vec2 radius, Alignment align)
     {
@@ -27,6 +27,11 @@ public class OscilloscopeScreen implements UIElement
     {
         this.buffer = buffer;
         sampleCount = samples;
+    }
+    
+    public void setBrightness(float b)
+    {
+        brightness = b;
     }
     
     @Override
@@ -78,9 +83,9 @@ public class OscilloscopeScreen implements UIElement
             float dx = (x1 - x0), dy = (y1 - y0);
             
             float dist = (float)Math.sqrt(dx*dx + dy*dy);
-            float brightness = (s*BRIGHTNESS)/(sampleCount*(dist + 0.01f));
+            float a = (s*brightness)/(sampleCount*(dist + 0.01f));
 
-            GL11.glColor4f(0.125f, 1.0f, 0.125f, brightness*alpha);
+            GL11.glColor4f(0.125f, 1.0f, 0.125f, a*alpha);
             GL11.glVertex2f(x0*radius.x, y0*radius.y);
             GL11.glVertex2f(x1*radius.x, y1*radius.y);
             

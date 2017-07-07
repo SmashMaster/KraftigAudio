@@ -22,7 +22,7 @@ public class Knob implements UIElement
     private static final float NOTCH_TOTAL_ANG = (Util.PIm2 - DEAD_ZONE*2.0f);
     private static final float NOTCH_DA = NOTCH_TOTAL_ANG/(NOTCHES - 1.0f);
     private static final float NOTCH_END = NOTCH_ANG0 + NOTCH_TOTAL_ANG + NOTCH_DA*0.5f;
-    private static final float NOTCH_LENGTH = 6f;
+    private static final float NOTCH_LENGTH = 1.25f;
     private static final float SENSITIVITY = 1.0f/256.0f;
     
     private final Vec2 pos = new Vec2();
@@ -33,7 +33,7 @@ public class Knob implements UIElement
     
     public Knob(Vec2 pos, Alignment align, float radius)
     {
-        radius -= NOTCH_LENGTH;
+        radius /= NOTCH_LENGTH;
         this.pos.set(pos).add(new Vec2(align.x, align.y).mult(radius));
         this.radius = radius;
     }
@@ -42,6 +42,13 @@ public class Knob implements UIElement
     {
         this.callback = callback;
         callback.accept(value);
+        return this;
+    }
+    
+    public Knob setValue(float value)
+    {
+        this.value = Util.saturate(value);
+        if (callback != null) callback.accept(value);
         return this;
     }
     
@@ -114,7 +121,7 @@ public class Knob implements UIElement
             float x = (float)Math.cos(-ang);
             float y = (float)Math.sin(-ang);
             GL11.glVertex2f(x*radius, y*radius);
-            GL11.glVertex2f(x*(radius + NOTCH_LENGTH), y*(radius + NOTCH_LENGTH));
+            GL11.glVertex2f(x*radius*NOTCH_LENGTH, y*radius*NOTCH_LENGTH);
         }
         
         float vAng = NOTCH_ANG0 + value*NOTCH_TOTAL_ANG;
