@@ -18,17 +18,21 @@ public class OutputJack extends Jack
     private final Device device;
     private float[][] buffer;
     
-    public OutputJack(Vec2 pos, Alignment align, Device device, float[][] buffer)
+    public OutputJack(Vec2 pos, Alignment align, Device device)
     {
         super(pos, align);
         if (device == null) throw new NullPointerException();
         this.device = device;
-        this.buffer = buffer;
     }
     
     public Device getDevice()
     {
         return device;
+    }
+    
+    public void setBuffer(float[][] buffer)
+    {
+        this.buffer = buffer;
     }
     
     public float[][] getBuffer()

@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import javax.sound.sampled.AudioFormat;
 import kraftig.game.Wire.WireNode;
 import kraftig.game.device.Device;
+import kraftig.game.device.Splitter;
 import kraftig.game.device.SystemInput;
 import kraftig.game.device.SystemOutput;
 import kraftig.game.gui.Crosshair;
@@ -110,11 +111,15 @@ public final class Main extends Game
         floor = new FloorGrid();
         
         panels.add(new SystemInput()
-                .setPosition(new Vec3(-0.25f, 1.75f, -1.0f))
+                .setPosition(new Vec3(-0.3f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
         panels.add(new SystemOutput()
-                .setPosition(new Vec3(0.25f, 1.75f, -1.0f))
+                .setPosition(new Vec3(0.3f, 1.75f, -1.0f))
+                .setYaw(Util.toRadians(0.0f)));
+        
+        panels.add(new Splitter()
+                .setPosition(new Vec3(0.0f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
         GL11.glEnable(GL11.GL_BLEND);

@@ -11,17 +11,18 @@ import org.lwjgl.opengl.GL11;
 
 public abstract class Jack implements UIElement
 {
-    protected static final int SEGMENTS = 32;
-    protected static final float DT = 8.0f/(SEGMENTS - 1);
-    protected static final float T_END = 8.0f + DT*0.5f;
-    protected static final float RADIUS = 16.0f;
-    protected static final float RADIUS_SQ = RADIUS*RADIUS;
-    protected static final float RADIUS_HALF = RADIUS/2.0f;
-    protected static final float WIRE_OFFSET = 8.0f;
+    public static final int SEGMENTS = 32;
+    public static final float DT = 8.0f/(SEGMENTS - 1);
+    public static final float T_END = 8.0f + DT*0.5f;
+    public static final float RADIUS = 16.0f;
+    public static final float RADIUS_SQ = RADIUS*RADIUS;
+    public static final float RADIUS_HALF = RADIUS/2.0f;
+    public static final float WIRE_OFFSET = 8.0f;
     
     private final Vec2 pos = new Vec2();
     private final Mat4 matrix = new Mat4();
     
+    private Runnable onWireChanged;
     private Wire wire;
     
     public Jack(Vec2 pos, Alignment align)
@@ -30,12 +31,21 @@ public abstract class Jack implements UIElement
         this.pos.set(pos).add(av);
     }
     
+    public Jack onWireChanged(Runnable onWireChanged)
+    {
+        if (onWireChanged == null) throw new NullPointerException();
+        this.onWireChanged = onWireChanged;
+        return this;
+    }
+    
     public final void connect(Wire wire)
     {
         if (wire == null) throw new NullPointerException();
         if (this.wire != null) throw new IllegalStateException();
         this.wire = wire;
         updateMatrix(matrix);
+        
+        if (onWireChanged != null) onWireChanged.run();
     }
     
     public final void disconnect(Wire wire)
@@ -43,6 +53,8 @@ public abstract class Jack implements UIElement
         if (wire == null) throw new NullPointerException();
         if (this.wire != wire) throw new IllegalStateException();
         this.wire = null;
+        
+        if (onWireChanged != null) onWireChanged.run();
     }
     
     public final boolean hasWire()

@@ -14,7 +14,6 @@ public class SystemInput extends Panel implements Device
     private final TargetDataLine inputLine;
     private final byte[] rawBytes;
     private final float[][] buffer;
-    private final OutputJack outJack;
     
     public SystemInput() throws Exception
     {
@@ -25,7 +24,8 @@ public class SystemInput extends Panel implements Device
         rawBytes = new byte[inputLine.getBufferSize()];
         buffer = new float[2][rawBytes.length/4];
         
-        outJack = new OutputJack(new Vec2(), Alignment.C, this, buffer);
+        OutputJack outJack = new OutputJack(new Vec2(), Alignment.C, this);
+        outJack.setBuffer(buffer);
         
         setSize(0.125f, 0.0625f);
         rearInterface.add(outJack);
@@ -35,8 +35,6 @@ public class SystemInput extends Panel implements Device
     @Override
     public void process(int samples)
     {
-        System.out.println("in");
-        
         //Buffer input byte data.
         int available = Math.min(inputLine.available(), samples*4);
         inputLine.read(rawBytes, 0, available);

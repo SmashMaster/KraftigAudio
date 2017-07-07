@@ -41,8 +41,8 @@ public class Wire
     {
         if (jack == null) throw new NullPointerException();
         if (in != null) throw new IllegalStateException();
-        jack.connect(this);
         in = jack;
+        jack.connect(this);
     }
     
     public OutputJack getIn()
@@ -66,8 +66,8 @@ public class Wire
     {
         if (jack == null) throw new NullPointerException();
         if (out != null) throw new IllegalStateException();
-        jack.connect(this);
         out = jack;
+        jack.connect(this);
     }
     
     public InputJack getOut()

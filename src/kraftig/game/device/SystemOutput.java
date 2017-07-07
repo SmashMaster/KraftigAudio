@@ -43,8 +43,6 @@ public class SystemOutput extends Panel implements Device
     @Override
     public void process(int samples)
     {
-        System.out.println("out");
-        
         float[][] buffer = inJack.getBuffer();
         
         if (buffer == null) Arrays.fill(rawBytes, 0, samples*4, (byte)0); //Send silence.
