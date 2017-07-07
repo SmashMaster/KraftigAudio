@@ -242,6 +242,13 @@ public final class Main extends Game
         wires.add(wire);
     }
     
+    public Stream<FocusQuery> focusStream()
+    {
+        return Stream.concat(panels.stream().map(p -> p.checkFocus(camera.pos, mouseDir)),
+                             wires.stream().map(w -> w.checkFocus(camera.pos, mouseDir)))
+                .filter(q -> q != null);
+    }
+    
     @Override
     public void onMouseMoved(float x, float y, float dx, float dy)
     {

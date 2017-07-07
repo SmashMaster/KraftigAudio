@@ -1,12 +1,15 @@
 package kraftig.game;
 
 import kraftig.game.Wire.WireNode;
+import kraftig.game.gui.Jack;
 import org.lwjgl.glfw.GLFW;
 
 public class WireDragState implements InteractionState
 {
     private WireNode node;
     private final float dist;
+    
+    private Jack connectJack;
     
     public WireDragState(WireNode node)
     {
@@ -20,8 +23,33 @@ public class WireDragState implements InteractionState
     
     private void update()
     {
-        node.pos.set(Main.instance().getCamera().pos);
-        node.pos.madd(Main.instance().getMouseDir(), dist);
+        if (!node.isCorner())
+        {
+            connectJack = null;
+            
+            Focusable focus = Main.instance().focusStream()
+                    .filter(f -> f.focus != node)
+                    .reduce((a, b) -> a.dist < b.dist ? a : b)
+                    .map(f -> f.focus)
+                    .orElse(null);
+
+            if (focus instanceof Jack)
+            {
+                Jack jack = (Jack)focus;
+                if (!jack.hasWire() && ((node.isLast() && jack.getType() == Jack.Type.INPUT) ||
+                                        (node.isFirst() && jack.getType() == Jack.Type.OUTPUT)))
+                {
+                    connectJack = jack;
+                    node.pos.set(jack.getWirePos());
+                }
+            }
+        }
+        
+        if (connectJack == null)
+        {
+            node.pos.set(Main.instance().getCamera().pos);
+            node.pos.madd(Main.instance().getMouseDir(), dist);
+        }
     }
 
     @Override
@@ -35,15 +63,27 @@ public class WireDragState implements InteractionState
     {
         update();
     }
-
+    
     @Override
     public void onMouseButton(int button, int action, int mods)
     {
         if (action != GLFW.GLFW_PRESS) return;
         
-        if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) Main.instance().setDefaultState();
-        else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && !node.isCorner())
-            node = node.makeCorner();
+        if (connectJack != null)
+        {
+            if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT || button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
+            {
+                if (node.isFirst()) node.getWire().connectIn(connectJack);
+                else if (node.isLast()) node.getWire().connectOut(connectJack);
+                Main.instance().setDefaultState();
+            }
+        }
+        else
+        {
+            if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) Main.instance().setDefaultState();
+            else if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && !node.isCorner())
+                node = node.makeCorner();
+        }
     }
 
     @Override

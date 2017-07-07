@@ -2,7 +2,6 @@ package kraftig.game;
 
 import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.math.Util;
-import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
 import kraftig.game.Wire.WireSplit;
 

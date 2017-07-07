@@ -3,6 +3,7 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
+import com.samrj.devil.math.Vec3;
 import com.samrj.devil.ui.Alignment;
 import kraftig.game.FocusQuery;
 import kraftig.game.Main;
@@ -61,14 +62,24 @@ public class Jack implements UIElement
         this.wire = null;
     }
     
+    public boolean hasWire()
+    {
+        return wire != null;
+    }
+    
+    public Vec3 getWirePos()
+    {
+        return new Vec3(pos.x, pos.y, WIRE_OFFSET).mult(matrix);
+    }
+    
     @Override
     public void updateMatrix(Mat4 matrix)
     {
         this.matrix.set(matrix);
         if (wire != null) switch (type)
         {
-            case INPUT: wire.getLast().pos.set(pos.x, pos.y, WIRE_OFFSET).mult(matrix); break;
-            case OUTPUT: wire.getFirst().pos.set(pos.x, pos.y, WIRE_OFFSET).mult(matrix); break;
+            case INPUT: wire.getLast().pos.set(getWirePos()); break;
+            case OUTPUT: wire.getFirst().pos.set(getWirePos()); break;
         }
     }
     
