@@ -4,6 +4,7 @@ import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.util.function.Supplier;
 import kraftig.game.FocusQuery;
 import kraftig.game.Main;
 import kraftig.game.Wire;
@@ -16,13 +17,19 @@ import org.lwjgl.opengl.GL11;
 public class OutputJack extends Jack
 {
     private final Device device;
-    private float[][] buffer;
+    private final Supplier<float[][]> bufferSupplier;
     
-    public OutputJack(Vec2 pos, Alignment align, Device device)
+    public OutputJack(Vec2 pos, Alignment align, Device device, Supplier<float[][]> bufferSupplier)
     {
         super(pos, align);
-        if (device == null) throw new NullPointerException();
+        if (device == null || bufferSupplier == null) throw new NullPointerException();
         this.device = device;
+        this.bufferSupplier = bufferSupplier;
+    }
+    
+    public OutputJack(Vec2 pos, Alignment align, Device device, float[][] buffer)
+    {
+        this(pos, align, device, () -> buffer);
     }
     
     public Device getDevice()
@@ -30,14 +37,9 @@ public class OutputJack extends Jack
         return device;
     }
     
-    public void setBuffer(float[][] buffer)
-    {
-        this.buffer = buffer;
-    }
-    
     public float[][] getBuffer()
     {
-        return buffer;
+        return bufferSupplier.get();
     }
     
     @Override

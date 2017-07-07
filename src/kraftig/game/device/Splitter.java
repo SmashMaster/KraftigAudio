@@ -16,18 +16,14 @@ public class Splitter extends Panel implements Device
     
     public Splitter()
     {
+        inJack = new InputJack(new Vec2(0.0f, Jack.RADIUS*1.5f), Alignment.C);
+        
         OutputJack[] outJacks = new OutputJack[4];
         for (int i=0; i<outJacks.length; i++)
         {
             float x = (i - (outJacks.length - 1)/2.0f)*Jack.RADIUS*2.5f;
-            outJacks[i] = new OutputJack(new Vec2(x, -Jack.RADIUS*1.5f), Alignment.C, this);
+            outJacks[i] = new OutputJack(new Vec2(x, -Jack.RADIUS*1.5f), Alignment.C, this, inJack::getBuffer);
         }
-        
-        inJack = new InputJack(new Vec2(0.0f, Jack.RADIUS*1.5f), Alignment.C);
-        inJack.onWireChanged(() ->
-        {
-            for (OutputJack jack : outJacks) jack.setBuffer(inJack.getBuffer());
-        });
         
         setSize(0.125f, 0.0625f);
         for (OutputJack jack : outJacks) rearInterface.add(jack);

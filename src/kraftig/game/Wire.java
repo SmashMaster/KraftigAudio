@@ -53,8 +53,9 @@ public class Wire
     public void disconnectIn()
     {
         if (in == null) throw new IllegalStateException();
-        in.disconnect(this);
+        OutputJack j = in;
         in = null;
+        j.disconnect(this);
     }
     
     public WireNode getLast()
@@ -78,8 +79,9 @@ public class Wire
     public void disconnectOut()
     {
         if (out == null) throw new IllegalStateException();
-        out.disconnect(this);
+        InputJack j = out;
         out = null;
+        j.disconnect(this);
     }
     
     public boolean isDegenerate()
