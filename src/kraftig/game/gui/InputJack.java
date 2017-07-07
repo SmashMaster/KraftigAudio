@@ -3,6 +3,7 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.util.stream.Stream;
 import kraftig.game.FocusQuery;
 import kraftig.game.Main;
 import kraftig.game.Wire;
@@ -23,6 +24,11 @@ public class InputJack extends Jack
     {
         if (hasLiveWire()) return getWire().getIn().getDevice();
         else return null;
+    }
+    
+    public Stream<Device> getDevices()
+    {
+        return hasLiveWire() ? Stream.of(getWire().getIn().getDevice()) : Stream.empty();
     }
     
     public float[][] getBuffer()

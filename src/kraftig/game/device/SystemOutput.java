@@ -27,17 +27,15 @@ public class SystemOutput extends Panel implements Device
         
         rawBytes = new byte[outputLine.getBufferSize()];
         
-        inJack = new InputJack(new Vec2(), Alignment.C);
-        
         setSize(0.125f, 0.0625f);
-        rearInterface.add(inJack);
+        rearInterface.add(inJack = new InputJack(new Vec2(), Alignment.C));
         frontInterface.add(new Label(Main.instance().getFont(), "System Out", new Vec2(), Alignment.C));
     }
     
     @Override
     public Stream<Device> getInputDevices()
     {
-        return inJack.hasLiveWire() ? Stream.of(inJack.getDevice()) : Stream.empty();
+        return inJack.getDevices();
     }
     
     @Override

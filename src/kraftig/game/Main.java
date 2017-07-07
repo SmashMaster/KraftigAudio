@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import javax.sound.sampled.AudioFormat;
 import kraftig.game.Wire.WireNode;
 import kraftig.game.device.Device;
+import kraftig.game.device.Oscilloscope;
 import kraftig.game.device.Splitter;
 import kraftig.game.device.SystemInput;
 import kraftig.game.device.SystemOutput;
@@ -114,12 +115,16 @@ public final class Main extends Game
                 .setPosition(new Vec3(-0.3f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
-        panels.add(new SystemOutput()
+        panels.add(new Splitter()
+                .setPosition(new Vec3(0.0f, 1.75f, -1.0f))
+                .setYaw(Util.toRadians(0.0f)));
+        
+        panels.add(new Oscilloscope()
                 .setPosition(new Vec3(0.3f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
-        panels.add(new Splitter()
-                .setPosition(new Vec3(0.0f, 1.75f, -1.0f))
+        panels.add(new SystemOutput()
+                .setPosition(new Vec3(0.6f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
         GL11.glEnable(GL11.GL_BLEND);

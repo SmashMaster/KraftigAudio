@@ -34,8 +34,7 @@ public class Knob implements UIElement
     public Knob(Vec2 pos, Alignment align, float radius)
     {
         radius -= NOTCH_LENGTH;
-        Vec2 av = new Vec2(align.x, align.y).mult(radius);
-        this.pos.set(pos).add(av);
+        this.pos.set(pos).add(new Vec2(align.x, align.y).mult(radius));
         this.radius = radius;
     }
     
