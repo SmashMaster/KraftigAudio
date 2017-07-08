@@ -89,14 +89,14 @@ public class Panel implements Drawable, Focusable
         return height;
     }
     
-    public Panel setPosition(Vec3 pos)
+    public final Panel setPosition(Vec3 pos)
     {
         this.pos.set(pos);
         updateMatrices();
         return this;
     }
     
-    public Panel setYaw(float yaw)
+    public final Panel setYaw(float yaw)
     {
         this.yaw = yaw;
         frontDir.set((float)Math.sin(yaw), 0.0f, (float)Math.cos(yaw));
@@ -105,7 +105,7 @@ public class Panel implements Drawable, Focusable
         return this;
     }
     
-    public Panel setSize(float w, float h)
+    public final Panel setSize(float w, float h)
     {
         width = w;
         height = h;

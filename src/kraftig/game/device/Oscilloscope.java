@@ -1,6 +1,5 @@
 package kraftig.game.device;
 
-import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.util.stream.Stream;
@@ -8,6 +7,7 @@ import kraftig.game.Panel;
 import kraftig.game.gui.InputJack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.OscilloscopeScreen;
+import kraftig.game.gui.ToggleButton;
 
 public class Oscilloscope extends Panel implements Device
 {
@@ -23,10 +23,12 @@ public class Oscilloscope extends Panel implements Device
         
         setSize(0.125f, 0.0625f);
         rearInterface.add(inJack);
-        frontInterface.add(screen = new OscilloscopeScreen(new Vec2(), new Vec2(48, 48), Alignment.C));
-        frontInterface.add(new Knob(new Vec2(64.0f, 0.0f), Alignment.C, 8.0f)
+        frontInterface.add(screen = new OscilloscopeScreen(new Vec2(48, 48), new Vec2(), Alignment.C));
+        frontInterface.add(new Knob(8.0f, new Vec2(64.0f, 0.0f), Alignment.C)
                 .setValue(0.5f)
                 .onValueChanged(v -> screen.setBrightness(MIN_BRIGHTNESS*(float)Math.pow(MAX_BRIGHTNESS/MIN_BRIGHTNESS, v))));
+        
+        frontInterface.add(new ToggleButton(8.0f, new Vec2(-64.0f, 0.0f), Alignment.C));
     }
     
     @Override

@@ -25,7 +25,7 @@ public class SystemInput extends Panel implements Device
         buffer = new float[2][rawBytes.length/4];
         
         setSize(0.125f, 0.0625f);
-        rearInterface.add(new OutputJack(new Vec2(), Alignment.C, this, buffer));
+        rearInterface.add(new OutputJack(this, buffer, new Vec2(), Alignment.C));
         frontInterface.add(new Label(Main.instance().getFont(), "System In", new Vec2(), Alignment.C));
     }
     

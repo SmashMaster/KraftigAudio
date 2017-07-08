@@ -17,10 +17,33 @@ public class OscilloscopeScreen implements UIElement
     
     private float brightness;
     
-    public OscilloscopeScreen(Vec2 pos, Vec2 radius, Alignment align)
+    public OscilloscopeScreen(Vec2 radius)
     {
-        this.pos.set(pos).add(new Vec2(align.x, align.y).mult(radius));
         this.radius.set(radius);
+    }
+    
+    public OscilloscopeScreen(Vec2 radius, Vec2 pos, Alignment align)
+    {
+        this(radius);
+        setPos(pos, align);
+    }
+    
+    @Override
+    public final Vec2 getPos()
+    {
+        return new Vec2(pos);
+    }
+    
+    @Override
+    public final Vec2 getSize()
+    {
+        return new Vec2(radius);
+    }
+    
+    @Override
+    public final void setPos(Vec2 pos, Alignment align)
+    {
+        align.align(pos, getSize(), this.pos);
     }
     
     public void process(float[][] buffer, int samples)

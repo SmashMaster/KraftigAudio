@@ -22,7 +22,7 @@ public class Splitter extends Panel implements Device
         for (int i=0; i<outJacks.length; i++)
         {
             float x = (i - (outJacks.length - 1)/2.0f)*Jack.RADIUS*2.5f;
-            outJacks[i] = new OutputJack(new Vec2(x, -Jack.RADIUS*1.5f), Alignment.C, this, inJack::getBuffer);
+            outJacks[i] = new OutputJack(this, inJack::getBuffer, new Vec2(x, -Jack.RADIUS*1.5f), Alignment.C);
         }
         
         setSize(0.125f, 0.0625f);

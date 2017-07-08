@@ -25,10 +25,31 @@ public abstract class Jack implements UIElement
     private Runnable onWireChanged;
     private Wire wire;
     
+    public Jack()
+    {
+    }
+    
     public Jack(Vec2 pos, Alignment align)
     {
-        Vec2 av = new Vec2(align.x, align.y).mult(RADIUS);
-        this.pos.set(pos).add(av);
+        setPos(pos, align);
+    }
+    
+    @Override
+    public final Vec2 getPos()
+    {
+        return new Vec2(pos);
+    }
+    
+    @Override
+    public final Vec2 getSize()
+    {
+        return new Vec2(RADIUS);
+    }
+    
+    @Override
+    public final void setPos(Vec2 pos, Alignment align)
+    {
+        align.align(pos, getSize(), this.pos);
     }
     
     public Jack onWireChanged(Runnable onWireChanged)

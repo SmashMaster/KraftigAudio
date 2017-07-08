@@ -31,11 +31,33 @@ public class Knob implements UIElement
     private float value = 0.0f;
     private Consumer<Float> callback;
     
-    public Knob(Vec2 pos, Alignment align, float radius)
+    public Knob(float radius)
     {
-        radius /= NOTCH_LENGTH;
-        this.pos.set(pos).add(new Vec2(align.x, align.y).mult(radius));
-        this.radius = radius;
+        this.radius = radius/NOTCH_LENGTH;
+    }
+    
+    public Knob(float radius, Vec2 pos, Alignment align)
+    {
+        this(radius);
+        setPos(pos, align);
+    }
+    
+    @Override
+    public final Vec2 getPos()
+    {
+        return new Vec2(pos);
+    }
+    
+    @Override
+    public final Vec2 getSize()
+    {
+        return new Vec2(radius);
+    }
+    
+    @Override
+    public final void setPos(Vec2 pos, Alignment align)
+    {
+        align.align(pos, getSize(), this.pos);
     }
     
     public Knob onValueChanged(Consumer<Float> callback)

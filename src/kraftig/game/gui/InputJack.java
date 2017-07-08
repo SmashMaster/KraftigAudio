@@ -15,6 +15,11 @@ import org.lwjgl.opengl.GL11;
 
 public class InputJack extends Jack
 {
+    public InputJack()
+    {
+        super();
+    }
+    
     public InputJack(Vec2 pos, Alignment align)
     {
         super(pos, align);

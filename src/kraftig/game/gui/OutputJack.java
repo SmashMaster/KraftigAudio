@@ -19,17 +19,28 @@ public class OutputJack extends Jack
     private final Device device;
     private final Supplier<float[][]> bufferSupplier;
     
-    public OutputJack(Vec2 pos, Alignment align, Device device, Supplier<float[][]> bufferSupplier)
+    public OutputJack(Device device, Supplier<float[][]> bufferSupplier)
     {
-        super(pos, align);
+        super();
         if (device == null || bufferSupplier == null) throw new NullPointerException();
         this.device = device;
         this.bufferSupplier = bufferSupplier;
     }
     
-    public OutputJack(Vec2 pos, Alignment align, Device device, float[][] buffer)
+    public OutputJack(Device device, Supplier<float[][]> bufferSupplier, Vec2 pos, Alignment align)
     {
-        this(pos, align, device, () -> buffer);
+        this(device, bufferSupplier);
+        setPos(pos, align);
+    }
+    
+    public OutputJack(Device device, float[][] buffer)
+    {
+        this(device, () -> buffer);
+    }
+    
+    public OutputJack(Device device, float[][] buffer, Vec2 pos, Alignment align)
+    {
+        this(device, () -> buffer, pos, align);
     }
     
     public Device getDevice()
