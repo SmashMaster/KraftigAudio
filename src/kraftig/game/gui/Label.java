@@ -10,14 +10,16 @@ import org.lwjgl.opengl.GL11;
 public class Label implements UIElement
 {
     private final AtlasFont font;
-    private String text;
+    private final String text;
     private final Vec2 pos = new Vec2();
+    private final Vec2 radius = new Vec2();
     private Alignment align = Alignment.C;
     
     public Label(AtlasFont font, String text)
     {
         this.font = font;
         this.text = text;
+        radius.set(font.getWidth(text)*0.5f, font.getHeight()*0.5f);
     }
     
     public Label(AtlasFont font, String text, Vec2 pos, Alignment align)
@@ -29,27 +31,21 @@ public class Label implements UIElement
     @Override
     public final Vec2 getPos()
     {
-        return new Vec2(pos);
+        return align.align(pos, radius);
     }
     
     @Override
     public final Vec2 getSize()
     {
-        return new Vec2(font.getWidth(text), font.getHeight());
+        return new Vec2(radius);
     }
     
     @Override
-    public final void setPos(Vec2 pos, Alignment align)
+    public final Label setPos(Vec2 pos, Alignment align)
     {
         this.pos.set(pos);
         this.align = align;
-    }
-    
-    public void setText(String text)
-    {
-        if (text == null) throw new NullPointerException();
-        
-        this.text = text;
+        return this;
     }
     
     @Override

@@ -55,9 +55,10 @@ public class Knob implements UIElement
     }
     
     @Override
-    public final void setPos(Vec2 pos, Alignment align)
+    public final Knob setPos(Vec2 pos, Alignment align)
     {
         align.align(pos, getSize(), this.pos);
+        return this;
     }
     
     public Knob onValueChanged(Consumer<Float> callback)

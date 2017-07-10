@@ -46,9 +46,10 @@ public class ToggleButton implements UIElement
     }
     
     @Override
-    public final void setPos(Vec2 pos, Alignment align)
+    public final ToggleButton setPos(Vec2 pos, Alignment align)
     {
         align.align(pos, getSize(), this.pos);
+        return this;
     }
     
     public ToggleButton onValueChanged(Consumer<Boolean> callback)

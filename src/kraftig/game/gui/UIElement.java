@@ -10,7 +10,7 @@ public interface UIElement extends Focusable
 {
     public Vec2 getPos();
     public Vec2 getSize();
-    public void setPos(Vec2 pos, Alignment align);
+    public UIElement setPos(Vec2 pos, Alignment align);
     
     public void updateMatrix(Mat4 matrix);
     public UIFocusQuery checkFocus(float dist, Vec2 p);

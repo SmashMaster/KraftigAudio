@@ -41,9 +41,10 @@ public class OscilloscopeScreen implements UIElement
     }
     
     @Override
-    public final void setPos(Vec2 pos, Alignment align)
+    public final OscilloscopeScreen setPos(Vec2 pos, Alignment align)
     {
         align.align(pos, getSize(), this.pos);
+        return this;
     }
     
     public void process(float[][] buffer, int samples)

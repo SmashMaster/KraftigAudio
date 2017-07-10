@@ -25,8 +25,9 @@ public class RadioButtons implements UIElement
     }
 
     @Override
-    public final void setPos(Vec2 pos, Alignment align)
+    public final RadioButtons setPos(Vec2 pos, Alignment align)
     {
+        return this;
     }
 
     @Override
