@@ -4,7 +4,6 @@ import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import kraftig.game.FocusQuery;
-import org.lwjgl.opengl.GL11;
 
 public class ColumnLayout implements UIElement
 {

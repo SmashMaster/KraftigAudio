@@ -28,7 +28,7 @@ public class Splitter extends Panel implements Device
         setSize(0.125f, 0.0625f);
         for (OutputJack jack : outJacks) rearInterface.add(jack);
         rearInterface.add(inJack);
-        frontInterface.add(new Label(Main.instance().getFont(), "Splitter", new Vec2(), Alignment.C));
+        frontInterface.add(new Label(Main.instance().getFont(), "Splitter", 32.0f, new Vec2(), Alignment.C));
     }
     
     @Override

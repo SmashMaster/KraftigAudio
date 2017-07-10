@@ -13,7 +13,6 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
 import com.samrj.devil.math.topo.DAG;
-import com.samrj.devil.ui.AtlasFont;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -26,6 +25,7 @@ import kraftig.game.device.SystemInput;
 import kraftig.game.device.SystemOutput;
 import kraftig.game.gui.Crosshair;
 import kraftig.game.util.ConcatList;
+import kraftig.game.util.VectorFont;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
@@ -77,7 +77,7 @@ public final class Main extends Game
         }
     }
     
-    private final AtlasFont font;
+    private final VectorFont font;
     private final Crosshair crosshair;
     private final Player player;
     private final Camera3D camera;
@@ -104,7 +104,7 @@ public final class Main extends Game
         DGL.init();
         mouse.setGrabbed(!displayMouse());
         
-        font = new AtlasFont("kraftig/res/fonts/", "menu.fnt");
+        font = new VectorFont("kraftig/res/fonts/DejaVuSans.ttf");
         crosshair = new Crosshair();
         player = new Player(keyboard, getResolution());
         camera = player.getCamera();
@@ -201,7 +201,7 @@ public final class Main extends Game
         return displayMouse && interactionState.isCursorVisible();
     }
     
-    public AtlasFont getFont()
+    public VectorFont getFont()
     {
         return font;
     }

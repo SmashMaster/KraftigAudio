@@ -3,28 +3,30 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
-import com.samrj.devil.ui.AtlasFont;
 import kraftig.game.FocusQuery;
+import kraftig.game.util.VectorFont;
 import org.lwjgl.opengl.GL11;
 
 public class Label implements UIElement
 {
-    private final AtlasFont font;
+    private final VectorFont font;
     private final String text;
+    private final float size;
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
     private Alignment align = Alignment.C;
     
-    public Label(AtlasFont font, String text)
+    public Label(VectorFont font, String text, float size)
     {
         this.font = font;
         this.text = text;
-        radius.set(font.getWidth(text)*0.5f, font.getHeight()*0.5f);
+        this.size = size;
+        radius.set(font.getSize(text).mult(0.5f));
     }
     
-    public Label(AtlasFont font, String text, Vec2 pos, Alignment align)
+    public Label(VectorFont font, String text, float size, Vec2 pos, Alignment align)
     {
-        this(font, text);
+        this(font, text, size);
         setPos(pos, align);
     }
     
@@ -72,7 +74,8 @@ public class Label implements UIElement
     @Override
     public void render(float alpha)
     {
+        GL11.glLineWidth(1.0f);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
-        font.drawDeprecated(text, pos, align);
+        font.render(text, pos, size, align);
     }
 }

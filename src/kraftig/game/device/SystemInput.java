@@ -26,7 +26,7 @@ public class SystemInput extends Panel implements Device
         
         setSize(0.125f, 0.0625f);
         rearInterface.add(new OutputJack(this, buffer, new Vec2(), Alignment.C));
-        frontInterface.add(new Label(Main.instance().getFont(), "System In", new Vec2(), Alignment.C));
+        frontInterface.add(new Label(Main.instance().getFont(), "System In", 32.0f, new Vec2(), Alignment.C));
     }
     
     @Override
