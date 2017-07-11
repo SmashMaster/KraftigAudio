@@ -2,7 +2,9 @@ package kraftig.game.device;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import com.samrj.devil.util.IntSet;
 import javax.sound.midi.MidiMessage;
+import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioOutputJack;
@@ -13,6 +15,8 @@ import kraftig.game.gui.MidiInputJack;
 public class AnalogSynth extends Panel implements AudioDevice
 {
     private final float[][] buffer = new float[2][48000];
+    
+    private final IntSet notes = new IntSet();
     
     private double time;
     
@@ -28,6 +32,22 @@ public class AnalogSynth extends Panel implements AudioDevice
     
     private void receive(MidiMessage message, long timeStamp)
     {
+        if (message instanceof ShortMessage)
+        {
+            ShortMessage msg = (ShortMessage)message;
+            
+            switch (msg.getCommand())
+            {
+                case ShortMessage.NOTE_ON:
+                    notes.add(msg.getData1());
+                    break;
+                case ShortMessage.NOTE_OFF:
+                    notes.remove(msg.getData1());
+                    break;
+                default:
+                    break;
+            }
+        }
     }
     
     @Override
@@ -35,7 +55,15 @@ public class AnalogSynth extends Panel implements AudioDevice
     {
         for (int i=0; i<samples; i++)
         {
-            float v = (float)Math.sin(Math.PI*2.0*440.0*time);
+            float v = 0.0f;
+            
+            for (int ni=0; ni<notes.size(); ni++)
+            {
+                int note = notes.get(ni);
+                double freq = (440.0/32.0)*Math.pow(2.0, (note - 9)/12.0);
+                v += (float)Math.sin(Math.PI*2.0*freq*time);
+            }
+            
             buffer[0][i] = v;
             buffer[1][i] = v;
             time += Main.SAMPLE_WIDTH;
