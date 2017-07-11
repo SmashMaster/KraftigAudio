@@ -9,6 +9,7 @@ import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.ColumnLayout;
+import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.MidiInputJack;
 
@@ -19,11 +20,15 @@ public class AnalogSynth extends Panel implements AudioDevice
     private final IntSet notes = new IntSet();
     
     private double time;
+    private float amplitude;
     
     public AnalogSynth()
     {
         setSize(0.125f, 0.0625f);
-        frontInterface.add(new Label(Main.instance().getFont(), "Analog Synth", 32.0f, new Vec2(), Alignment.C));
+        frontInterface.add(new Label(Main.instance().getFont(), "Analog Synth", 32.0f, new Vec2(0.0f, 8.0f), Alignment.N));
+        frontInterface.add(new Knob(16.0f, new Vec2(0.0f, -8.0f), Alignment.S)
+                .setValue(0.25f)
+                .onValueChanged(f -> amplitude = f));
         rearInterface.add(new ColumnLayout(4.0f, Alignment.C,
                     new MidiInputJack(this::receive),
                     new AudioOutputJack(this, buffer))
@@ -64,8 +69,10 @@ public class AnalogSynth extends Panel implements AudioDevice
                 v += (float)Math.sin(Math.PI*2.0*freq*time);
             }
             
+            v *= amplitude;
             buffer[0][i] = v;
             buffer[1][i] = v;
+            
             time += Main.SAMPLE_WIDTH;
         }
     }
