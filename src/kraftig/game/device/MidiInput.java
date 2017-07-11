@@ -3,21 +3,16 @@ package kraftig.game.device;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiMessage;
 import javax.sound.midi.MidiSystem;
-import javax.sound.midi.Receiver;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.Label;
+import kraftig.game.gui.MidiOutputJack;
 
 public class MidiInput extends Panel
 {
-    private static MidiReceiver receive(MidiReceiver f)
-    {
-        return f;
-    }
-    
     private final MidiDevice device;
+    private final MidiOutputJack jack;
     
     public MidiInput() throws Exception
     {
@@ -30,15 +25,12 @@ public class MidiInput extends Panel
         }
         device = d;
         
-        device.getTransmitter().setReceiver(receive(this::receive));
-        device.open();
-        
         setSize(0.125f, 0.0625f);
         frontInterface.add(new Label(Main.instance().getFont(), "MIDI In", 32.0f, new Vec2(), Alignment.C));
-    }
-    
-    private void receive(MidiMessage message, long timeStamp)
-    {
+        rearInterface.add(jack = new MidiOutputJack());
+        
+        device.getTransmitter().setReceiver(jack);
+        device.open();
     }
     
     @Override
@@ -46,12 +38,5 @@ public class MidiInput extends Panel
     {
         super.delete();
         device.close();
-    }
-    
-    @FunctionalInterface
-    private interface MidiReceiver extends Receiver
-    {
-        @Override
-        public default void close() {}
     }
 }

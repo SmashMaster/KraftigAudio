@@ -35,6 +35,7 @@ import org.lwjgl.opengl.GL13;
 public final class Main extends Game
 {
     public static final int SAMPLE_RATE = 48000;
+    public static final double SAMPLE_WIDTH = 1.0/SAMPLE_RATE;
     public static final AudioFormat AUDIO_FORMAT = new AudioFormat(SAMPLE_RATE, 16, 2, true, false);
     
     private static Main INSTANCE;
