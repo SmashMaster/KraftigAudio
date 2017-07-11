@@ -41,6 +41,7 @@ public class VectorFont
         Vec2 rad = new Vec2((float)bounds.getWidth(), (float)bounds.getHeight()).mult(0.5f);
         
         GL11.glPushMatrix();
+        GL11.glTranslatef(pos.x, pos.y, 0.0f);
         GL11.glScalef(size, -size, 0.0f);
         GL11.glTranslatef((align.x - 1.0f)*rad.x, (-align.y + 1.0f)*rad.y, 0.0f);
         

@@ -34,7 +34,7 @@ public class ColumnLayout implements UIElement
     @Override
     public Vec2 getPos()
     {
-        return new Vec2();
+        return new Vec2(pos);
     }
 
     @Override
@@ -90,14 +90,5 @@ public class ColumnLayout implements UIElement
     public void render(float alpha)
     {
         for (UIElement e : elements) e.render(alpha);
-        
-//        GL11.glLineWidth(1.0f);
-//        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
-//        GL11.glBegin(GL11.GL_LINE_LOOP);
-//        GL11.glVertex2f(pos.x - radius.x, pos.y - radius.y);
-//        GL11.glVertex2f(pos.x - radius.x, pos.y + radius.y);
-//        GL11.glVertex2f(pos.x + radius.x, pos.y + radius.y);
-//        GL11.glVertex2f(pos.x + radius.x, pos.y - radius.y);
-//        GL11.glEnd();
     }
 }

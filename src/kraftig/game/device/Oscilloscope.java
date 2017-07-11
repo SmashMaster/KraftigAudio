@@ -7,6 +7,7 @@ import kraftig.game.Panel;
 import kraftig.game.gui.InputJack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.OscilloscopeScreen;
+import kraftig.game.gui.RadioButtons;
 
 public class Oscilloscope extends Panel implements Device
 {
@@ -26,6 +27,9 @@ public class Oscilloscope extends Panel implements Device
         frontInterface.add(new Knob(8.0f, new Vec2(64.0f, 0.0f), Alignment.C)
                 .setValue(0.5f)
                 .onValueChanged(v -> screen.setBrightness(MIN_BRIGHTNESS*(float)Math.pow(MAX_BRIGHTNESS/MIN_BRIGHTNESS, v))));
+        frontInterface.add(new RadioButtons(6.0f, "X:Time, Y:Amp", "X:Left, Y:Right")
+                .setPos(new Vec2(-64.0f, 0.0f), Alignment.W)
+                .onValueChanged(screen::setMode));
     }
     
     @Override

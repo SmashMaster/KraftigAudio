@@ -21,7 +21,7 @@ public class Label implements UIElement
         this.font = font;
         this.text = text;
         this.size = size;
-        radius.set(font.getSize(text).mult(0.5f));
+        radius.set(font.getSize(text).mult(0.5f*size));
     }
     
     public Label(VectorFont font, String text, float size, Vec2 pos, Alignment align)

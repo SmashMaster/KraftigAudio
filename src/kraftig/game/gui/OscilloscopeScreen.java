@@ -15,6 +15,7 @@ public class OscilloscopeScreen implements UIElement
     private float[][] buffer;
     private int sampleCount;
     
+    private int mode = 0;
     private float brightness;
     
     public OscilloscopeScreen(Vec2 radius)
@@ -26,6 +27,11 @@ public class OscilloscopeScreen implements UIElement
     {
         this(radius);
         setPos(pos, align);
+    }
+    
+    public void setMode(int mode)
+    {
+        this.mode = mode;
     }
     
     @Override
@@ -97,35 +103,42 @@ public class OscilloscopeScreen implements UIElement
         
         if (buffer == null) return;
         
-//        //Stereo oscilloscope
-//        GL11.glLineWidth(1.5f);
-//        GL11.glBegin(GL11.GL_LINES);
-//        for (int s = 1; s < sampleCount; s++)
-//        {
-//            float x0 = clamp(buffer[0][s - 1]), x1 = clamp(buffer[0][s]);
-//            float y0 = clamp(buffer[1][s - 1]), y1 = clamp(buffer[1][s]);
-//            
-//            float dx = (x1 - x0), dy = (y1 - y0);
-//            float dist = (float)Math.sqrt(dx*dx + dy*dy);
-//            float a = (s*brightness)/(sampleCount*(dist + 0.01f));
-//            
-//            GL11.glColor4f(0.125f, 1.0f, 0.125f, a*alpha);
-//            GL11.glVertex2f(x0*radius.x, y0*radius.y);
-//            GL11.glVertex2f(x0*radius.x, y1*radius.y);
-//        }
-//        GL11.glEnd();
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
         
-        //Mono oscilloscope
         GL11.glLineWidth(1.5f);
-        GL11.glColor4f(0.125f, 1.0f, 0.125f, alpha);
-        GL11.glBegin(GL11.GL_LINE_STRIP);
-        for (int s = 0; s < sampleCount; s++)
+        GL11.glBegin(GL11.GL_LINES);
+        for (int s = 1; s < sampleCount; s++)
         {
-            float left = clamp(buffer[0][s]), right = clamp(buffer[1][s]);
-            float x = (s/(sampleCount - 1.0f))*2.0f - 1.0f;
-            
-            GL11.glVertex2f(x*radius.x, (left + right)*0.5f*radius.y);
+            float l0 = clamp(buffer[0][s - 1]), l1 = clamp(buffer[0][s]);
+            float r0 = clamp(buffer[1][s - 1]), r1 = clamp(buffer[1][s]);
+
+            float x0, x1, y0, y1;
+
+            if (mode == 0) //Mono oscilloscope
+            {
+                x0 = ((s - 1)/(sampleCount - 1.0f))*2.0f - 1.0f;
+                x1 = (s/(sampleCount - 1.0f))*2.0f - 1.0f;
+                y0 = (l0 + r0)*0.5f;
+                y1 = (l1 + r1)*0.5f;
+            }
+            else //Stereo oscilloscope
+            {
+                x0 = l0;
+                x1 = l1;
+                y0 = r0;
+                y1 = r1;
+            }
+
+            float dx = (l1 - l0), dy = (r1 - r0);
+            float dist = (float)Math.sqrt(dx*dx + dy*dy);
+            float a = brightness/(dist + 0.01f);
+
+            GL11.glColor4f(0.125f, 1.0f, 0.125f, a*alpha);
+            GL11.glVertex2f(x0*radius.x, y0*radius.y);
+            GL11.glVertex2f(x1*radius.x, y1*radius.y);
         }
         GL11.glEnd();
+        
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
     }
 }
