@@ -103,7 +103,7 @@ public class OscilloscopeScreen implements UIElement
         
         if (buffer == null) return;
         
-        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE);
+        GL11.glBlendFunc(GL11.GL_ONE, GL11.GL_ONE);
         
         GL11.glLineWidth(1.5f);
         GL11.glBegin(GL11.GL_LINES);
@@ -131,9 +131,9 @@ public class OscilloscopeScreen implements UIElement
 
             float dx = (l1 - l0), dy = (r1 - r0);
             float dist = (float)Math.sqrt(dx*dx + dy*dy);
-            float a = brightness/(dist + 0.01f);
+            float a = alpha*brightness/(dist + 0.01f);
 
-            GL11.glColor4f(0.125f, 1.0f, 0.125f, a*alpha);
+            GL11.glColor4f(0.125f*a, 1.0f*a, 0.125f*a, 1.0f);
             GL11.glVertex2f(x0*radius.x, y0*radius.y);
             GL11.glVertex2f(x1*radius.x, y1*radius.y);
         }
