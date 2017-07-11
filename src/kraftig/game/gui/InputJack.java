@@ -3,17 +3,14 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
-import java.util.stream.Stream;
 import kraftig.game.FocusQuery;
 import kraftig.game.Main;
 import kraftig.game.Wire;
 import kraftig.game.Wire.WireNode;
 import kraftig.game.WireDragState;
-import kraftig.game.device.Device;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
-public class InputJack extends Jack
+public abstract class InputJack extends Jack
 {
     public InputJack()
     {
@@ -23,23 +20,6 @@ public class InputJack extends Jack
     public InputJack(Vec2 pos, Alignment align)
     {
         super(pos, align);
-    }
-    
-    public Device getDevice()
-    {
-        if (hasLiveWire()) return getWire().getIn().getDevice();
-        else return null;
-    }
-    
-    public Stream<Device> getDevices()
-    {
-        return hasLiveWire() ? Stream.of(getWire().getIn().getDevice()) : Stream.empty();
-    }
-    
-    public float[][] getBuffer()
-    {
-        if (hasLiveWire()) return getWire().getIn().getBuffer();
-        else return null;
     }
     
     @Override
@@ -68,14 +48,5 @@ public class InputJack extends Jack
     public void delete()
     {
         if (hasWire()) getWire().disconnectOut();
-    }
-
-    @Override
-    public void renderSymbol()
-    {
-        GL11.glBegin(GL11.GL_LINES);
-        GL11.glVertex2f(0.0f, -RADIUS_HALF);
-        GL11.glVertex2f(0.0f, RADIUS_HALF);
-        GL11.glEnd();
     }
 }

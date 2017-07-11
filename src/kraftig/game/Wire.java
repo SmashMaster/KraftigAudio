@@ -8,6 +8,7 @@ import com.samrj.devil.math.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 import kraftig.game.gui.InputJack;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.OutputJack;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
@@ -152,6 +153,13 @@ public class Wire
         public boolean isLast()
         {
             return last == this;
+        }
+        
+        public boolean canConnect(Jack jack)
+        {
+            if (first == this) return out != null && out.canConnect(jack);
+            else if (last == this) return in != null && in.canConnect(jack);
+            else return false;
         }
         
         public boolean isCorner()

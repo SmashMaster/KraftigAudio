@@ -8,16 +8,16 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.SourceDataLine;
 import kraftig.game.Main;
 import kraftig.game.Panel;
-import kraftig.game.gui.InputJack;
+import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.Label;
 
-public class SystemOutput extends Panel implements Device
+public class SystemOutput extends Panel implements AudioDevice
 {
     private final SourceDataLine outputLine;
     
     private final byte[] rawBytes;
     
-    private final InputJack inJack;
+    private final AudioInputJack inJack;
     
     public SystemOutput() throws Exception
     {
@@ -28,12 +28,12 @@ public class SystemOutput extends Panel implements Device
         rawBytes = new byte[outputLine.getBufferSize()];
         
         setSize(0.125f, 0.0625f);
-        rearInterface.add(inJack = new InputJack(new Vec2(), Alignment.C));
+        rearInterface.add(inJack = new AudioInputJack(new Vec2(), Alignment.C));
         frontInterface.add(new Label(Main.instance().getFont(), "System Out", 32.0f, new Vec2(), Alignment.C));
     }
     
     @Override
-    public Stream<Device> getInputDevices()
+    public Stream<AudioDevice> getInputDevices()
     {
         return inJack.getDevices();
     }

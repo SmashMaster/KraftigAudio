@@ -2,9 +2,9 @@ package kraftig.game.device;
 
 import java.util.stream.Stream;
 
-public interface Device
+public interface AudioDevice
 {
-    public default Stream<Device> getInputDevices()
+    public default Stream<AudioDevice> getInputDevices()
     {
         return Stream.empty();
     };

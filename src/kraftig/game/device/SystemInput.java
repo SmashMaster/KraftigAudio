@@ -6,10 +6,10 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.TargetDataLine;
 import kraftig.game.Main;
 import kraftig.game.Panel;
+import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.Label;
-import kraftig.game.gui.OutputJack;
 
-public class SystemInput extends Panel implements Device
+public class SystemInput extends Panel implements AudioDevice
 {
     private final TargetDataLine inputLine;
     private final byte[] rawBytes;
@@ -25,7 +25,7 @@ public class SystemInput extends Panel implements Device
         buffer = new float[2][rawBytes.length/4];
         
         setSize(0.125f, 0.0625f);
-        rearInterface.add(new OutputJack(this, buffer, new Vec2(), Alignment.C));
+        rearInterface.add(new AudioOutputJack(this, buffer, new Vec2(), Alignment.C));
         frontInterface.add(new Label(Main.instance().getFont(), "System In", 32.0f, new Vec2(), Alignment.C));
     }
     

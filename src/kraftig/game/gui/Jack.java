@@ -99,6 +99,8 @@ public abstract class Jack implements UIElement
         return new Vec3(pos.x, pos.y, WIRE_OFFSET).mult(matrix);
     }
     
+    public abstract boolean canConnect(Jack other);
+    
     @Override
     public void updateMatrix(Mat4 matrix)
     {

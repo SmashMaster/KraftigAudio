@@ -18,7 +18,9 @@ import java.util.List;
 import java.util.stream.Stream;
 import javax.sound.sampled.AudioFormat;
 import kraftig.game.Wire.WireNode;
-import kraftig.game.device.Device;
+import kraftig.game.device.AnalogSynth;
+import kraftig.game.device.AudioDevice;
+import kraftig.game.device.MidiInput;
 import kraftig.game.device.Oscilloscope;
 import kraftig.game.device.Splitter;
 import kraftig.game.device.SystemInput;
@@ -45,9 +47,9 @@ public final class Main extends Game
     private static HintSet hints()
     {
         HintSet hints = new HintSet();
-        hints.hint(GLFW.GLFW_RED_BITS, 8);
-        hints.hint(GLFW.GLFW_GREEN_BITS, 8);
-        hints.hint(GLFW.GLFW_BLUE_BITS, 8);
+        hints.hint(GLFW.GLFW_RED_BITS, 16);
+        hints.hint(GLFW.GLFW_GREEN_BITS, 16);
+        hints.hint(GLFW.GLFW_BLUE_BITS, 16);
         hints.hint(GLFW.GLFW_ALPHA_BITS, 0);
         hints.hint(GLFW.GLFW_DEPTH_BITS, 16);
         hints.hint(GLFW.GLFW_STENCIL_BITS, 0);
@@ -111,20 +113,28 @@ public final class Main extends Game
         skybox = new Skybox();
         floor = new FloorGrid();
         
+        panels.add(new MidiInput()
+                .setPosition(new Vec3(-0.6f, 1.75f, -1.0f))
+                .setYaw(Util.toRadians(0.0f)));
+        
         panels.add(new SystemInput()
                 .setPosition(new Vec3(-0.3f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
-        panels.add(new Splitter()
+        panels.add(new AnalogSynth()
                 .setPosition(new Vec3(0.0f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
-        panels.add(new Oscilloscope()
+        panels.add(new Splitter()
                 .setPosition(new Vec3(0.3f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
-        panels.add(new SystemOutput()
+        panels.add(new Oscilloscope()
                 .setPosition(new Vec3(0.6f, 1.75f, -1.0f))
+                .setYaw(Util.toRadians(0.0f)));
+        
+        panels.add(new SystemOutput()
+                .setPosition(new Vec3(0.9f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
         GL11.glEnable(GL11.GL_BLEND);
@@ -320,10 +330,10 @@ public final class Main extends Game
         }
         
         //Sort devices by topological order.
-        DAG<Device> dag = new DAG<>();
-        for (Panel panel : panels) if (panel instanceof Device)
+        DAG<AudioDevice> dag = new DAG<>();
+        for (Panel panel : panels) if (panel instanceof AudioDevice)
         {
-            Device device = (Device)panel;
+            AudioDevice device = (AudioDevice)panel;
             dag.add(device);
             device.getInputDevices().forEach(in ->
             {
@@ -333,7 +343,7 @@ public final class Main extends Game
         }
         
         //Update all devices.
-        for (Device device : dag.sort()) device.process(samples);
+        for (AudioDevice device : dag.sort()) device.process(samples);
     }
     
     @Override
@@ -388,6 +398,7 @@ public final class Main extends Game
     @Override
     public void onDestroy()
     {
+        for (Panel panel : panels) panel.delete();
         DGL.destroy();
     }
 }
