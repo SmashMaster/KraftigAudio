@@ -11,46 +11,47 @@ import kraftig.game.gui.RowLayout;
 
 public class Adder extends Panel implements AudioDevice
 {
-    private final AudioInputJack inJackA, inJackB;
+    private final AudioInputJack[] inJacks = new AudioInputJack[4];
     
     private final float[][] buffer = new float[2][48000];
     
     public Adder()
     {
-        setSize(0.125f, 0.0625f);
-        rearInterface.add(new RowLayout(2.0f, Alignment.C,
-                    inJackA = new AudioInputJack(),
+        frontInterface.add(new RowLayout(2.0f, Alignment.C,
+                    inJacks[0] = new AudioInputJack(),
                     new Label("+", 24.0f),
-                    inJackB = new AudioInputJack(),
+                    inJacks[1] = new AudioInputJack(),
+                    new Label("+", 24.0f),
+                    inJacks[2] = new AudioInputJack(),
+                    new Label("+", 24.0f),
+                    inJacks[3] = new AudioInputJack(),
                     new Label("=", 24.0f),
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
-        frontInterface.add(new Label("Adder", 32.0f, new Vec2(), Alignment.C));
+        
+        rearInterface.add(new Label("Adder", 24.0f, new Vec2(), Alignment.C));
+        
+        setSizeFromContents(4.0f);
     }
     
     @Override
     public Stream<AudioDevice> getInputDevices()
     {
-        return Stream.concat(inJackA.getDevices(), inJackB.getDevices());
+        return Stream.of(inJacks).flatMap(d -> d.getDevices());
     }
     
     @Override
     public void process(int samples)
     {
-        float[][] a = inJackA.getBuffer();
-        float[][] b = inJackB.getBuffer();
+        float[][][] buffers =  new float[4][][];
+        
+        for (int j=0; j<4; j++) buffers[j] = inJacks[j].getBuffer();
         
         for (int i=0; i<samples; i++)
         {
             float vl = 0.0f, vr = 0.0f;
             
-            if (a != null)
-            {
-                vl += a[0][i];
-                vr += a[1][i];
-            }
-            
-            if (b != null)
+            for (float[][] b : buffers) if (b != null)
             {
                 vl += b[0][i];
                 vr += b[1][i];

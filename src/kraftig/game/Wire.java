@@ -157,8 +157,8 @@ public class Wire
         
         public boolean canConnect(Jack jack)
         {
-            if (first == this) return out != null && out.canConnect(jack);
-            else if (last == this) return in != null && in.canConnect(jack);
+            if (first == this) return (jack instanceof OutputJack) && (out == null || out.canConnect(jack));
+            else if (last == this) return (jack instanceof InputJack) && (in == null || in.canConnect(jack));
             else return false;
         }
         

@@ -40,7 +40,7 @@ public abstract class OutputJack extends Jack
             new Wire().connectIn(this);
             Wire wire = getWire();
             WireNode dragNode = wire.getLast();
-            dragNode.pos.set(wire.getFirst().pos);
+            dragNode.pos.set(getWirePos());
             Main.instance().addWire(wire);
             Main.instance().setState(new WireDragState(dragNode));
         }

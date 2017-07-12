@@ -1,5 +1,6 @@
 package kraftig.game;
 
+import com.samrj.devil.geo2d.AAB2;
 import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
@@ -109,7 +110,14 @@ public class Panel implements Drawable, Focusable
     {
         width = w;
         height = h;
-        updateMatrices();
+        return this;
+    }
+    
+    public final Panel setSizeFromContents(float margin)
+    {
+        AAB2 bounds = frontInterface.getBounds().expand(rearInterface.getBounds());
+        width = (Math.max(Math.abs(bounds.x0), Math.abs(bounds.x1)) + margin)*UI_SCALE;
+        height = (Math.max(Math.abs(bounds.y0), Math.abs(bounds.y1)) + margin)*UI_SCALE;
         return this;
     }
     

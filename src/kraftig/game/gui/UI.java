@@ -1,5 +1,6 @@
 package kraftig.game.gui;
 
+import com.samrj.devil.geo2d.AAB2;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import java.util.ArrayList;
@@ -15,6 +16,14 @@ public class UI
     {
         this.matrix.set(matrix);
         for (UIElement e : elements) e.updateMatrix(matrix);
+    }
+    
+    public AAB2 getBounds()
+    {
+        AAB2 result = AAB2.empty();
+        for (UIElement e : elements)
+            result.expand(AAB2.fromHalfWidth(e.getPos(), e.getSize()));
+        return result;
     }
     
     public UI add(UIElement e)

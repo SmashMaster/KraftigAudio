@@ -7,8 +7,8 @@ import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
-import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
+import kraftig.game.gui.RowLayout;
 
 public class Splitter extends Panel implements AudioDevice
 {
@@ -16,19 +16,18 @@ public class Splitter extends Panel implements AudioDevice
     
     public Splitter()
     {
-        inJack = new AudioInputJack(new Vec2(0.0f, Jack.RADIUS*1.5f), Alignment.C);
+        frontInterface.add(new RowLayout(2.0f, Alignment.C,
+                    inJack = new AudioInputJack(),
+                    new Label("\u2192", 24.0f),
+                    new AudioOutputJack(this, inJack::getBuffer),
+                    new AudioOutputJack(this, inJack::getBuffer),
+                    new AudioOutputJack(this, inJack::getBuffer),
+                    new AudioOutputJack(this, inJack::getBuffer))
+                .setPos(new Vec2(), Alignment.C));
         
-        AudioOutputJack[] outJacks = new AudioOutputJack[4];
-        for (int i=0; i<outJacks.length; i++)
-        {
-            float x = (i - (outJacks.length - 1)/2.0f)*Jack.RADIUS*2.5f;
-            outJacks[i] = new AudioOutputJack(this, inJack::getBuffer, new Vec2(x, -Jack.RADIUS*1.5f), Alignment.C);
-        }
+        rearInterface.add(new Label(Main.instance().getFont(), "Splitter", 24.0f, new Vec2(), Alignment.C));
         
-        setSize(0.125f, 0.0625f);
-        for (AudioOutputJack jack : outJacks) rearInterface.add(jack);
-        rearInterface.add(inJack);
-        frontInterface.add(new Label(Main.instance().getFont(), "Splitter", 32.0f, new Vec2(), Alignment.C));
+        setSizeFromContents(4.0f);
     }
     
     @Override

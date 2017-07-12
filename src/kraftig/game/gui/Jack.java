@@ -14,7 +14,7 @@ public abstract class Jack implements UIElement
     public static final int SEGMENTS = 32;
     public static final float DT = 8.0f/(SEGMENTS - 1);
     public static final float T_END = 8.0f + DT*0.5f;
-    public static final float RADIUS = 16.0f;
+    public static final float RADIUS = 12.0f;
     public static final float RADIUS_SQ = RADIUS*RADIUS;
     public static final float RADIUS_HALF = RADIUS/2.0f;
     public static final float WIRE_OFFSET = 8.0f;
