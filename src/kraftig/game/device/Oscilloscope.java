@@ -32,7 +32,7 @@ public class Oscilloscope extends Panel implements AudioDevice
         frontInterface.add(new RadioButtons(6.0f, "X:Time, Y:Amp", "X:Left, Y:Right")
                 .setPos(new Vec2(-64.0f, 0.0f), Alignment.W)
                 .onValueChanged(screen::setMode));
-        frontInterface.add(new Label(Main.instance().getFont(), "Oscilloscope", 12.0f, new Vec2(0.0f, 52.0f), Alignment.N));
+        frontInterface.add(new Label(Main.instance().getFont(), "Oscilloscope", 12.0f, new Vec2(0.0f, 48.0f), Alignment.N));
     }
     
     @Override

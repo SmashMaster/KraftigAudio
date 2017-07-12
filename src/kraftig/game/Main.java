@@ -18,13 +18,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import javax.sound.sampled.AudioFormat;
 import kraftig.game.Wire.WireNode;
-import kraftig.game.device.AnalogSynth;
-import kraftig.game.device.AudioDevice;
-import kraftig.game.device.MidiInput;
-import kraftig.game.device.Oscilloscope;
-import kraftig.game.device.Splitter;
-import kraftig.game.device.SystemInput;
-import kraftig.game.device.SystemOutput;
+import kraftig.game.device.*;
 import kraftig.game.gui.Crosshair;
 import kraftig.game.util.ConcatList;
 import kraftig.game.util.VectorFont;
@@ -115,27 +109,31 @@ public final class Main extends Game
         floor = new FloorGrid();
         
         panels.add(new MidiInput()
-                .setPosition(new Vec3(-0.6f, 1.75f, -1.0f))
-                .setYaw(Util.toRadians(0.0f)));
-        
-        panels.add(new SystemInput()
-                .setPosition(new Vec3(-0.3f, 1.75f, -1.0f))
+                .setPosition(new Vec3(0.9f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
         panels.add(new AnalogSynth()
+                .setPosition(new Vec3(0.6f, 1.75f, -1.0f))
+                .setYaw(Util.toRadians(0.0f)));
+        
+        panels.add(new SystemInput()
+                .setPosition(new Vec3(0.3f, 1.75f, -1.0f))
+                .setYaw(Util.toRadians(0.0f)));
+        
+        panels.add(new Adder()
                 .setPosition(new Vec3(0.0f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
         panels.add(new Splitter()
-                .setPosition(new Vec3(0.3f, 1.75f, -1.0f))
+                .setPosition(new Vec3(-0.3f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
         panels.add(new Oscilloscope()
-                .setPosition(new Vec3(0.6f, 1.75f, -1.0f))
+                .setPosition(new Vec3(-0.6f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
         panels.add(new SystemOutput()
-                .setPosition(new Vec3(0.9f, 1.75f, -1.0f))
+                .setPosition(new Vec3(-0.9f, 1.75f, -1.0f))
                 .setYaw(Util.toRadians(0.0f)));
         
         GL11.glEnable(GL11.GL_BLEND);

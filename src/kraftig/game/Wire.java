@@ -118,7 +118,7 @@ public class Wire
             }
         }
         
-        return closest != null ? new FocusQuery(closest, closeDist) : null;
+        return closest != null ? new FocusQuery(closest, pos.dist(closest.pos)) : null;
     }
     
     public List<WireSplit> updateSplits(List<Panel> panels)

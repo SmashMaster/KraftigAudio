@@ -4,6 +4,7 @@ import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import kraftig.game.FocusQuery;
+import kraftig.game.Main;
 import kraftig.game.util.VectorFont;
 import org.lwjgl.opengl.GL11;
 
@@ -24,10 +25,20 @@ public class Label implements UIElement
         radius.set(font.getSize(text).mult(0.5f*size));
     }
     
+    public Label(String text, float size)
+    {
+        this(Main.instance().getFont(), text, size);
+    }
+    
     public Label(VectorFont font, String text, float size, Vec2 pos, Alignment align)
     {
         this(font, text, size);
         setPos(pos, align);
+    }
+    
+    public Label(String text, float size, Vec2 pos, Alignment align)
+    {
+        this(Main.instance().getFont(), text, size, pos, align);
     }
     
     @Override

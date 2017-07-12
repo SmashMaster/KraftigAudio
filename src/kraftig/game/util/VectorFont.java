@@ -4,9 +4,9 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.res.Resource;
 import com.samrj.devil.ui.Alignment;
 import java.awt.Font;
-import java.awt.Shape;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
+import java.awt.font.LineMetrics;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
@@ -34,23 +34,23 @@ public class VectorFont
     
     public void render(String text, Vec2 pos, float size, Alignment align)
     {
+        LineMetrics metrics = font.getLineMetrics(text, frc);
         GlyphVector vector = font.createGlyphVector(frc, text);
-        Shape shape = vector.getOutline();
-        Rectangle2D bounds = shape.getBounds2D();
+        Rectangle2D bounds = vector.getLogicalBounds();
         
         Vec2 rad = new Vec2((float)bounds.getWidth(), (float)bounds.getHeight()).mult(0.5f);
         
         GL11.glPushMatrix();
         GL11.glTranslatef(pos.x, pos.y, 0.0f);
         GL11.glScalef(size, -size, 0.0f);
-        GL11.glTranslatef((align.x - 1.0f)*rad.x, (-align.y + 1.0f)*rad.y, 0.0f);
+        GL11.glTranslatef((align.x - 1.0f)*rad.x, (-align.y + 1.0f)*rad.y - metrics.getDescent(), 0.0f);
         
         float[] coords = new float[6];
         float loopX = 0.0f, loopY = 0.0f;
         float px = 0.0f, py = 0.0f;
         
         GL11.glBegin(GL11.GL_LINES);
-        for (PathIterator path = shape.getPathIterator(identity); !path.isDone(); path.next())
+        for (PathIterator path = vector.getOutline().getPathIterator(identity); !path.isDone(); path.next())
         {
             int code = path.currentSegment(coords);
             float x = coords[0], y = coords[1];
