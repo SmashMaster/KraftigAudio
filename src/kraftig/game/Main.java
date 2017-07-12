@@ -8,7 +8,6 @@ import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.GraphicsUtil;
 import com.samrj.devil.math.Mat3;
 import com.samrj.devil.math.Quat;
-import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
@@ -46,7 +45,7 @@ public final class Main extends Game
         hints.hint(GLFW.GLFW_GREEN_BITS, 16);
         hints.hint(GLFW.GLFW_BLUE_BITS, 16);
         hints.hint(GLFW.GLFW_ALPHA_BITS, 0);
-        hints.hint(GLFW.GLFW_DEPTH_BITS, 16);
+        hints.hint(GLFW.GLFW_DEPTH_BITS, 0);
         hints.hint(GLFW.GLFW_STENCIL_BITS, 0);
         hints.hint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
         return hints;
@@ -108,33 +107,13 @@ public final class Main extends Game
         skybox = new Skybox();
         floor = new FloorGrid();
         
-        panels.add(new MidiInput()
-                .setPosition(new Vec3(0.9f, 1.75f, -1.0f))
-                .setYaw(Util.toRadians(0.0f)));
-        
-        panels.add(new AnalogSynth()
-                .setPosition(new Vec3(0.6f, 1.75f, -1.0f))
-                .setYaw(Util.toRadians(0.0f)));
-        
-        panels.add(new SystemInput()
-                .setPosition(new Vec3(0.3f, 1.75f, -1.0f))
-                .setYaw(Util.toRadians(0.0f)));
-        
-        panels.add(new Adder()
-                .setPosition(new Vec3(0.0f, 1.75f, -1.0f))
-                .setYaw(Util.toRadians(0.0f)));
-        
-        panels.add(new Splitter()
-                .setPosition(new Vec3(-0.3f, 1.75f, -1.0f))
-                .setYaw(Util.toRadians(0.0f)));
-        
-        panels.add(new Oscilloscope()
-                .setPosition(new Vec3(-0.6f, 1.75f, -1.0f))
-                .setYaw(Util.toRadians(0.0f)));
-        
-        panels.add(new SystemOutput()
-                .setPosition(new Vec3(-0.9f, 1.75f, -1.0f))
-                .setYaw(Util.toRadians(0.0f)));
+        panels.add(new MidiInput().setPosition(new Vec3(-0.9f, 1.75f, -1.0f)));
+        panels.add(new AnalogSynth().setPosition(new Vec3(-0.6f, 1.75f, -1.0f)));
+        panels.add(new SystemInput().setPosition(new Vec3(-0.3f, 1.75f, -1.0f)));
+        panels.add(new Adder().setPosition(new Vec3(0.0f, 1.75f, -1.0f)));
+        panels.add(new Splitter().setPosition(new Vec3(0.3f, 1.75f, -1.0f)));
+        panels.add(new Oscilloscope().setPosition(new Vec3(0.6f, 1.75f, -1.0f)));
+        panels.add(new SystemOutput().setPosition(new Vec3(0.9f, 1.75f, -1.0f)));
         
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

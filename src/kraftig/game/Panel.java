@@ -19,7 +19,7 @@ public class Panel implements Drawable, Focusable
     private float yaw;
     private float width, height;
     
-    public final Vec3 frontDir = new Vec3(), rightDir = new Vec3();
+    public final Vec3 frontDir = new Vec3(0.0f, 0.0f, 1.0f), rightDir = new Vec3(-1.0f, 0.0f, 0.0f);
     
     //2D top-down edge data.
     public final Vec2 ea = new Vec2(), eb = new Vec2();
@@ -237,7 +237,7 @@ public class Panel implements Drawable, Focusable
         GL11.glRotatef(Util.toDegrees(yaw), 0.0f, 1.0f, 0.0f);
         
         //Shadow
-        GL11.glLineWidth(0.5f);
+        GL11.glLineWidth(1.0f);
         GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.5f*alpha);
         GL11.glBegin(GL11.GL_LINES);
         GL11.glVertex3f(-width, -pos.y, 0.0f);
