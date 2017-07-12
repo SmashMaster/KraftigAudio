@@ -16,16 +16,16 @@ public class RadioButtons implements UIElement
     private int value = 0;
     private IntConsumer callback;
     
-    public RadioButtons(float fontSize, String... options)
+    public RadioButtons(String... options)
     {
         buttons = new ToggleButton[options.length];
         RowLayout[] rows = new RowLayout[options.length];
         
         for (int i=0; i<options.length; i++)
         {
-            buttons[i] = new ToggleButton(fontSize);
-            Label label = new Label(Main.instance().getFont(), options[i], fontSize);
-            rows[i] = new RowLayout(1.0f, Alignment.E, label, buttons[i]);
+            buttons[i] = new ToggleButton(4.0f);
+            Label label = new Label(Main.instance().getFont(), options[i], 8.0f);
+            rows[i] = new RowLayout(2.0f, Alignment.C, label, buttons[i]);
         }
         
         buttons[value].setValue(true);
@@ -50,7 +50,7 @@ public class RadioButtons implements UIElement
             });
         }
         
-        columns = new ColumnLayout(1.0f, Alignment.N, rows);
+        columns = new ColumnLayout(1.0f, Alignment.E, rows);
     }
     
     public int getValue()
