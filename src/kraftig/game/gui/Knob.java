@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import kraftig.game.FocusQuery;
 import kraftig.game.InteractionState;
 import kraftig.game.Main;
+import kraftig.game.Panel;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -76,7 +77,7 @@ public class Knob implements UIElement
     }
     
     @Override
-    public void updateMatrix(Mat4 matrix)
+    public void updateMatrix(Mat4 matrix, Panel panel, boolean front)
     {
     }
     

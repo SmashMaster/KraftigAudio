@@ -5,6 +5,7 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import kraftig.game.FocusQuery;
 import kraftig.game.Main;
+import kraftig.game.Panel;
 import kraftig.game.util.VectorFont;
 import org.lwjgl.opengl.GL11;
 
@@ -62,7 +63,7 @@ public class Label implements UIElement
     }
     
     @Override
-    public void updateMatrix(Mat4 matrix)
+    public void updateMatrix(Mat4 matrix, Panel panel, boolean front)
     {
     }
     

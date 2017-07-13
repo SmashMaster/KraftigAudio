@@ -6,6 +6,7 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
 import com.samrj.devil.ui.Alignment;
 import kraftig.game.Main;
+import kraftig.game.Panel;
 import kraftig.game.Wire;
 import org.lwjgl.opengl.GL11;
 
@@ -21,6 +22,8 @@ public abstract class Jack implements UIElement
     
     private final Vec2 pos = new Vec2();
     private final Mat4 matrix = new Mat4();
+    private Panel panel;
+    private boolean front;
     
     private Runnable onWireChanged;
     private Wire wire;
@@ -65,7 +68,7 @@ public abstract class Jack implements UIElement
         if (wire == null) throw new NullPointerException();
         if (this.wire != null) throw new IllegalStateException();
         this.wire = wire;
-        updateMatrix(matrix);
+        updateMatrix(matrix, panel, front);
         
         if (onWireChanged != null) onWireChanged.run();
     }
@@ -102,9 +105,11 @@ public abstract class Jack implements UIElement
     public abstract boolean canConnect(Jack other);
     
     @Override
-    public void updateMatrix(Mat4 matrix)
+    public void updateMatrix(Mat4 matrix, Panel panel, boolean front)
     {
         this.matrix.set(matrix);
+        this.panel = panel;
+        this.front = front;
     }
     
     @Override

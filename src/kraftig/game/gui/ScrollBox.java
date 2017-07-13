@@ -7,7 +7,10 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import kraftig.game.FocusQuery;
 import kraftig.game.Focusable;
+import kraftig.game.InteractionState;
 import kraftig.game.Main;
+import kraftig.game.Panel;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 public class ScrollBox implements UIElement
@@ -18,15 +21,18 @@ public class ScrollBox implements UIElement
     private static final float ARROW_BUTTON_RY = ARROW_BUTTON_HEIGHT/2.0f;
     private static final float ARROW_RX = ARROW_BUTTON_RX*0.5f;
     private static final float ARROW_RY = ARROW_BUTTON_RY*0.5f;
+    private static final float SCROLL_RATE = 12.0f;
     
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
     private final UIElement content;
+    private Panel panel;
+    private boolean front;
     
     private final ArrowButton upButton = new ArrowButton(true), downButton = new ArrowButton(false);
     private final Thumb thumb = new Thumb();
     
-    private float scrollPos = 10.0f;
+    private float scrollPos = 0.0f;
     
     public ScrollBox(Vec2 radius, UIElement content)
     {
@@ -38,6 +44,11 @@ public class ScrollBox implements UIElement
     {
         this(size, content);
         setPos(pos, align);
+    }
+    
+    private void setScrollPos(float pos)
+    {
+        scrollPos = Util.clamp(pos, 0.0f, Math.max((content.getRadius().y - radius.y)*2.0f, 0.0f));
     }
     
     @Override
@@ -61,9 +72,11 @@ public class ScrollBox implements UIElement
     }
 
     @Override
-    public void updateMatrix(Mat4 matrix)
+    public void updateMatrix(Mat4 matrix, Panel panel, boolean front)
     {
-        content.updateMatrix(matrix);
+        this.panel = panel;
+        this.front = front;
+        content.updateMatrix(matrix, panel, front);
     }
 
     @Override
@@ -175,6 +188,10 @@ public class ScrollBox implements UIElement
         @Override
         public void onMouseButton(FocusQuery query, int button, int action, int mods)
         {
+            if (action != GLFW.GLFW_PRESS || button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return;
+            
+            if (top) setScrollPos(scrollPos - SCROLL_RATE);
+            else setScrollPos(scrollPos + SCROLL_RATE);
         }
         
         public void render(float alpha)
@@ -237,6 +254,45 @@ public class ScrollBox implements UIElement
         @Override
         public void onMouseButton(FocusQuery query, int button, int action, int mods)
         {
+            UIFocusQuery q = (UIFocusQuery)query;
+            float initScrollPos = scrollPos;
+            
+            Main.instance().setState(new InteractionState()
+            {
+                private void update()
+                {
+                    float contentSize = content.getRadius().y*2.0f;
+                    float barHeight = (radius.y - ARROW_BUTTON_HEIGHT)*2.0f;
+                    
+                    Vec2 p = panel.projectMouse(front);
+                    if (p != null) setScrollPos(initScrollPos + (q.p.y - p.y)*contentSize/barHeight);
+                }
+                
+                @Override
+                public boolean canPlayerAim()
+                {
+                    return true;
+                }
+                
+                @Override
+                public void onMouseMoved(float x, float y, float dx, float dy)
+                {
+                    update();
+                }
+                
+                @Override
+                public void onMouseButton(int button, int action, int mods)
+                {
+                    if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT && action == GLFW.GLFW_RELEASE)
+                        Main.instance().setDefaultState();
+                }
+                
+                @Override
+                public void step(float dt)
+                {
+                    update();
+                }
+            });
         }
         
         public void render(float alpha)

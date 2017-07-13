@@ -29,7 +29,7 @@ public class SystemInput extends Panel implements AudioDevice
         setSize(0.125f, 0.0625f);
         rearInterface.add(new AudioOutputJack(this, buffer, new Vec2(), Alignment.C));
         frontInterface.add(new ScrollBox(new Vec2(48.0f, 32.0f),
-                new ColumnLayout(4.0f, Alignment.W,
+                new ColumnLayout(0.0f, Alignment.W,
                     new Label("Option A", 8.0f),
                     new Label("Option B", 8.0f),
                     new Label("Option C", 8.0f),

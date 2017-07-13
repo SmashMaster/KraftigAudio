@@ -41,13 +41,13 @@ public class Panel implements Drawable, Focusable
         
         Mat4 frontMatrix = Mat4.translation(pos);
         frontMatrix.mult(rot);
-        frontMatrix.mult(new Vec3(UI_SCALE, UI_SCALE, UI_SCALE));
-        frontInterface.updateMatrix(frontMatrix);
+        frontMatrix.mult(new Vec3(UI_SCALE));
+        frontInterface.updateMatrix(frontMatrix, this, true);
         
         Mat4 rearMatrix = Mat4.translation(pos);
         rearMatrix.mult(rot);
         rearMatrix.mult(new Vec3(-UI_SCALE, UI_SCALE, -UI_SCALE));
-        rearInterface.updateMatrix(rearMatrix);
+        rearInterface.updateMatrix(rearMatrix, this, false);
     }
     
     public void updateEdge()
@@ -190,15 +190,43 @@ public class Panel implements Drawable, Focusable
         }
     }
     
-    public FocusQuery checkFocus(Vec3 pos, Vec3 dir)
+    //Duplicated code here but no easy way to combine them.
+    
+    public Vec2 projectRay(Vec3 pos, Vec3 dir, boolean front)
     {
-        Vec3 camDir = Vec3.sub(pos, this.pos);
-        float camDot = camDir.dot(frontDir);
+        Vec3 pDir = Vec3.sub(pos, this.pos);
+        float pDot = pDir.dot(frontDir);
         
-        float dist = -camDot/dir.dot(frontDir);
+        float dist = -pDot/dir.dot(frontDir);
         if (dist <= 0.0f) return null; //Panel is behind us.
         
-        Vec3 hitPos = Vec3.madd(camDir, dir, dist);
+        Vec3 hitPos = Vec3.madd(pDir, dir, dist);
+        if (Math.abs(hitPos.y) > height) return null; //Hit above/below panel.
+        
+        float x = hitPos.dot(rightDir);
+        if (Math.abs(x) > width) return null; //Hit left/right of panel.
+        
+        if (Math.abs(pDot) < 0.001f) return null; //Hit edge of panel.
+        
+        if (front) return pDot > 0.0f ? new Vec2(-x, hitPos.y).div(UI_SCALE) : null;
+        else return pDot < 0.0f ? new Vec2(x, hitPos.y).div(UI_SCALE) : null;
+    }
+    
+    public Vec2 projectMouse(boolean front)
+    {
+        Main main = Main.instance();
+        return projectRay(main.getCamera().pos, main.getMouseDir(), front);
+    }
+    
+    public FocusQuery checkFocus(Vec3 pos, Vec3 dir)
+    {
+        Vec3 pDir = Vec3.sub(pos, this.pos);
+        float pDot = pDir.dot(frontDir);
+        
+        float dist = -pDot/dir.dot(frontDir);
+        if (dist <= 0.0f) return null; //Panel is behind us.
+        
+        Vec3 hitPos = Vec3.madd(pDir, dir, dist);
         if (Math.abs(hitPos.y) > height) return null; //Hit above/below panel.
         
         float x = hitPos.dot(rightDir);
@@ -207,9 +235,9 @@ public class Panel implements Drawable, Focusable
         FocusQuery panelFocus = new PanelFocusQuery(dist, x, hitPos.y);
         FocusQuery uiFocus;
         
-        if (Math.abs(camDot) < 0.001f) return panelFocus;
+        if (Math.abs(pDot) < 0.001f) return panelFocus;
         
-        if (camDot > 0.0f) uiFocus = frontInterface.checkFocus(dist, new Vec2(-x, hitPos.y).div(UI_SCALE));
+        if (pDot > 0.0f) uiFocus = frontInterface.checkFocus(dist, new Vec2(-x, hitPos.y).div(UI_SCALE));
         else uiFocus = rearInterface.checkFocus(dist, new Vec2(x, hitPos.y).div(UI_SCALE));
         
         return uiFocus != null ? uiFocus : panelFocus;

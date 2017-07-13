@@ -7,16 +7,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import kraftig.game.FocusQuery;
+import kraftig.game.Panel;
 
 public class UI
 {
     private final Mat4 matrix = new Mat4();
+    private Panel panel;
+    private boolean front;
     private final List<UIElement> elements = new ArrayList<>();
     
-    public void updateMatrix(Mat4 matrix)
+    public void updateMatrix(Mat4 matrix, Panel panel, boolean front)
     {
         this.matrix.set(matrix);
-        for (UIElement e : elements) e.updateMatrix(matrix);
+        this.panel = panel;
+        this.front = front;
+        for (UIElement e : elements) e.updateMatrix(matrix, panel, front);
     }
     
     public AAB2 getBounds()
@@ -30,7 +35,7 @@ public class UI
     public UI add(UIElement e)
     {
         elements.add(e);
-        e.updateMatrix(matrix);
+        e.updateMatrix(matrix, panel, front);
         return this;
     }
     

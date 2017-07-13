@@ -4,6 +4,7 @@ import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import kraftig.game.FocusQuery;
+import kraftig.game.Panel;
 
 public class ColumnLayout implements UIElement
 {
@@ -59,9 +60,9 @@ public class ColumnLayout implements UIElement
     }
 
     @Override
-    public void updateMatrix(Mat4 matrix)
+    public void updateMatrix(Mat4 matrix, Panel panel, boolean front)
     {
-        for (UIElement e : elements) e.updateMatrix(matrix);
+        for (UIElement e : elements) e.updateMatrix(matrix, panel, front);
     }
 
     @Override
