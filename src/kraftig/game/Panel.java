@@ -7,7 +7,6 @@ import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
 import kraftig.game.gui.UI;
-import kraftig.game.gui.UIFocusQuery;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
@@ -205,8 +204,8 @@ public class Panel implements Drawable, Focusable
         float x = hitPos.dot(rightDir);
         if (Math.abs(x) > width) return null; //Hit left/right of panel.
         
-        PanelFocusQuery panelFocus = new PanelFocusQuery(dist, x, hitPos.y);
-        UIFocusQuery uiFocus;
+        FocusQuery panelFocus = new PanelFocusQuery(dist, x, hitPos.y);
+        FocusQuery uiFocus;
         
         if (Math.abs(camDot) < 0.001f) return panelFocus;
         

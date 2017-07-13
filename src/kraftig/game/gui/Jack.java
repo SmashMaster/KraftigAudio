@@ -41,7 +41,7 @@ public abstract class Jack implements UIElement
     }
     
     @Override
-    public final Vec2 getSize()
+    public final Vec2 getRadius()
     {
         return new Vec2(RADIUS);
     }
@@ -49,7 +49,7 @@ public abstract class Jack implements UIElement
     @Override
     public final Jack setPos(Vec2 pos, Alignment align)
     {
-        align.align(pos, getSize(), this.pos);
+        align.align(pos, getRadius(), this.pos);
         return this;
     }
     

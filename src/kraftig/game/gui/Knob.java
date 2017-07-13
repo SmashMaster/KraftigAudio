@@ -49,7 +49,7 @@ public class Knob implements UIElement
     }
     
     @Override
-    public final Vec2 getSize()
+    public final Vec2 getRadius()
     {
         return new Vec2(radius);
     }
@@ -57,7 +57,7 @@ public class Knob implements UIElement
     @Override
     public final Knob setPos(Vec2 pos, Alignment align)
     {
-        align.align(pos, getSize(), this.pos);
+        align.align(pos, getRadius(), this.pos);
         return this;
     }
     

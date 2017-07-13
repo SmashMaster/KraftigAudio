@@ -48,7 +48,7 @@ public class Label implements UIElement
     }
     
     @Override
-    public final Vec2 getSize()
+    public final Vec2 getRadius()
     {
         return new Vec2(radius);
     }

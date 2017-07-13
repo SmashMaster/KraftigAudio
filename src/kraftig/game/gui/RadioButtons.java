@@ -79,9 +79,9 @@ public class RadioButtons implements UIElement
     }
 
     @Override
-    public final Vec2 getSize()
+    public final Vec2 getRadius()
     {
-        return columns.getSize().add(new Vec2(1.0f));
+        return columns.getRadius().add(new Vec2(1.0f));
     }
 
     @Override
@@ -120,7 +120,7 @@ public class RadioButtons implements UIElement
         columns.render(alpha);
         
         Vec2 pos = getPos();
-        Vec2 radius = getSize();
+        Vec2 radius = getRadius();
         
         GL11.glLineWidth(1.0f);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);

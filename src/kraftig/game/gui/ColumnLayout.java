@@ -19,7 +19,7 @@ public class ColumnLayout implements UIElement
         
         for (UIElement e : elements)
         {
-            Vec2 size = e.getSize();
+            Vec2 size = e.getRadius();
             w = Math.max(size.x*2.0f, w);
             h += size.y*2.0f + spacing;
         }
@@ -38,7 +38,7 @@ public class ColumnLayout implements UIElement
     }
 
     @Override
-    public Vec2 getSize()
+    public Vec2 getRadius()
     {
         return new Vec2(radius);
     }
@@ -52,7 +52,7 @@ public class ColumnLayout implements UIElement
         for (UIElement e : elements)
         {
             e.setPos(p, internalAlign);
-            p.y -= spacing + e.getSize().y*2.0f;
+            p.y -= spacing + e.getRadius().y*2.0f;
         }
         
         return this;

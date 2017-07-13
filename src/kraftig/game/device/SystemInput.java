@@ -7,7 +7,9 @@ import javax.sound.sampled.TargetDataLine;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioOutputJack;
+import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Label;
+import kraftig.game.gui.ScrollBox;
 
 public class SystemInput extends Panel implements AudioDevice
 {
@@ -26,7 +28,18 @@ public class SystemInput extends Panel implements AudioDevice
         
         setSize(0.125f, 0.0625f);
         rearInterface.add(new AudioOutputJack(this, buffer, new Vec2(), Alignment.C));
-        frontInterface.add(new Label(Main.instance().getFont(), "System In", 32.0f, new Vec2(), Alignment.C));
+        frontInterface.add(new ScrollBox(new Vec2(48.0f, 32.0f),
+                new ColumnLayout(4.0f, Alignment.W,
+                    new Label("Option A", 8.0f),
+                    new Label("Option B", 8.0f),
+                    new Label("Option C", 8.0f),
+                    new Label("Option D", 8.0f),
+                    new Label("Option E", 8.0f),
+                    new Label("Option F", 8.0f),
+                    new Label("Option G", 8.0f),
+                    new Label("Option H", 8.0f),
+                    new Label("Option I", 8.0f)
+                )).setPos(new Vec2(), Alignment.C));
     }
     
     @Override

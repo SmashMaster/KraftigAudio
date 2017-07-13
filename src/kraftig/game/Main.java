@@ -46,7 +46,7 @@ public final class Main extends Game
         hints.hint(GLFW.GLFW_BLUE_BITS, 16);
         hints.hint(GLFW.GLFW_ALPHA_BITS, 0);
         hints.hint(GLFW.GLFW_DEPTH_BITS, 0);
-        hints.hint(GLFW.GLFW_STENCIL_BITS, 0);
+        hints.hint(GLFW.GLFW_STENCIL_BITS, 8);
         hints.hint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
         return hints;
     }

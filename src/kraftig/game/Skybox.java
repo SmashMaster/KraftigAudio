@@ -14,7 +14,8 @@ public class Skybox
     public void render()
     {
         GL11.glClearColor(SKY_COLOR, SKY_COLOR, SKY_COLOR, 0.0f);
-        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+        GL11.glClearStencil(0);
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_STENCIL_BUFFER_BIT);
         
         GL11.glColor3f(GROUND_COLOR, GROUND_COLOR, GROUND_COLOR);
         GL11.glBegin(GL11.GL_QUADS);

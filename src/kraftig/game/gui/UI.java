@@ -6,6 +6,7 @@ import com.samrj.devil.math.Vec2;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import kraftig.game.FocusQuery;
 
 public class UI
 {
@@ -22,7 +23,7 @@ public class UI
     {
         AAB2 result = AAB2.empty();
         for (UIElement e : elements)
-            result.expand(AAB2.fromHalfWidth(e.getPos(), e.getSize()));
+            result.expand(AAB2.fromHalfWidth(e.getPos(), e.getRadius()));
         return result;
     }
     
@@ -43,11 +44,11 @@ public class UI
         return Collections.unmodifiableList(elements);
     }
     
-    public UIFocusQuery checkFocus(float dist, Vec2 p)
+    public FocusQuery checkFocus(float dist, Vec2 p)
     {
         for (UIElement e : elements)
         {
-            UIFocusQuery query = e.checkFocus(dist, p);
+            FocusQuery query = e.checkFocus(dist, p);
             if (query != null) return query;
         }
         return null;

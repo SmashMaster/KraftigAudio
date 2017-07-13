@@ -19,7 +19,7 @@ public class RowLayout implements UIElement
         
         for (UIElement e : elements)
         {
-            Vec2 size = e.getSize();
+            Vec2 size = e.getRadius();
             w += size.x*2.0f + spacing;
             h = Math.max(size.y*2.0f, h);
         }
@@ -38,7 +38,7 @@ public class RowLayout implements UIElement
     }
 
     @Override
-    public Vec2 getSize()
+    public Vec2 getRadius()
     {
         return new Vec2(radius);
     }
@@ -52,7 +52,7 @@ public class RowLayout implements UIElement
         for (UIElement e : elements)
         {
             e.setPos(p, internalAlign);
-            p.x += spacing + e.getSize().x*2.0f;
+            p.x += spacing + e.getRadius().x*2.0f;
         }
         
         return this;

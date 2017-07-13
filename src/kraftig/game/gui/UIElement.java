@@ -9,7 +9,7 @@ import kraftig.game.Focusable;
 public interface UIElement extends Focusable
 {
     public Vec2 getPos();
-    public Vec2 getSize();
+    public Vec2 getRadius();
     public UIElement setPos(Vec2 pos, Alignment align);
     
     public void updateMatrix(Mat4 matrix);
