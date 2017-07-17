@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.TargetDataLine;
 import kraftig.game.Wire.WireNode;
 import kraftig.game.device.*;
 import kraftig.game.gui.Crosshair;
@@ -30,6 +33,8 @@ public final class Main extends Game
     public static final int SAMPLE_RATE = 48000;
     public static final double SAMPLE_WIDTH = 1.0/SAMPLE_RATE;
     public static final AudioFormat AUDIO_FORMAT = new AudioFormat(SAMPLE_RATE, 16, 2, true, false);
+    public static final DataLine.Info AUDIO_INPUT_INFO = new DataLine.Info(TargetDataLine.class, AUDIO_FORMAT);
+    public static final DataLine.Info AUDIO_OUTPUT_INFO = new DataLine.Info(SourceDataLine.class, AUDIO_FORMAT);
     
     private static Main INSTANCE;
     

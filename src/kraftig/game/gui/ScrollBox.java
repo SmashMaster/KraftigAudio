@@ -21,11 +21,12 @@ public class ScrollBox implements UIElement
     private static final float ARROW_BUTTON_RY = ARROW_BUTTON_HEIGHT/2.0f;
     private static final float ARROW_RX = ARROW_BUTTON_RX*0.5f;
     private static final float ARROW_RY = ARROW_BUTTON_RY*0.5f;
-    private static final float SCROLL_RATE = 12.0f;
+    private static final float SCROLL_RATE = 9.5f;
     
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
-    private final UIElement content;
+    private UIElement content;
+    private final Mat4 matrix = new Mat4();
     private Panel panel;
     private boolean front;
     
@@ -46,9 +47,27 @@ public class ScrollBox implements UIElement
         setPos(pos, align);
     }
     
+    public ScrollBox setContent(UIElement content)
+    {
+        this.content = content;
+        
+        if (content != null)
+        {
+            content.setPos(new Vec2(pos.x - radius.x, pos.y + radius.y), Alignment.SE);
+            if (panel != null) content.updateMatrix(matrix, panel, front);
+        }
+        
+        return this;
+    }
+    
+    private float getContentRY()
+    {
+        return content != null ? content.getRadius().y : 0.0f;
+    }
+    
     private void setScrollPos(float pos)
     {
-        scrollPos = Util.clamp(pos, 0.0f, Math.max((content.getRadius().y - radius.y)*2.0f, 0.0f));
+        scrollPos = Util.clamp(pos, 0.0f, Math.max((getContentRY() - radius.y)*2.0f, 0.0f));
     }
     
     @Override
@@ -67,16 +86,17 @@ public class ScrollBox implements UIElement
     public final ScrollBox setPos(Vec2 pos, Alignment align)
     {
         align.align(pos, radius, this.pos);
-        content.setPos(new Vec2(pos.x - radius.x, pos.y + radius.y), Alignment.SE);
+        if (content != null) content.setPos(new Vec2(this.pos.x - radius.x, this.pos.y + radius.y), Alignment.SE);
         return this;
     }
 
     @Override
     public void updateMatrix(Mat4 matrix, Panel panel, boolean front)
     {
+        this.matrix.set(matrix);
         this.panel = panel;
         this.front = front;
-        content.updateMatrix(matrix, panel, front);
+        if (content != null) content.updateMatrix(matrix, panel, front);
     }
 
     @Override
@@ -87,6 +107,7 @@ public class ScrollBox implements UIElement
         if ((f = downButton.checkFocus(dist, p)) != null) return f;
         if ((f = thumb.checkFocus(dist, p)) != null) return f;
         
+        if (content == null) return null;
         if (p.x < pos.x - radius.x || p.x > pos.x + radius.x - BAR_WIDTH) return null;
         if (p.y < pos.y - radius.y || p.y > pos.y + radius.y - BAR_WIDTH) return null;
         
@@ -101,11 +122,14 @@ public class ScrollBox implements UIElement
     @Override
     public void delete()
     {
+        if (content != null) content.delete();
     }
 
     @Override
     public void render(float alpha)
     {
+        setScrollPos(scrollPos);
+        
         float x0 = pos.x - radius.x, x1 = pos.x + radius.x;
         float y0 = pos.y - radius.y, y1 = pos.y + radius.y;
         
@@ -120,6 +144,7 @@ public class ScrollBox implements UIElement
         
         float barX = x1 - BAR_WIDTH;
         
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha*0.25f);
         GL11.glBegin(GL11.GL_LINES);
         GL11.glVertex2f(barX, y0);
         GL11.glVertex2f(barX, y1);
@@ -129,32 +154,35 @@ public class ScrollBox implements UIElement
         downButton.render(alpha);
         thumb.render(alpha);
         
-        //Enable stencil writing, disable color writing.
-        GL11.glEnable(GL11.GL_STENCIL_TEST);
-        GL11.glColorMask(false, false, false, false);
-        GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
-        GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
-        
-        //Draw stencil mask.
-        GL11.glBegin(GL11.GL_QUADS);
-        GL11.glVertex2f(x0, y0);
-        GL11.glVertex2f(x0, y1);
-        GL11.glVertex2f(barX, y1);
-        GL11.glVertex2f(barX, y0);
-        GL11.glEnd();
-        
-        //Disable stencil writing, enable color writing.
-        GL11.glColorMask(true, true, true, true);
-        GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
-        GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-        
-        GL11.glPushMatrix();
-        GL11.glTranslatef(0.0f, scrollPos, 0.0f);
-        content.render(alpha);
-        GL11.glPopMatrix();
-        
-        //Disable stencil.
-        GL11.glDisable(GL11.GL_STENCIL_TEST);
+        if (content != null)
+        {
+            //Enable stencil writing, disable color writing.
+            GL11.glEnable(GL11.GL_STENCIL_TEST);
+            GL11.glColorMask(false, false, false, false);
+            GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0xFF);
+            GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE);
+
+            //Draw stencil mask.
+            GL11.glBegin(GL11.GL_QUADS);
+            GL11.glVertex2f(x0, y0);
+            GL11.glVertex2f(x0, y1);
+            GL11.glVertex2f(barX, y1);
+            GL11.glVertex2f(barX, y0);
+            GL11.glEnd();
+
+            //Disable stencil writing, enable color writing.
+            GL11.glColorMask(true, true, true, true);
+            GL11.glStencilFunc(GL11.GL_EQUAL, 1, 0xFF);
+            GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
+
+            GL11.glPushMatrix();
+            GL11.glTranslatef(0.0f, scrollPos, 0.0f);
+            content.render(alpha);
+            GL11.glPopMatrix();
+
+            //Disable stencil.
+            GL11.glDisable(GL11.GL_STENCIL_TEST);
+        }
     }
     
     private class ArrowButton implements Focusable
@@ -236,9 +264,19 @@ public class ScrollBox implements UIElement
         {
             float x1 = pos.x + radius.x;
             
-            float contentSize = content.getRadius().y*2.0f;
-            float y0t = Util.saturate((scrollPos + radius.y*2.0f)/contentSize);
-            float y1t = Util.saturate(scrollPos/contentSize);
+            float y0t, y1t;
+            
+            if (content != null)
+            {
+                float contentSize = getContentRY()*2.0f;
+                y0t = Util.saturate((scrollPos + radius.y*2.0f)/contentSize);
+                y1t = Util.saturate(scrollPos/contentSize);
+            }
+            else
+            {
+                y0t = 1.0f;
+                y1t = 0.0f;
+            }
             
             float barTop = pos.y + radius.y - ARROW_BUTTON_HEIGHT;
             float barBottom = pos.y - radius.y + ARROW_BUTTON_HEIGHT;
@@ -261,7 +299,7 @@ public class ScrollBox implements UIElement
             {
                 private void update()
                 {
-                    float contentSize = content.getRadius().y*2.0f;
+                    float contentSize = getContentRY()*2.0f;
                     float barHeight = (radius.y - ARROW_BUTTON_HEIGHT)*2.0f;
                     
                     Vec2 p = panel.projectMouse(front);
