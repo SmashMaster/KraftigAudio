@@ -81,7 +81,7 @@ public class ScrollBox implements UIElement
     {
         return new Vec2(radius);
     }
-
+    
     @Override
     public final ScrollBox setPos(Vec2 pos, Alignment align)
     {
@@ -109,7 +109,7 @@ public class ScrollBox implements UIElement
         
         if (content == null) return null;
         if (p.x < pos.x - radius.x || p.x > pos.x + radius.x - BAR_WIDTH) return null;
-        if (p.y < pos.y - radius.y || p.y > pos.y + radius.y - BAR_WIDTH) return null;
+        if (p.y < pos.y - radius.y || p.y > pos.y + radius.y) return null;
         
         return content.checkFocus(dist, new Vec2(p.x, p.y - scrollPos));
     }

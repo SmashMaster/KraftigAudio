@@ -3,91 +3,133 @@ package kraftig.game.device;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.util.ArrayList;
+import java.util.Arrays;
 import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.TargetDataLine;
 import kraftig.game.Main;
 import kraftig.game.Panel;
+import kraftig.game.gui.AudioOutputJack;
+import kraftig.game.gui.Label;
 import kraftig.game.gui.ListBox;
+import kraftig.game.gui.RowLayout;
 
 public class SystemInput extends Panel implements AudioDevice
 {
-//    private final TargetDataLine inputLine;
-//    private final byte[] rawBytes;
-//    private final float[][] buffer;
+    private Mixer.Info inputMixerInfo;
+    private TargetDataLine inputLine;
+    private final byte[] rawBytes = new byte[Main.BUFFER_SIZE*4];
+    private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
-    public SystemInput() throws Exception
+    public SystemInput()
     {
-//        inputLine = AudioSystem.getTargetDataLine(Main.AUDIO_FORMAT);
-//        inputLine.open();
-//        inputLine.start();
-//        
-//        rawBytes = new byte[inputLine.getBufferSize()];
-//        buffer = new float[2][rawBytes.length/4];
-        
-        setSize(0.125f, 0.0625f);
-//        rearInterface.add(new AudioOutputJack(this, buffer, new Vec2(), Alignment.C));
-        frontInterface.add(new ListBox(new Vec2(64.0f, 32.0f), () ->
+        ListBox<InputOption> listBox = new ListBox<>(new Vec2(64.0f, 32.0f), () ->
         {
             ArrayList<InputOption> options = new ArrayList<>();
             
             for (Mixer.Info mixerInfo : AudioSystem.getMixerInfo())
             {
-                try
-                {
-                    Mixer mixer = AudioSystem.getMixer(mixerInfo);
-                    if (!mixer.isLineSupported(Main.AUDIO_INPUT_INFO)) continue;
-                    
-                    TargetDataLine line = (TargetDataLine)mixer.getLine(Main.AUDIO_INPUT_INFO);
-                    
-                    options.add(new InputOption(mixerInfo.getName()));
-                }
-                catch (LineUnavailableException e) {}
+                Mixer mixer = AudioSystem.getMixer(mixerInfo);
+                if (!mixer.isLineSupported(Main.AUDIO_INPUT_INFO)) continue;
+                options.add(new InputOption(mixerInfo));
             }
             
-            return options.toArray(new InputOption[0]);
-        }).setPos(new Vec2(), Alignment.C));
+            return options;
+        });
+        
+        listBox.onValueChanged((option) ->
+        {
+            if (option != null && option.info == inputMixerInfo) return;
+            
+            if (inputLine != null)
+            {
+                inputLine.stop();
+                inputLine.close();
+            }
+            
+            if (option != null) try
+            {
+                Mixer mixer = AudioSystem.getMixer(option.info);
+                inputLine = (TargetDataLine)mixer.getLine(Main.AUDIO_INPUT_INFO);
+                inputLine.open();
+                inputLine.start();
+            }
+            catch (Exception e)
+            {
+                inputLine = null;
+                listBox.setValue(null);
+            }
+        });
+        
+        frontInterface.add(new RowLayout(4.0f, Alignment.C,
+                    listBox,
+                    new AudioOutputJack(this, buffer, new Vec2(64.0f, 0.0f), Alignment.C))
+                .setPos(new Vec2(), Alignment.C));
+        
+        rearInterface.add(new Label("System Input", 24.0f, new Vec2(), Alignment.C));
+        
+        setSizeFromContents(4.0f);
     }
     
     @Override
     public void process(int samples)
     {
-//        //Buffer input byte data.
-//        int available = Math.min(inputLine.available(), samples*4);
-//        inputLine.read(rawBytes, 0, available);
-//        
-//        //Convert to floating point PCM.
-//        for (int i=0, k=0; i<available;)
-//        {
-//            short left = (short)((rawBytes[i++] & 0xff) | ((rawBytes[i++] & 0xff) << 8));
-//            short right = (short)((rawBytes[i++] & 0xff) | ((rawBytes[i++] & 0xff) << 8));
-//            
-//            buffer[0][k] = (left + 0.5f)/32767.5f;
-//            buffer[1][k++] = (right + 0.5f)/32767.5f;
-//        }
+        //Buffer input byte data.
+        int available = samples*4;
+        
+        if (inputLine != null)
+        {
+            available = Math.min(inputLine.available(), available);
+            inputLine.read(rawBytes, 0, available);
+        }
+        else Arrays.fill(rawBytes, 0, available, (byte)0);
+        
+        //Convert to floating point PCM.
+        for (int i=0, k=0; i<available;)
+        {
+            short left = (short)((rawBytes[i++] & 0xff) | ((rawBytes[i++] & 0xff) << 8));
+            short right = (short)((rawBytes[i++] & 0xff) | ((rawBytes[i++] & 0xff) << 8));
+            
+            buffer[0][k] = (left + 0.5f)/32767.5f;
+            buffer[1][k++] = (right + 0.5f)/32767.5f;
+        }
     }
     
     @Override
     public void delete()
     {
-//        inputLine.stop();
-//        inputLine.close();
+        if (inputLine != null)
+        {
+            inputMixerInfo = null;
+            inputLine.stop();
+            inputLine.close();
+            inputLine = null;
+        }
     }
     
     private class InputOption implements ListBox.Option
     {
-        private final String label;
+        private final Mixer.Info info;
         
-        private InputOption(String label)
+        private InputOption(Mixer.Info info)
         {
-            this.label = label;
+            this.info = info;
         }
         
         @Override
         public String getLabel()
         {
-            return label;
+            return info.getName();
+        }
+        
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (getClass() != obj.getClass()) return false;
+            InputOption other = (InputOption)obj;
+            return info.getName().equals(other.info.getName());
         }
     }
 }

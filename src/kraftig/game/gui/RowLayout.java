@@ -3,6 +3,8 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.util.Arrays;
+import java.util.List;
 import kraftig.game.FocusQuery;
 import kraftig.game.Panel;
 
@@ -12,9 +14,9 @@ public class RowLayout implements UIElement
     private final Vec2 radius = new Vec2();
     private final float spacing;
     private final Alignment internalAlign;
-    private final UIElement[] elements;
+    private final List<? extends UIElement> elements;
     
-    public RowLayout(float spacing, Alignment internalAlign, UIElement... elements)
+    public RowLayout(float spacing, Alignment internalAlign, List<? extends UIElement> elements)
     {
         float w = -spacing, h = 0.0f;
         
@@ -30,6 +32,11 @@ public class RowLayout implements UIElement
         this.spacing = spacing;
         this.internalAlign = Alignment.get(1.0f, -internalAlign.y);
         this.elements = elements;
+    }
+    
+    public RowLayout(float spacing, Alignment internalAlign, UIElement... elements)
+    {
+        this(spacing, internalAlign, Arrays.asList(elements));
     }
     
     @Override

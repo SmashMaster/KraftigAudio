@@ -35,6 +35,7 @@ public final class Main extends Game
     public static final AudioFormat AUDIO_FORMAT = new AudioFormat(SAMPLE_RATE, 16, 2, true, false);
     public static final DataLine.Info AUDIO_INPUT_INFO = new DataLine.Info(TargetDataLine.class, AUDIO_FORMAT);
     public static final DataLine.Info AUDIO_OUTPUT_INFO = new DataLine.Info(SourceDataLine.class, AUDIO_FORMAT);
+    public static final int BUFFER_SIZE = 16384;
     
     private static Main INSTANCE;
     
