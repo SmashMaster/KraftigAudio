@@ -21,10 +21,6 @@ public class Oscilloscope extends Panel implements AudioDevice
     
     public Oscilloscope()
     {
-        inJack = new AudioInputJack(new Vec2(), Alignment.C);
-        
-        setSize(0.125f, 0.0625f);
-        rearInterface.add(inJack);
         frontInterface.add(screen = new OscilloscopeScreen(new Vec2(48.0f, 48.0f), new Vec2(), Alignment.C));
         frontInterface.add(new Knob(8.0f, new Vec2(64.0f, 0.0f), Alignment.C)
                 .setValue(0.5f)
@@ -33,6 +29,9 @@ public class Oscilloscope extends Panel implements AudioDevice
                 .setPos(new Vec2(-52.0f, 0.0f), Alignment.W)
                 .onValueChanged(screen::setMode));
         frontInterface.add(new Label(Main.instance().getFont(), "Oscilloscope", 12.0f, new Vec2(0.0f, 48.0f), Alignment.N));
+        frontInterface.add(inJack = new AudioInputJack(new Vec2(-96.0f, -32.0f), Alignment.C));
+        
+        setSizeFromContents(4.0f);
     }
     
     @Override
