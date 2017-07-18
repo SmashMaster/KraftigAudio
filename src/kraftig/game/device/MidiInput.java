@@ -3,13 +3,12 @@ package kraftig.game.device;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Transmitter;
-import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.ListBox;
@@ -18,7 +17,32 @@ import kraftig.game.gui.RowLayout;
 
 public class MidiInput extends Panel
 {
-    private MidiDevice.Info inputDeviceInfo;
+    private static final Map<MidiDevice, Integer> deviceUsage = new IdentityHashMap<>();
+    
+    private static void useDevice(MidiDevice device) throws MidiUnavailableException
+    {
+        Integer i = deviceUsage.get(device);
+        if (i == null)
+        {
+            device.open();
+            deviceUsage.put(device, 1);
+        }
+        else deviceUsage.put(device, i + 1);
+    }
+    
+    private static void unuseDevice(MidiDevice device)
+    {
+        Integer i = deviceUsage.get(device);
+        if (i == null) return;
+        else if (i <= 1)
+        {
+            device.close();
+            deviceUsage.remove(device);
+        }
+        else deviceUsage.put(device, i - 1);
+    }
+    
+    private MidiDevice inputDevice;
     private Transmitter inputTransmitter;
     private final MidiOutputJack jack = new MidiOutputJack();
     
@@ -33,8 +57,8 @@ public class MidiInput extends Panel
                 try
                 {
                     MidiDevice device = MidiSystem.getMidiDevice(info);
-                     if (device.getMaxTransmitters() == 0) continue;
-                     options.add(new InputOption(info, device));
+                    if (device.getMaxTransmitters() == 0) continue;
+                    options.add(new InputOption(info, device));
                 }
                 catch (MidiUnavailableException e) {}
             }
@@ -44,19 +68,29 @@ public class MidiInput extends Panel
         
         listBox.onValueChanged((option) ->
         {
-            if (option != null && option.info == inputDeviceInfo) return;
-            
-            if (inputTransmitter != null) inputTransmitter.close();
+            if (inputTransmitter != null)
+            {
+                inputTransmitter.close();
+                unuseDevice(inputDevice);
+                inputDevice = null;
+            }
             
             if (option != null) try
             {
-                if (!option.device.isOpen()) option.device.open();
+                inputDevice = option.device;
+                useDevice(inputDevice);
                 inputTransmitter = option.device.getTransmitter();
                 inputTransmitter.setReceiver(jack);
             }
             catch (Exception e)
             {
-                inputTransmitter = null;
+                if (inputTransmitter != null)
+                {
+                    inputTransmitter.close();
+                    inputTransmitter = null;
+                }
+                unuseDevice(inputDevice);
+                inputDevice = null;
                 listBox.setValue(null);
             }
         });
@@ -75,7 +109,18 @@ public class MidiInput extends Panel
     public void delete()
     {
         super.delete();
-        if (inputTransmitter != null) inputTransmitter.close();
+        
+        if (inputTransmitter != null)
+        {
+            inputTransmitter.close();
+            inputTransmitter = null;
+        }
+        
+        if (inputDevice != null)
+        {
+            unuseDevice(inputDevice);
+            inputDevice = null;
+        }
     }
     
     private class InputOption implements ListBox.Option

@@ -16,7 +16,6 @@ import kraftig.game.gui.RowLayout;
 
 public class SystemInput extends Panel implements AudioDevice
 {
-    private Mixer.Info inputMixerInfo;
     private TargetDataLine inputLine;
     private final byte[] rawBytes = new byte[Main.BUFFER_SIZE*4];
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
@@ -39,8 +38,6 @@ public class SystemInput extends Panel implements AudioDevice
         
         listBox.onValueChanged((option) ->
         {
-            if (option != null && option.info == inputMixerInfo) return;
-            
             if (inputLine != null)
             {
                 inputLine.stop();
@@ -100,7 +97,6 @@ public class SystemInput extends Panel implements AudioDevice
     {
         if (inputLine != null)
         {
-            inputMixerInfo = null;
             inputLine.stop();
             inputLine.close();
             inputLine = null;
