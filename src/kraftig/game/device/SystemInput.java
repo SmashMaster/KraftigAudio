@@ -63,7 +63,7 @@ public class SystemInput extends Panel implements AudioDevice
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
-        rearInterface.add(new Label("System Input", 24.0f, new Vec2(), Alignment.C));
+        rearInterface.add(new Label("System In", 24.0f, new Vec2(), Alignment.C));
         
         setSizeFromContents(4.0f);
     }

@@ -8,10 +8,10 @@ import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioOutputJack;
-import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.MidiInputJack;
+import kraftig.game.gui.RowLayout;
 
 public class AnalogSynth extends Panel implements AudioDevice
 {
@@ -24,15 +24,17 @@ public class AnalogSynth extends Panel implements AudioDevice
     
     public AnalogSynth()
     {
-        setSize(0.125f, 0.0625f);
-        frontInterface.add(new Label(Main.instance().getFont(), "Analog Synth", 32.0f, new Vec2(0.0f, 8.0f), Alignment.N));
-        frontInterface.add(new Knob(16.0f, new Vec2(0.0f, -8.0f), Alignment.S)
-                .setValue(0.25f)
-                .onValueChanged(f -> amplitude = f));
-        rearInterface.add(new ColumnLayout(4.0f, Alignment.C,
+        frontInterface.add(new RowLayout(16.0f, Alignment.C,
                     new MidiInputJack(this::receive),
+                    new Knob(16.0f, new Vec2(0.0f, -8.0f), Alignment.S)
+                        .setValue(0.25f)
+                        .onValueChanged(f -> amplitude = f),
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
+        
+        rearInterface.add(new Label("Analog Synth", 24.0f, new Vec2(0.0f, 0.0f), Alignment.C));
+        
+        setSizeFromContents(4.0f);
     }
     
     private void receive(MidiMessage message, long timeStamp)

@@ -100,7 +100,7 @@ public class MidiInput extends Panel
                     jack)
                 .setPos(new Vec2(), Alignment.C));
         
-        rearInterface.add(new Label("MIDI Input", 24.0f, new Vec2(), Alignment.C));
+        rearInterface.add(new Label("MIDI In", 24.0f, new Vec2(), Alignment.C));
         
         setSizeFromContents(4.0f);
     }
