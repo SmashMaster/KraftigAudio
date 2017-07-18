@@ -11,6 +11,7 @@ import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.MidiInputJack;
+import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
 
 public class AnalogSynth extends Panel implements AudioDevice
@@ -21,11 +22,15 @@ public class AnalogSynth extends Panel implements AudioDevice
     
     private double time;
     private float amplitude;
+    private int waveform;
     
     public AnalogSynth()
     {
         frontInterface.add(new RowLayout(16.0f, Alignment.C,
                     new MidiInputJack(this::receive),
+                    new RadioButtons("Sine", "Triangle", "Sawtooth", "Square")
+                        .onValueChanged(i -> waveform = i)
+                        .setValue(0),
                     new Knob(16.0f, new Vec2(0.0f, -8.0f), Alignment.S)
                         .setValue(0.25f)
                         .onValueChanged(f -> amplitude = f),
@@ -68,7 +73,15 @@ public class AnalogSynth extends Panel implements AudioDevice
             {
                 int note = notes.get(ni);
                 double freq = (440.0/32.0)*Math.pow(2.0, (note - 9)/12.0);
-                v += (float)Math.sin(Math.PI*2.0*freq*time);
+                double len = 1.0/freq;
+                
+                switch (waveform)
+                {
+                    case 0: v += Math.sin(Math.PI*2.0*freq*time); break; //Sine wave
+                    case 1: v += Math.abs((time % len)/len - 0.5)*4.0 - 1.0; break; //Triangle wave
+                    case 2: v += ((time % len)/len)*2.0 - 1.0; break; //Sawtooth wave
+                    case 3: v += (time % len) > len*0.5 ? -1.0 : 1.0; break; //Square wave
+                }
             }
             
             v *= amplitude;
