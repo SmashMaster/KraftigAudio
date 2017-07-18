@@ -292,6 +292,8 @@ public class ScrollBox implements UIElement
         @Override
         public void onMouseButton(FocusQuery query, int button, int action, int mods)
         {
+            if (button != GLFW.GLFW_MOUSE_BUTTON_LEFT || action != GLFW.GLFW_PRESS) return;
+            
             UIFocusQuery q = (UIFocusQuery)query;
             float initScrollPos = scrollPos;
             
