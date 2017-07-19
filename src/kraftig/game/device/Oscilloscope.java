@@ -34,7 +34,7 @@ public class Oscilloscope extends Panel implements AudioDevice
                     screen,
                     new Knob(8.0f, new Vec2(64.0f, 0.0f), Alignment.C)
                         .setValue(0.5f)
-                        .onValueChanged(v -> screen.setBrightness(DSPMath.expstep(MIN_BRIGHTNESS, MAX_BRIGHTNESS, v))))
+                        .onValueChanged(v -> screen.setBrightness(DSPMath.experp(MIN_BRIGHTNESS, MAX_BRIGHTNESS, v))))
                 .setPos(new Vec2(), Alignment.C));
         
         rearInterface.add(new Label(Main.instance().getFont(), "Oscilloscope", 24.0f, new Vec2(), Alignment.C));

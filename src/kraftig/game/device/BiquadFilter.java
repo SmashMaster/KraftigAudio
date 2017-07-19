@@ -7,6 +7,7 @@ import kraftig.game.Panel;
 import kraftig.game.audio.BiquadFilterKernel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
+import kraftig.game.gui.BiquadResponseWindow;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
@@ -18,6 +19,7 @@ public class BiquadFilter extends Panel implements AudioDevice
 {
     private final BiquadFilterKernel kernelLeft = new BiquadFilterKernel();
     private final BiquadFilterKernel kernelRight = new BiquadFilterKernel();
+    private final BiquadResponseWindow responseWindow = new BiquadResponseWindow(new Vec2(32.0f, 24.0f));
     private final AudioInputJack inJack;
     private final float[][] buffer = new float[2][48000];
     
@@ -32,9 +34,10 @@ public class BiquadFilter extends Panel implements AudioDevice
                     new RadioButtons("Low Pass", "Band Pass", "High Pass", "Band Reject", "All Pass")
                         .onValueChanged(mode -> setFilter(mode, filterFreq, filterQ))
                         .setValue(0),
+                    responseWindow,
                     new ColumnLayout(4.0f, Alignment.C,
                         new Knob(12.0f)
-                            .onValueChanged(v -> setFilter(filterMode, (float)DSPMath.expstep(20.0, 20000.0, v), filterQ))
+                            .onValueChanged(v -> setFilter(filterMode, (float)DSPMath.experp(20.0, 20000.0, v), filterQ))
                             .setValue(0.5f),
                         new Knob(12.0f)
                             .onValueChanged(v -> setFilter(filterMode, filterFreq, (float)Math.pow(16.0, v*2.0 - 1.0)))
@@ -42,7 +45,7 @@ public class BiquadFilter extends Panel implements AudioDevice
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
-        rearInterface.add(new Label("Adder", 24.0f, new Vec2(), Alignment.C));
+        rearInterface.add(new Label("Biquad Filter", 24.0f, new Vec2(), Alignment.C));
         
         setSizeFromContents(4.0f);
     }
@@ -63,6 +66,7 @@ public class BiquadFilter extends Panel implements AudioDevice
         }
         
         kernelRight.s.set(kernelLeft.s);
+        responseWindow.update(kernelLeft.s);
     }
     
     @Override

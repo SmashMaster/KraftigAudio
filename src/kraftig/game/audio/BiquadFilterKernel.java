@@ -13,7 +13,7 @@ public class BiquadFilterKernel
         for (int i=0; i<samples; i++)
         {
             float x = input != null ? input[i] : 0.0f;
-            float y = s.b0*x + s.b1*x1 + s.b2*x2 - s.a1*y1 - s.a2*y2;
+            float y = (float)(s.b0*x + s.b1*x1 + s.b2*x2 - s.a1*y1 - s.a2*y2);
             x2 = x1; x1 = x;
             y2 = y1; y1 = y;
             output[i] = y;
@@ -22,7 +22,7 @@ public class BiquadFilterKernel
     
     public class Settings
     {
-        public float b0, b1, b2, a1, a2;
+        public double b0, b1, b2, a1, a2;
         
         public Settings set(Settings other)
         {
@@ -31,18 +31,16 @@ public class BiquadFilterKernel
             this.b2 = other.b2;
             this.a1 = other.a1;
             this.a2 = other.a2;
-            
             return this;
         }
         
         public Settings set(double b0, double b1, double b2, double a0, double a1, double a2)
         {
-            this.b0 = (float)(b0/a0);
-            this.b1 = (float)(b1/a0);
-            this.b2 = (float)(b2/a0);
-            this.a1 = (float)(a1/a0);
-            this.a2 = (float)(a2/a0);
-            
+            this.b0 = b0/a0;
+            this.b1 = b1/a0;
+            this.b2 = b2/a0;
+            this.a1 = a1/a0;
+            this.a2 = a2/a0;
             return this;
         }
         
