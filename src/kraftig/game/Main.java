@@ -117,9 +117,10 @@ public final class Main extends Game
         panels.add(new AnalogSynth().setPosition(new Vec3(-0.6f, 1.75f, -1.0f)));
         panels.add(new SystemInput().setPosition(new Vec3(-0.3f, 1.75f, -1.0f)));
         panels.add(new Adder().setPosition(new Vec3(0.0f, 1.75f, -1.0f)));
-        panels.add(new Splitter().setPosition(new Vec3(0.3f, 1.75f, -1.0f)));
-        panels.add(new Oscilloscope().setPosition(new Vec3(0.6f, 1.75f, -1.0f)));
-        panels.add(new SystemOutput().setPosition(new Vec3(0.9f, 1.75f, -1.0f)));
+        panels.add(new BiquadFilter().setPosition(new Vec3(0.3f, 1.75f, -1.0f)));
+        panels.add(new Splitter().setPosition(new Vec3(0.6f, 1.75f, -1.0f)));
+        panels.add(new Oscilloscope().setPosition(new Vec3(0.9f, 1.75f, -1.0f)));
+        panels.add(new SystemOutput().setPosition(new Vec3(1.2f, 1.75f, -1.0f)));
         
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

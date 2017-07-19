@@ -33,7 +33,7 @@ public class Splitter extends Panel implements AudioDevice
     @Override
     public Stream<AudioDevice> getInputDevices()
     {
-        return inJack.hasLiveWire() ? Stream.of(inJack.getDevice()) : Stream.empty();
+        return inJack.getDevices();
     }
     
     @Override
