@@ -23,7 +23,7 @@ public class SystemOutput extends Panel implements AudioDevice
     
     private SourceDataLine outputLine;
     
-    public SystemOutput() throws Exception
+    public SystemOutput()
     {
         listBox = new ListBox<>(new Vec2(64.0f, 32.0f), () ->
         {

@@ -12,6 +12,7 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
 import com.samrj.devil.math.topo.DAG;
+import com.samrj.devil.ui.Alignment;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -93,6 +94,7 @@ public final class Main extends Game
     private final Vec3 mouseDir = new Vec3(0.0f, 0.0f, -1.0f);
     private FocusQuery focus;
     private InteractionState interactionState;
+    private DeviceMenu deviceMenu;
     
     private double sampleRemainder = 0.0f;
     
@@ -146,13 +148,18 @@ public final class Main extends Game
             @Override
             public void onMouseMoved(float x, float y, float dx, float dy)
             {
-                updateFocus();
+                if (deviceMenu != null)
+                {
+                    Vec2i res = getResolution();
+                    focus = deviceMenu.checkFocus(0.0f, new Vec2(x - res.x*0.5f, y - res.y*0.5f));
+                }
+                else updateFocus();
             }
             
             @Override
             public void step(float dt)
             {
-                updateFocus();
+                if (deviceMenu == null) updateFocus();
             }
             
             @Override
@@ -164,7 +171,30 @@ public final class Main extends Game
             @Override
             public void onKey(int key, int action, int mods)
             {
-                if (action != GLFW.GLFW_PRESS || key != GLFW.GLFW_KEY_DELETE) return;
+                if (action != GLFW.GLFW_PRESS) return;
+                
+                if (key == GLFW.GLFW_KEY_SPACE)
+                {
+                    if (deviceMenu != null)
+                    {
+                        deviceMenu = null;
+                        mouse.setGrabbed(!displayMouse());
+                    }
+                    else
+                    {
+                        deviceMenu = new DeviceMenu();
+                        deviceMenu.setPos(new Vec2(), Alignment.C);
+                        
+                        mouse.setPosDirty();
+                        mouse.setGrabbed(false);
+                        Vec2i res = getResolution();
+                        mouse.setPos(res.x/2.0f, res.y/2.0f);
+                    }
+                    
+                    return;
+                }
+                
+                if (key != GLFW.GLFW_KEY_DELETE) return;
                 if (focus == null) return;
                 
                 if (focus.focus instanceof Panel)
@@ -193,7 +223,7 @@ public final class Main extends Game
     
     private boolean displayMouse()
     {
-        return displayMouse && interactionState.isCursorVisible();
+        return (deviceMenu != null) || (displayMouse && interactionState.isCursorVisible());
     }
     
     public VectorFont getFont()
@@ -248,18 +278,21 @@ public final class Main extends Game
     @Override
     public void onMouseMoved(float x, float y, float dx, float dy)
     {
-        if (!displayMouse && interactionState.canPlayerAim()) player.onMouseMoved(x, y, dx, dy);
-        
-        Vec2 mPos = new Vec2();
-        if (displayMouse)
+        if (deviceMenu == null)
         {
-            Vec2i res = getResolution();
-            mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
-        }
+            if (!displayMouse && interactionState.canPlayerAim()) player.onMouseMoved(x, y, dx, dy);
 
-        Vec3.madd(camera.forward, camera.right, mPos.x*camera.hSlope, mouseDir);
-        mouseDir.madd(camera.up, mPos.y*camera.vSlope);
-        mouseDir.normalize();
+            Vec2 mPos = new Vec2();
+            if (displayMouse)
+            {
+                Vec2i res = getResolution();
+                mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
+            }
+
+            Vec3.madd(camera.forward, camera.right, mPos.x*camera.hSlope, mouseDir);
+            mouseDir.madd(camera.up, mPos.y*camera.vSlope);
+            mouseDir.normalize();
+        }
         
         interactionState.onMouseMoved(x, y, dx, dy);
     }
@@ -279,19 +312,17 @@ public final class Main extends Game
     @Override
     public void onKey(int key, int action, int mods)
     {
-        if (action == GLFW.GLFW_PRESS)
+        if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_ESCAPE) stop();
+        
+        if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_TAB && deviceMenu == null)
         {
-            if (key == GLFW.GLFW_KEY_ESCAPE) stop();
-            else if (key == GLFW.GLFW_KEY_TAB)
-            {
-                displayMouse = !displayMouse;
-                boolean display = displayMouse();
-                mouse.setGrabbed(!display);
-                
-                Vec2i res = getResolution();
-                if (!display) mouse.setPosDirty();
-                mouse.setPos(res.x/2.0f, res.y/2.0f);
-            }
+            displayMouse = !displayMouse;
+            boolean display = displayMouse();
+            mouse.setGrabbed(!display);
+
+            if (!display) mouse.setPosDirty();
+            Vec2i res = getResolution();
+            mouse.setPos(res.x/2.0f, res.y/2.0f);
         }
         
         interactionState.onKey(key, action, mods);
@@ -377,7 +408,10 @@ public final class Main extends Game
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glLoadIdentity();
         
-        if (!displayMouse && interactionState == defaultState) crosshair.renderCrosshair();
+        if (deviceMenu == null && !displayMouse && interactionState == defaultState)
+            crosshair.renderCrosshair();
+        
+        if (deviceMenu != null) deviceMenu.render(1.0f);
     }
     
     @Override

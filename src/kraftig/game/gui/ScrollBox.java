@@ -35,9 +35,14 @@ public class ScrollBox implements UIElement
     
     private float scrollPos = 0.0f;
     
-    public ScrollBox(Vec2 radius, UIElement content)
+    public ScrollBox(Vec2 radius)
     {
         this.radius.set(radius);
+    }
+    
+    public ScrollBox(Vec2 radius, UIElement content)
+    {
+        this(radius);
         this.content = content;
     }
     
@@ -299,13 +304,17 @@ public class ScrollBox implements UIElement
             
             Main.instance().setState(new InteractionState()
             {
-                private void update()
+                private void update(float mx, float my)
                 {
                     float contentSize = getContentRY()*2.0f;
                     float barHeight = (radius.y - ARROW_BUTTON_HEIGHT)*2.0f;
                     
-                    Vec2 p = panel.projectMouse(front);
-                    if (p != null) setScrollPos(initScrollPos + (q.p.y - p.y)*contentSize/barHeight);
+                    if (panel != null)
+                    {
+                        Vec2 p = panel.projectMouse(front);
+                        if (p != null) setScrollPos(initScrollPos + (q.p.y - p.y)*contentSize/barHeight);
+                    }
+                    else setScrollPos(initScrollPos + (q.p.y - my)*contentSize/barHeight);
                 }
                 
                 @Override
@@ -317,7 +326,7 @@ public class ScrollBox implements UIElement
                 @Override
                 public void onMouseMoved(float x, float y, float dx, float dy)
                 {
-                    update();
+                    update(x, y);
                 }
                 
                 @Override
@@ -330,7 +339,7 @@ public class ScrollBox implements UIElement
                 @Override
                 public void step(float dt)
                 {
-                    update();
+                    if (panel != null) update(0.0f, 0.0f);
                 }
             });
         }

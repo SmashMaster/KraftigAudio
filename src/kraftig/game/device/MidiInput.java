@@ -46,7 +46,7 @@ public class MidiInput extends Panel
     private Transmitter inputTransmitter;
     private final MidiOutputJack jack = new MidiOutputJack();
     
-    public MidiInput() throws Exception
+    public MidiInput()
     {
         ListBox<InputOption> listBox = new ListBox<>(new Vec2(64.0f, 32.0f), () ->
         {
