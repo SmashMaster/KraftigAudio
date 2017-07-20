@@ -36,9 +36,11 @@ public class BiquadFilter extends Panel implements AudioDevice
                         .setValue(0),
                     responseWindow,
                     new ColumnLayout(4.0f, Alignment.C,
+                        new Label("Freq", 3.0f),
                         new Knob(12.0f)
                             .onValueChanged(v -> setFilter(filterMode, (float)DSPMath.experp(20.0, 20000.0, v), filterQ))
                             .setValue(0.5f),
+                        new Label("Q factor", 3.0f),
                         new Knob(12.0f)
                             .onValueChanged(v -> setFilter(filterMode, filterFreq, (float)Math.pow(16.0, v*2.0 - 1.0)))
                             .setValue(0.5f)),
