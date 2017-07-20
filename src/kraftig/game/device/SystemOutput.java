@@ -25,7 +25,7 @@ public class SystemOutput extends Panel implements AudioDevice
     
     public SystemOutput()
     {
-        listBox = new ListBox<>(new Vec2(64.0f, 32.0f), () ->
+        listBox = new ListBox<>(new Vec2(128.0f, 64.0f), () ->
         {
             ArrayList<OutputOption> options = new ArrayList<>();
             
@@ -66,9 +66,9 @@ public class SystemOutput extends Panel implements AudioDevice
                     listBox)
                 .setPos(new Vec2(), Alignment.C));
         
-        rearInterface.add(new Label("System In", 24.0f, new Vec2(), Alignment.C));
+        rearInterface.add(new Label("System Out", 48.0f, new Vec2(), Alignment.C));
         
-        setSizeFromContents(4.0f);
+        setSizeFromContents(8.0f);
     }
     
     @Override

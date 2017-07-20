@@ -26,20 +26,20 @@ public class AnalogSynth extends Panel implements AudioDevice
     
     public AnalogSynth()
     {
-        frontInterface.add(new RowLayout(16.0f, Alignment.C,
+        frontInterface.add(new RowLayout(32.0f, Alignment.C,
                     new MidiInputJack(this::receive),
                     new RadioButtons("Sine", "Triangle", "Sawtooth", "Square")
                         .onValueChanged(i -> waveform = i)
                         .setValue(0),
-                    new Knob(16.0f, new Vec2(0.0f, -8.0f), Alignment.S)
+                    new Knob(32.0f)
                         .setValue(0.25f)
                         .onValueChanged(f -> amplitude = f),
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
-        rearInterface.add(new Label("Analog Synth", 24.0f, new Vec2(0.0f, 0.0f), Alignment.C));
+        rearInterface.add(new Label("Analog Synth", 48.0f, new Vec2(0.0f, 0.0f), Alignment.C));
         
-        setSizeFromContents(4.0f);
+        setSizeFromContents(8.0f);
     }
     
     private void receive(MidiMessage message, long timeStamp)

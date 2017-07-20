@@ -24,22 +24,22 @@ public class Oscilloscope extends Panel implements AudioDevice
     
     public Oscilloscope()
     {
-        screen = new OscilloscopeScreen(new Vec2(48.0f, 48.0f));
+        screen = new OscilloscopeScreen(new Vec2(96.0f, 96.0f));
         
-        frontInterface.add(new RowLayout(4.0f, Alignment.C,
-                    new ColumnLayout(4.0f, Alignment.C,
+        frontInterface.add(new RowLayout(8.0f, Alignment.C,
+                    new ColumnLayout(8.0f, Alignment.C,
                         new RadioButtons("X:Time, Y:Amp", "X:Left, Y:Right")
                             .onValueChanged(screen::setMode),
                         inJack = new AudioInputJack()),
                     screen,
-                    new Knob(8.0f, new Vec2(64.0f, 0.0f), Alignment.C)
+                    new Knob(16.0f)
                         .setValue(0.5f)
                         .onValueChanged(v -> screen.setBrightness(DSPMath.experp(MIN_BRIGHTNESS, MAX_BRIGHTNESS, v))))
                 .setPos(new Vec2(), Alignment.C));
         
-        rearInterface.add(new Label(Main.instance().getFont(), "Oscilloscope", 24.0f, new Vec2(), Alignment.C));
+        rearInterface.add(new Label(Main.instance().getFont(), "Oscilloscope", 48.0f, new Vec2(), Alignment.C));
         
-        setSizeFromContents(4.0f);
+        setSizeFromContents(8.0f);
     }
     
     @Override

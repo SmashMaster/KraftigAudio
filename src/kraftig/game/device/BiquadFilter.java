@@ -19,7 +19,7 @@ public class BiquadFilter extends Panel implements AudioDevice
 {
     private final BiquadFilterKernel kernelLeft = new BiquadFilterKernel();
     private final BiquadFilterKernel kernelRight = new BiquadFilterKernel();
-    private final BiquadResponseWindow responseWindow = new BiquadResponseWindow(new Vec2(32.0f, 24.0f));
+    private final BiquadResponseWindow responseWindow = new BiquadResponseWindow(new Vec2(64.0f, 48.0f));
     private final AudioInputJack inJack;
     private final float[][] buffer = new float[2][48000];
     
@@ -29,27 +29,27 @@ public class BiquadFilter extends Panel implements AudioDevice
     
     public BiquadFilter()
     {
-        frontInterface.add(new RowLayout(8.0f, Alignment.C,
+        frontInterface.add(new RowLayout(16.0f, Alignment.C,
                     inJack = new AudioInputJack(),
                     new RadioButtons("Low Pass", "Band Pass", "High Pass", "Band Reject", "All Pass")
                         .onValueChanged(mode -> setFilter(mode, filterFreq, filterQ))
                         .setValue(0),
                     responseWindow,
-                    new ColumnLayout(4.0f, Alignment.C,
-                        new Label("Freq", 3.0f),
-                        new Knob(12.0f)
+                    new ColumnLayout(8.0f, Alignment.C,
+                        new Label("Freq", 6.0f),
+                        new Knob(24.0f)
                             .onValueChanged(v -> setFilter(filterMode, (float)DSPMath.experp(20.0, 20000.0, v), filterQ))
                             .setValue(0.5f),
-                        new Label("Q factor", 3.0f),
-                        new Knob(12.0f)
+                        new Label("Q factor", 6.0f),
+                        new Knob(24.0f)
                             .onValueChanged(v -> setFilter(filterMode, filterFreq, (float)Math.pow(16.0, v*2.0 - 1.0)))
                             .setValue(0.5f)),
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
-        rearInterface.add(new Label("Biquad Filter", 24.0f, new Vec2(), Alignment.C));
+        rearInterface.add(new Label("Biquad Filter", 48.0f, new Vec2(), Alignment.C));
         
-        setSizeFromContents(4.0f);
+        setSizeFromContents(8.0f);
     }
     
     private void setFilter(int mode, float freq, float q)

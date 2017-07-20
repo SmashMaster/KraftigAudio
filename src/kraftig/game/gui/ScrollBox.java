@@ -15,13 +15,13 @@ import org.lwjgl.opengl.GL11;
 
 public class ScrollBox implements UIElement
 {
-    private static final float BAR_WIDTH = 12.0f;
-    private static final float ARROW_BUTTON_HEIGHT = 6.0f;
+    private static final float BAR_WIDTH = 24.0f;
+    private static final float ARROW_BUTTON_HEIGHT = 12.0f;
     private static final float ARROW_BUTTON_RX = BAR_WIDTH/2.0f;
     private static final float ARROW_BUTTON_RY = ARROW_BUTTON_HEIGHT/2.0f;
     private static final float ARROW_RX = ARROW_BUTTON_RX*0.5f;
     private static final float ARROW_RY = ARROW_BUTTON_RY*0.5f;
-    private static final float SCROLL_RATE = 9.5f;
+    private static final float SCROLL_RATE = 19.0f;
     
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();

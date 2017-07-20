@@ -18,7 +18,7 @@ import org.lwjgl.opengl.GL11;
 
 public class ListBox<T extends Option> implements UIElement
 {
-    private static final float FONT_SIZE = 8.0f;
+    private static final float FONT_SIZE = 16.0f;
     
     private final VectorFont font;
     private final ColumnLayout container;
@@ -29,7 +29,7 @@ public class ListBox<T extends Option> implements UIElement
     {
         font = Main.instance().getFont();
         ScrollBox scrollBox = new ScrollBox(radius, null);
-        LabelButton refreshButton = new LabelButton("\u27f3 Refresh", 6.0f, 1.0f);
+        LabelButton refreshButton = new LabelButton("\u27f3 Refresh", 12.0f, 2.0f);
         
         refreshButton.onClick(() ->
         {
@@ -39,7 +39,7 @@ public class ListBox<T extends Option> implements UIElement
         });
         refreshButton.click();
         
-        container = new ColumnLayout(1.0f, Alignment.W, scrollBox, refreshButton);
+        container = new ColumnLayout(2.0f, Alignment.W, scrollBox, refreshButton);
     }
     
     public ListBox onValueChanged(Consumer<T> callback)

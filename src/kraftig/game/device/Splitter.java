@@ -16,18 +16,18 @@ public class Splitter extends Panel implements AudioDevice
     
     public Splitter()
     {
-        frontInterface.add(new RowLayout(2.0f, Alignment.C,
+        frontInterface.add(new RowLayout(4.0f, Alignment.C,
                     inJack = new AudioInputJack(),
-                    new Label("\u2192", 24.0f),
+                    new Label("\u2192", 48.0f),
                     new AudioOutputJack(this, inJack::getBuffer),
                     new AudioOutputJack(this, inJack::getBuffer),
                     new AudioOutputJack(this, inJack::getBuffer),
                     new AudioOutputJack(this, inJack::getBuffer))
                 .setPos(new Vec2(), Alignment.C));
         
-        rearInterface.add(new Label(Main.instance().getFont(), "Splitter", 24.0f, new Vec2(), Alignment.C));
+        rearInterface.add(new Label(Main.instance().getFont(), "Splitter", 48.0f, new Vec2(), Alignment.C));
         
-        setSizeFromContents(4.0f);
+        setSizeFromContents(8.0f);
     }
     
     @Override

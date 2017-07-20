@@ -35,7 +35,7 @@ public class MidiOutputJack extends OutputJack implements MidiReceiver
     public void renderSymbol()
     {
         VectorFont font = Main.instance().getFont();
-        font.render("MIDI", new Vec2(0.0f, 1.0f), 6.0f, Alignment.N);
-        font.render("OUT", new Vec2(0.0f, -1.0f), 6.0f, Alignment.S);
+        font.render("MIDI", new Vec2(0.0f, 1.0f), 12.0f, Alignment.N);
+        font.render("OUT", new Vec2(0.0f, -1.0f), 12.0f, Alignment.S);
     }
 }

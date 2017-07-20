@@ -22,7 +22,7 @@ public class SystemInput extends Panel implements AudioDevice
     
     public SystemInput()
     {
-        ListBox<InputOption> listBox = new ListBox<>(new Vec2(64.0f, 32.0f), () ->
+        ListBox<InputOption> listBox = new ListBox<>(new Vec2(128.0f, 64.0f), () ->
         {
             ArrayList<InputOption> options = new ArrayList<>();
             
@@ -58,14 +58,14 @@ public class SystemInput extends Panel implements AudioDevice
             }
         });
         
-        frontInterface.add(new RowLayout(4.0f, Alignment.C,
+        frontInterface.add(new RowLayout(8.0f, Alignment.C,
                     listBox,
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
-        rearInterface.add(new Label("System In", 24.0f, new Vec2(), Alignment.C));
+        rearInterface.add(new Label("System In", 48.0f, new Vec2(), Alignment.C));
         
-        setSizeFromContents(4.0f);
+        setSizeFromContents(8.0f);
     }
     
     @Override

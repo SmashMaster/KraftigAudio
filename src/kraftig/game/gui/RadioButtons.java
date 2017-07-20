@@ -24,9 +24,9 @@ public class RadioButtons implements UIElement
         
         for (int i=0; i<options.length; i++)
         {
-            buttons[i] = new ToggleButton(4.0f);
-            Label label = new Label(Main.instance().getFont(), options[i], 8.0f);
-            rows[i] = new RowLayout(2.0f, Alignment.C, label, buttons[i]);
+            buttons[i] = new ToggleButton(8.0f);
+            Label label = new Label(Main.instance().getFont(), options[i], 16.0f);
+            rows[i] = new RowLayout(4.0f, Alignment.C, label, buttons[i]);
         }
         
         buttons[value].setValue(true);
@@ -51,7 +51,7 @@ public class RadioButtons implements UIElement
             });
         }
         
-        columns = new ColumnLayout(1.0f, Alignment.E, rows);
+        columns = new ColumnLayout(2.0f, Alignment.E, rows);
     }
     
     public int getValue()

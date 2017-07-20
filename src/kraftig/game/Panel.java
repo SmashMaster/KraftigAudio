@@ -12,7 +12,7 @@ import org.lwjgl.opengl.GL11;
 
 public class Panel implements Drawable, Focusable
 {
-    private static final float UI_SCALE = 1.0f/1024.0f; //Pixels per meter.
+    private static final float UI_SCALE = 1.0f/2048.0f; //Pixels per meter.
     
     public final Vec3 pos = new Vec3();
     private float yaw;

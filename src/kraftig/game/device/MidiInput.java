@@ -48,7 +48,7 @@ public class MidiInput extends Panel
     
     public MidiInput()
     {
-        ListBox<InputOption> listBox = new ListBox<>(new Vec2(64.0f, 32.0f), () ->
+        ListBox<InputOption> listBox = new ListBox<>(new Vec2(128.0f, 64.0f), () ->
         {
             ArrayList<InputOption> options = new ArrayList<>();
             
@@ -95,14 +95,14 @@ public class MidiInput extends Panel
             }
         });
         
-        frontInterface.add(new RowLayout(4.0f, Alignment.C,
+        frontInterface.add(new RowLayout(8.0f, Alignment.C,
                     listBox,
                     jack)
                 .setPos(new Vec2(), Alignment.C));
         
-        rearInterface.add(new Label("MIDI In", 24.0f, new Vec2(), Alignment.C));
+        rearInterface.add(new Label("MIDI In", 48.0f, new Vec2(), Alignment.C));
         
-        setSizeFromContents(4.0f);
+        setSizeFromContents(8.0f);
     }
     
     @Override

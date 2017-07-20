@@ -17,21 +17,21 @@ public class Adder extends Panel implements AudioDevice
     
     public Adder()
     {
-        frontInterface.add(new RowLayout(2.0f, Alignment.C,
+        frontInterface.add(new RowLayout(4.0f, Alignment.C,
                     inJacks[0] = new AudioInputJack(),
-                    new Label("+", 24.0f),
+                    new Label("+", 48.0f),
                     inJacks[1] = new AudioInputJack(),
-                    new Label("+", 24.0f),
+                    new Label("+", 48.0f),
                     inJacks[2] = new AudioInputJack(),
-                    new Label("+", 24.0f),
+                    new Label("+", 48.0f),
                     inJacks[3] = new AudioInputJack(),
-                    new Label("=", 24.0f),
+                    new Label("=", 48.0f),
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
-        rearInterface.add(new Label("Adder", 24.0f, new Vec2(), Alignment.C));
+        rearInterface.add(new Label("Adder", 48.0f, new Vec2(), Alignment.C));
         
-        setSizeFromContents(4.0f);
+        setSizeFromContents(8.0f);
     }
     
     @Override
