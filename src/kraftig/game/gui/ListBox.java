@@ -28,7 +28,7 @@ public class ListBox<T extends Option> implements UIElement
     public ListBox(Vec2 radius, Supplier<List<? extends T>> optionSupplier)
     {
         font = Main.instance().getFont();
-        ScrollBox scrollBox = new ScrollBox(radius, null);
+        ScrollBox scrollBox = new ScrollBox(radius, Alignment.W);
         LabelButton refreshButton = new LabelButton("\u27f3 Refresh", 12.0f, 2.0f);
         
         refreshButton.onClick(() ->

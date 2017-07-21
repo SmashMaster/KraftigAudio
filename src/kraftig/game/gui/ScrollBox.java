@@ -25,6 +25,7 @@ public class ScrollBox implements UIElement
     
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
+    private final Alignment internalAlign;
     private UIElement content;
     private final Mat4 matrix = new Mat4();
     private Panel panel;
@@ -35,20 +36,21 @@ public class ScrollBox implements UIElement
     
     private float scrollPos = 0.0f;
     
-    public ScrollBox(Vec2 radius)
+    public ScrollBox(Vec2 radius, Alignment internalAlign)
     {
         this.radius.set(radius);
+        this.internalAlign = Alignment.get(-internalAlign.x, -1.0f);
     }
     
-    public ScrollBox(Vec2 radius, UIElement content)
+    public ScrollBox(Vec2 radius, Alignment internalAlign, UIElement content)
     {
-        this(radius);
+        this(radius, internalAlign);
         this.content = content;
     }
     
-    public ScrollBox(Vec2 size, UIElement content, Vec2 pos, Alignment align)
+    public ScrollBox(Vec2 size, Alignment internalAlign, UIElement content, Vec2 pos, Alignment align)
     {
-        this(size, content);
+        this(size, internalAlign, content);
         setPos(pos, align);
     }
     
@@ -91,7 +93,13 @@ public class ScrollBox implements UIElement
     public final ScrollBox setPos(Vec2 pos, Alignment align)
     {
         align.align(pos, radius, this.pos);
-        if (content != null) content.setPos(new Vec2(this.pos.x - radius.x, this.pos.y + radius.y), Alignment.SE);
+        if (content != null)
+        {
+            float x0 = this.pos.x - radius.x;
+            float x1 = this.pos.x + radius.x - BAR_WIDTH;
+            float x = Util.lerp(x0, x1, -internalAlign.x*0.5f + 0.5f);
+            content.setPos(new Vec2(x, this.pos.y + radius.y), internalAlign);
+        }
         return this;
     }
 

@@ -6,8 +6,11 @@ import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
 import com.samrj.devil.ui.Alignment;
 import java.util.function.Supplier;
-import kraftig.game.device.SystemInput;
+import kraftig.game.device.*;
+import kraftig.game.gui.ColumnLayout;
+import kraftig.game.gui.Label;
 import kraftig.game.gui.LabelButton;
+import kraftig.game.gui.RowLayout;
 import kraftig.game.gui.ScrollBox;
 import kraftig.game.gui.UIElement;
 import kraftig.game.gui.UIFocusQuery;
@@ -21,9 +24,43 @@ public class DeviceMenu implements UIElement
     {
         Vec2i res = Main.instance().getResolution();
         float height = res.y/2.0f - 16.0f;
-        scrollBox = new ScrollBox(new Vec2(height*0.75f, height));
+        scrollBox = new ScrollBox(new Vec2(height*0.75f, height), Alignment.C);
         
-        scrollBox.setContent(new SpawnButton("System Input", SystemInput::new));
+        ColumnLayout sourceCat = new ColumnLayout(2.0f, Alignment.C,
+                new Label("Sources", 24.0f),
+                new SpawnButton("System Input", SystemInput::new),
+                new SpawnButton("Analog Synth", AnalogSynth::new));
+        
+        ColumnLayout effectCat = new ColumnLayout(2.0f, Alignment.C,
+                new Label("Effects", 24.0f),
+                new SpawnButton("Biquad Filter", BiquadFilter::new));
+        
+        ColumnLayout utilityCat = new ColumnLayout(2.0f, Alignment.C,
+                new Label("Utility", 24.0f),
+                new SpawnButton("Adder", Adder::new),
+                new SpawnButton("Splitter", Splitter::new));
+        
+        ColumnLayout outputCat = new ColumnLayout(2.0f, Alignment.C,
+                new Label("Output", 24.0f),
+                new SpawnButton("System Output", SystemOutput::new),
+                new SpawnButton("Oscilloscope", Oscilloscope::new));
+        
+        ColumnLayout midiCat = new ColumnLayout(2.0f, Alignment.C,
+                new Label("MIDI", 24.0f),
+                new SpawnButton("MIDI Input", MidiInput::new),
+                new SpawnButton("MIDI Output", MidiOutput::new));
+        
+        RowLayout row1 = new RowLayout(32.0f, Alignment.C, sourceCat, effectCat);
+        RowLayout row2 = new RowLayout(32.0f, Alignment.C, utilityCat, outputCat);
+        RowLayout row3 = new RowLayout(32.0f, Alignment.C, midiCat);
+        
+        ColumnLayout content = new ColumnLayout(32.0f, Alignment.C,
+                new Label("Device Spawn Menu", 28.0f),
+                row1,
+                row2,
+                row3);
+        
+        scrollBox.setContent(content);
     }
     
     @Override
