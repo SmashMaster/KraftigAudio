@@ -115,7 +115,8 @@ public final class Main extends Game
         skybox = new Skybox();
         floor = new FloorGrid();
         
-        panels.add(new MidiInput().setPosition(new Vec3(-0.9f, 1.75f, -1.0f)));
+        panels.add(new MidiInput().setPosition(new Vec3(-1.2f, 1.75f, -1.0f)));
+        panels.add(new MidiOutput().setPosition(new Vec3(-0.9f, 1.75f, -1.0f)));
         panels.add(new AnalogSynth().setPosition(new Vec3(-0.6f, 1.75f, -1.0f)));
         panels.add(new SystemInput().setPosition(new Vec3(-0.3f, 1.75f, -1.0f)));
         panels.add(new Adder().setPosition(new Vec3(0.0f, 1.75f, -1.0f)));
