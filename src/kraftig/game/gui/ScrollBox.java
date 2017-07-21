@@ -187,6 +187,9 @@ public class ScrollBox implements UIElement
 
             //Disable stencil.
             GL11.glDisable(GL11.GL_STENCIL_TEST);
+            
+            //Clear stencil buffer.
+            GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
         }
     }
     
@@ -304,15 +307,20 @@ public class ScrollBox implements UIElement
             
             Main.instance().setState(new InteractionState()
             {
-                private void update(float mx, float my)
+                private void update(float my)
                 {
                     float contentSize = getContentRY()*2.0f;
                     float barHeight = (radius.y - ARROW_BUTTON_HEIGHT)*2.0f;
                     
                     if (panel != null)
                     {
-                        Vec2 p = panel.projectMouse(front);
-                        if (p != null) setScrollPos(initScrollPos + (q.p.y - p.y)*contentSize/barHeight);
+                        boolean[] hit = {false};
+                        float[] dist = {0.0f};
+                        Vec2 rPos = new Vec2();
+                        int[] side = {0};
+                        panel.projectMouse(hit, dist, rPos, side);
+                        
+                        setScrollPos(initScrollPos + (q.p.y - rPos.y/Panel.UI_SCALE)*contentSize/barHeight);
                     }
                     else setScrollPos(initScrollPos + (q.p.y - my)*contentSize/barHeight);
                 }
@@ -326,7 +334,7 @@ public class ScrollBox implements UIElement
                 @Override
                 public void onMouseMoved(float x, float y, float dx, float dy)
                 {
-                    update(x, y);
+                    update(y - Main.instance().getResolution().y*0.5f);
                 }
                 
                 @Override
@@ -339,7 +347,7 @@ public class ScrollBox implements UIElement
                 @Override
                 public void step(float dt)
                 {
-                    if (panel != null) update(0.0f, 0.0f);
+                    if (panel != null) update(0.0f);
                 }
             });
         }

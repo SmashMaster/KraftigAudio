@@ -3,7 +3,11 @@ package kraftig.game;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
+import com.samrj.devil.math.Vec3;
 import com.samrj.devil.ui.Alignment;
+import java.util.function.Supplier;
+import kraftig.game.device.SystemInput;
+import kraftig.game.gui.LabelButton;
 import kraftig.game.gui.ScrollBox;
 import kraftig.game.gui.UIElement;
 import kraftig.game.gui.UIFocusQuery;
@@ -18,6 +22,8 @@ public class DeviceMenu implements UIElement
         Vec2i res = Main.instance().getResolution();
         float height = res.y/2.0f - 16.0f;
         scrollBox = new ScrollBox(new Vec2(height*0.75f, height));
+        
+        scrollBox.setContent(new SpawnButton("System Input", SystemInput::new));
     }
     
     @Override
@@ -80,5 +86,30 @@ public class DeviceMenu implements UIElement
         GL11.glEnd();
         
         scrollBox.render(alpha);
+    }
+    
+    private class SpawnButton extends LabelButton
+    {
+        private final Supplier<Panel> constructor;
+        
+        private SpawnButton(String text, Supplier<Panel> constructor)
+        {
+            super(text, 16.0f, 4.0f);
+            this.constructor = constructor;
+            onClick(this::spawn);
+        }
+        
+        private void spawn()
+        {
+            Main main = Main.instance();
+            
+            Panel panel = constructor.get();
+            main.addPanel(panel);
+            main.closeDeviceMenu();
+            main.onMouseMoved(0.0f, 0.0f, 0.0f, 0.0f);
+            
+            panel.setPosYaw(Vec3.madd(main.getCamera().pos, main.getMouseDir(), 0.5f), main.getPlayer().getYaw());
+            main.setState(new PanelDragState(panel));
+        }
     }
 }

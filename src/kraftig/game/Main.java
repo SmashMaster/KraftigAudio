@@ -175,11 +175,7 @@ public final class Main extends Game
                 
                 if (key == GLFW.GLFW_KEY_SPACE)
                 {
-                    if (deviceMenu != null)
-                    {
-                        deviceMenu = null;
-                        mouse.setGrabbed(!displayMouse());
-                    }
+                    if (deviceMenu != null) closeDeviceMenu();
                     else
                     {
                         deviceMenu = new DeviceMenu();
@@ -268,11 +264,24 @@ public final class Main extends Game
         wires.add(wire);
     }
     
+    public void addPanel(Panel panel)
+    {
+        panels.add(panel);
+    }
+    
     public Stream<FocusQuery> focusStream()
     {
         return Stream.concat(panels.stream().map(p -> p.checkFocus(camera.pos, mouseDir)),
                              wires.stream().map(w -> w.checkFocus(camera.pos, mouseDir)))
                 .filter(q -> q != null);
+    }
+    
+    public void closeDeviceMenu()
+    {
+        if (deviceMenu == null) return;
+        
+        deviceMenu = null;
+        mouse.setGrabbed(!displayMouse());
     }
     
     @Override

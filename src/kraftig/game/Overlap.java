@@ -69,7 +69,7 @@ public enum Overlap
             if (Math.abs(denom) < 0.001f) return NONE;
             
             //Make sure the wire doesn't intersect the plane.
-            float tIntersect = Vec3.dot(Vec3.sub(a.pos, b.a.pos), a.frontDir)/denom;
+            float tIntersect = Vec3.dot(Vec3.sub(a.getPos(), b.a.pos), a.frontDir)/denom;
             float yIntersect = b.a.pos.y + b.ab.y*tIntersect;
             
             float ay0 = a.getY() - a.getHeight();

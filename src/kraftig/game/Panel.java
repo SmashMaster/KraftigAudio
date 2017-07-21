@@ -12,9 +12,9 @@ import org.lwjgl.opengl.GL11;
 
 public class Panel implements Drawable, Focusable
 {
-    private static final float UI_SCALE = 1.0f/2048.0f; //Pixels per meter.
+    public static final float UI_SCALE = 1.0f/2048.0f; //Pixels per meter.
     
-    public final Vec3 pos = new Vec3();
+    private final Vec3 pos = new Vec3();
     private float yaw;
     private float width, height;
     
@@ -28,7 +28,7 @@ public class Panel implements Drawable, Focusable
     public final UI frontInterface = new UI();
     public final UI rearInterface = new UI();
     
-    private boolean dragged;
+    public boolean dragged;
     
     public Panel()
     {
@@ -77,6 +77,16 @@ public class Panel implements Drawable, Focusable
         return dr.dot(d);
     }
     
+    public Vec3 getPos()
+    {
+        return new Vec3(pos);
+    }
+    
+    public float getYaw()
+    {
+        return yaw;
+    }
+    
     @Override
     public float getY()
     {
@@ -87,6 +97,16 @@ public class Panel implements Drawable, Focusable
     public float getHeight()
     {
         return height;
+    }
+    
+    public final Panel setPosYaw(Vec3 pos, float yaw)
+    {
+        this.pos.set(pos);
+        this.yaw = yaw;
+        frontDir.set((float)Math.sin(yaw), 0.0f, (float)Math.cos(yaw));
+        rightDir.set(-frontDir.z, 0.0f, frontDir.x);
+        updateMatrices();
+        return this;
     }
     
     public final Panel setPosition(Vec3 pos)
@@ -140,105 +160,63 @@ public class Panel implements Drawable, Focusable
         //Panel drag.
         if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
         {
-            dragged = true;
-            Player player = Main.instance().getPlayer();
-            float relYaw = Util.reduceAngle(yaw - player.getYaw());
-            
-            Main.instance().setState(new InteractionState()
-            {
-                private void update()
-                {
-                    yaw = Util.reduceAngle(player.getYaw() + relYaw);
-                    frontDir.set((float)Math.sin(yaw), 0.0f, (float)Math.cos(yaw));
-                    rightDir.set(-frontDir.z, 0.0f, frontDir.x);
-                    
-                    pos.set(player.getCamera().pos);
-                    pos.madd(Main.instance().getMouseDir(), q.dist);
-                    pos.madd(rightDir, -q.x);
-                    pos.y -= q.y;
-                    
-                    updateMatrices();
-                }
-                
-                @Override
-                public boolean canPlayerAim()
-                {
-                    return true;
-                }
-                
-                @Override
-                public void onMouseMoved(float x, float y, float dx, float dy)
-                {
-                    update();
-                }
-                
-                @Override
-                public void onMouseButton(int button, int action, int mods)
-                {
-                    if (action != GLFW.GLFW_PRESS || button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) return;
-                    
-                    dragged = false;
-                    Main.instance().setDefaultState();
-                }
-                
-                @Override
-                public void step(float dt)
-                {
-                    update();
-                }
-            });
+            Main.instance().setState(new PanelDragState(this));
         }
     }
     
     //Duplicated code here but no easy way to combine them.
     
-    public Vec2 projectRay(Vec3 pos, Vec3 dir, boolean front)
+    public void projectRay(Vec3 pos, Vec3 dir, boolean[] rHit, float[] rDist, Vec2 rPos, int[] rSide)
     {
         Vec3 pDir = Vec3.sub(pos, this.pos);
         float pDot = pDir.dot(frontDir);
-        
         float dist = -pDot/dir.dot(frontDir);
-        if (dist <= 0.0f) return null; //Panel is behind us.
+        
+        rHit[0] = false;
+        rDist[0] = dist;
+        
+        if (dist <= 0.0f) return; //Panel is behind us.
         
         Vec3 hitPos = Vec3.madd(pDir, dir, dist);
-        if (Math.abs(hitPos.y) > height) return null; //Hit above/below panel.
-        
         float x = hitPos.dot(rightDir);
-        if (Math.abs(x) > width) return null; //Hit left/right of panel.
         
-        if (Math.abs(pDot) < 0.001f) return null; //Hit edge of panel.
+        rPos.set(x, hitPos.y);
         
-        if (front) return pDot > 0.0f ? new Vec2(-x, hitPos.y).div(UI_SCALE) : null;
-        else return pDot < 0.0f ? new Vec2(x, hitPos.y).div(UI_SCALE) : null;
+        if (Math.abs(hitPos.y) > height) return; //Missed above/below panel.
+        if (Math.abs(x) > width) return; //Missed left/right of panel.
+        
+        rHit[0] = true;
+        if (Math.abs(pDot) < 0.001f) rSide[0] = 0; //Hit edge of panel.
+        else if (pDot > 0.0f) rSide[0] = 1; //Hit front.
+        else rSide[0] = -1; //Hit rear.
     }
     
-    public Vec2 projectMouse(boolean front)
+    public void projectMouse(boolean[] rHit, float[] rDist, Vec2 rPos, int[] rSide)
     {
         Main main = Main.instance();
-        return projectRay(main.getCamera().pos, main.getMouseDir(), front);
+        projectRay(main.getCamera().pos, main.getMouseDir(), rHit, rDist, rPos, rSide);
     }
     
     public FocusQuery checkFocus(Vec3 pos, Vec3 dir)
     {
-        Vec3 pDir = Vec3.sub(pos, this.pos);
-        float pDot = pDir.dot(frontDir);
+        boolean[] hit = {false};
+        float[] dist = {0.0f};
+        Vec2 rPos = new Vec2();
+        int[] side = {0};
         
-        float dist = -pDot/dir.dot(frontDir);
-        if (dist <= 0.0f) return null; //Panel is behind us.
+        projectRay(pos, dir, hit, dist, rPos, side);
         
-        Vec3 hitPos = Vec3.madd(pDir, dir, dist);
-        if (Math.abs(hitPos.y) > height) return null; //Hit above/below panel.
+        if (!hit[0]) return null;
         
-        float x = hitPos.dot(rightDir);
-        if (Math.abs(x) > width) return null; //Hit left/right of panel.
+        FocusQuery panelFocus = new PanelFocusQuery(dist[0], rPos.x, rPos.y);
+        FocusQuery uiFocus = null;
         
-        FocusQuery panelFocus = new PanelFocusQuery(dist, x, hitPos.y);
-        FocusQuery uiFocus;
-        
-        if (Math.abs(pDot) < 0.001f) return panelFocus;
-        
-        if (pDot > 0.0f) uiFocus = frontInterface.checkFocus(dist, new Vec2(-x, hitPos.y).div(UI_SCALE));
-        else uiFocus = rearInterface.checkFocus(dist, new Vec2(x, hitPos.y).div(UI_SCALE));
+        switch (side[0])
+        {
+            case 0: return panelFocus;
+            case 1: uiFocus = frontInterface.checkFocus(dist[0], new Vec2(-rPos.x, rPos.y).div(UI_SCALE)); break;
+            case -1: uiFocus = rearInterface.checkFocus(dist[0], rPos.div(UI_SCALE)); break;
+        }
         
         return uiFocus != null ? uiFocus : panelFocus;
     }
