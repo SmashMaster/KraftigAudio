@@ -48,6 +48,7 @@ public class DeviceMenu implements UIElement
         ColumnLayout midiCat = new ColumnLayout(2.0f, Alignment.C,
                 new Label("MIDI", 24.0f),
                 new SpawnButton("MIDI Input", MidiInput::new),
+                new SpawnButton("MIDI Splitter", MidiSplitter::new),
                 new SpawnButton("MIDI Output", MidiOutput::new));
         
         RowLayout row1 = new RowLayout(32.0f, Alignment.C, sourceCat, effectCat);

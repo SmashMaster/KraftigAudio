@@ -3,7 +3,6 @@ package kraftig.game.device;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.util.stream.Stream;
-import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
@@ -25,7 +24,7 @@ public class Splitter extends Panel implements AudioDevice
                     new AudioOutputJack(this, inJack::getBuffer))
                 .setPos(new Vec2(), Alignment.C));
         
-        rearInterface.add(new Label(Main.instance().getFont(), "Splitter", 48.0f, new Vec2(), Alignment.C));
+        rearInterface.add(new Label("Splitter", 48.0f, new Vec2(), Alignment.C));
         
         setSizeFromContents(8.0f);
     }
