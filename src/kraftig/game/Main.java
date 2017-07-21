@@ -169,13 +169,16 @@ public final class Main extends Game
                     if (deviceMenu != null) closeDeviceMenu();
                     else
                     {
+                        if (!displayMouse())
+                        {
+                            mouse.setPosDirty();
+                            mouse.setGrabbed(false);
+                            Vec2i res = getResolution();
+                            mouse.setPos(res.x/2.0f, res.y/2.0f);
+                        }
+                        
                         deviceMenu = new DeviceMenu();
                         deviceMenu.setPos(new Vec2(), Alignment.C);
-                        
-                        mouse.setPosDirty();
-                        mouse.setGrabbed(false);
-                        Vec2i res = getResolution();
-                        mouse.setPos(res.x/2.0f, res.y/2.0f);
                     }
                     
                     return;
