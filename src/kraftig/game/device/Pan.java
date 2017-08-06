@@ -17,7 +17,7 @@ import kraftig.game.util.DSPMath;
 public class Pan extends Panel implements AudioDevice
 {
     private final AudioInputJack inJack;
-    private final PanCurveGraph curveGraph = new PanCurveGraph(new Vec2(64.0f, 48.0f));
+    private final PanCurveGraph curveGraph = new PanCurveGraph(new Vec2(32.0f, 16.0f));
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private float pan, power;
@@ -26,16 +26,15 @@ public class Pan extends Panel implements AudioDevice
     {
         frontInterface.add(new RowLayout(8.0f, Alignment.C,
                     inJack = new AudioInputJack(),
-                    curveGraph,
-                    new ColumnLayout(8.0f, Alignment.C,
-                        new Label("Pan", 6.0f),
-                        new Knob(24.0f)
-                            .onValueChanged(v -> set(v, power))
-                            .setValue(0.5f),
-                        new Label("Power", 6.0f),
-                        new Knob(24.0f)
+                    new ColumnLayout(4.0f, Alignment.C,
+                        new Label("Power Curve", 6.0f),
+                        curveGraph,
+                        new Knob(12.0f)
                             .onValueChanged(v -> set(pan, v))
                             .setValue(0.5f)),
+                    new Knob(24.0f)
+                        .onValueChanged(v -> set(v, power))
+                        .setValue(0.5f),
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
