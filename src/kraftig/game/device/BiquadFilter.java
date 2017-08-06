@@ -8,7 +8,7 @@ import kraftig.game.Panel;
 import kraftig.game.audio.BiquadFilterKernel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
-import kraftig.game.gui.BiquadResponseWindow;
+import kraftig.game.gui.BiquadResponseGraph;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
@@ -20,7 +20,7 @@ public class BiquadFilter extends Panel implements AudioDevice
 {
     private final BiquadFilterKernel kernelLeft = new BiquadFilterKernel();
     private final BiquadFilterKernel kernelRight = new BiquadFilterKernel();
-    private final BiquadResponseWindow responseWindow = new BiquadResponseWindow(new Vec2(64.0f, 48.0f));
+    private final BiquadResponseGraph responseGraph = new BiquadResponseGraph(new Vec2(64.0f, 48.0f));
     private final AudioInputJack inJack;
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
@@ -33,17 +33,17 @@ public class BiquadFilter extends Panel implements AudioDevice
         frontInterface.add(new RowLayout(16.0f, Alignment.C,
                     inJack = new AudioInputJack(),
                     new RadioButtons("Low Pass", "Band Pass", "High Pass", "Band Reject", "All Pass")
-                        .onValueChanged(mode -> setFilter(mode, filterFreq, filterQ))
+                        .onValueChanged(mode -> set(mode, filterFreq, filterQ))
                         .setValue(0),
-                    responseWindow,
+                    responseGraph,
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Freq", 6.0f),
                         new Knob(24.0f)
-                            .onValueChanged(v -> setFilter(filterMode, (float)DSPMath.experp(20.0, 20000.0, v), filterQ))
+                            .onValueChanged(v -> set(filterMode, (float)DSPMath.experp(20.0, 20000.0, v), filterQ))
                             .setValue(0.5f),
                         new Label("Q factor", 6.0f),
                         new Knob(24.0f)
-                            .onValueChanged(v -> setFilter(filterMode, filterFreq, (float)Math.pow(16.0, v*2.0 - 1.0)))
+                            .onValueChanged(v -> set(filterMode, filterFreq, (float)Math.pow(16.0, v*2.0 - 1.0)))
                             .setValue(0.5f)),
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
@@ -53,7 +53,7 @@ public class BiquadFilter extends Panel implements AudioDevice
         setSizeFromContents(8.0f);
     }
     
-    private void setFilter(int mode, float freq, float q)
+    private void set(int mode, float freq, float q)
     {
         filterMode = mode;
         filterFreq = freq;
@@ -69,7 +69,7 @@ public class BiquadFilter extends Panel implements AudioDevice
         }
         
         kernelRight.s.set(kernelLeft.s);
-        responseWindow.update(kernelLeft.s);
+        responseGraph.update(kernelLeft.s);
     }
     
     @Override

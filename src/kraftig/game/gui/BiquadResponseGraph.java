@@ -10,7 +10,7 @@ import kraftig.game.audio.BiquadFilterKernel.Settings;
 import kraftig.game.util.DSPMath;
 import org.lwjgl.opengl.GL11;
 
-public class BiquadResponseWindow implements UIElement
+public class BiquadResponseGraph implements UIElement
 {
     private static final float MIN_FREQ = 20.0f, MAX_FREQ = 20000.0f;
     private static final int SEGMENTS = 128;
@@ -20,12 +20,12 @@ public class BiquadResponseWindow implements UIElement
     
     private final float[] response = new float[SEGMENTS];
     
-    public BiquadResponseWindow(Vec2 radius)
+    public BiquadResponseGraph(Vec2 radius)
     {
         this.radius.set(radius);
     }
     
-    public BiquadResponseWindow update(Settings s)
+    public BiquadResponseGraph update(Settings s)
     {
         double num0 = s.b0*s.b0 + s.b1*s.b1 + s.b2*s.b2;
         double num1 = (s.b0*s.b1 + s.b1*s.b2)*2.0f;
@@ -60,7 +60,7 @@ public class BiquadResponseWindow implements UIElement
     }
 
     @Override
-    public BiquadResponseWindow setPos(Vec2 pos, Alignment align)
+    public BiquadResponseGraph setPos(Vec2 pos, Alignment align)
     {
         align.align(pos, radius, this.pos);
         return this;
