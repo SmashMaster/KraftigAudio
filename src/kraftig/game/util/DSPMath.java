@@ -32,6 +32,12 @@ public class DSPMath
         for (int i=0; i<samples; i++) out[i] = 0.0f;
     }
     
+    public static final void zero(float[][] out, int samples)
+    {
+        zero(out[0], samples);
+        zero(out[1], samples);
+    }
+    
     public static final void apply(float[] in, float[] out, int samples, FloatFunction function)
     {
         if (in == null)
@@ -42,11 +48,7 @@ public class DSPMath
     
     public static final void apply(float[][] in, float[][] out, int samples, FloatFunction function)
     {
-        if (in == null)
-        {
-            zero(out[0], samples);
-            zero(out[1], samples);
-        }
+        if (in == null) zero(out, samples);
         else
         {
             apply(in[0], out[0], samples, function);

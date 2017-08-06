@@ -7,28 +7,35 @@ import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
+import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
+import kraftig.game.gui.PanCurveGraph;
 import kraftig.game.gui.RowLayout;
-import kraftig.game.gui.TextBox;
 import kraftig.game.util.DSPMath;
 
 public class Pan extends Panel implements AudioDevice
 {
     private final AudioInputJack inJack;
+    private final PanCurveGraph curveGraph = new PanCurveGraph(new Vec2(64.0f, 48.0f));
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
-    private final TextBox textBox = new TextBox(new Vec2(72.0f, 20.0f), Alignment.E, 32.0f);
-    private int displayMode;
-    private float gain;
     
+    private float pan, power;
+
     public Pan()
     {
         frontInterface.add(new RowLayout(8.0f, Alignment.C,
                     inJack = new AudioInputJack(),
-                    new Knob(32.0f)
-                            .onValueChanged(v -> set(displayMode, (float)Math.pow(16.0, v*2.0 - 1.0)))
+                    curveGraph,
+                    new ColumnLayout(8.0f, Alignment.C,
+                        new Label("Pan", 6.0f),
+                        new Knob(24.0f)
+                            .onValueChanged(v -> set(v, power))
                             .setValue(0.5f),
-                    textBox,
+                        new Label("Power", 6.0f),
+                        new Knob(24.0f)
+                            .onValueChanged(v -> set(pan, v))
+                            .setValue(0.5f)),
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
@@ -37,21 +44,12 @@ public class Pan extends Panel implements AudioDevice
         setSizeFromContents(8.0f);
     }
     
-    private void set(int displayMode, float gain)
+    private void set(float pan, float power)
     {
-        this.displayMode = displayMode;
-        this.gain = gain;
+        this.pan = pan;
+        this.power = power;
         
-        if (displayMode == 0) //dB
-        {
-            float db = (float)(10.0*Math.log10(gain));
-            textBox.setText(String.format("%.1f", db) + " dB");
-        }
-        else
-        {
-            if (gain >= 1.0f) textBox.setText("\u00D7" + String.format("%.3f", gain));
-            else textBox.setText("\u00F7" + String.format("%.3f", (1.0f/gain)));
-        }
+        curveGraph.update(pan, power);
     }
     
     @Override
@@ -63,6 +61,26 @@ public class Pan extends Panel implements AudioDevice
     @Override
     public void process(int samples)
     {
-        DSPMath.apply(inJack.getBuffer(), buffer, samples, v -> v*gain);
+        float[][] in = inJack.getBuffer();
+        
+        if (in == null) DSPMath.zero(buffer, samples);
+        else if (pan >= 0.5) for (int i=0; i<samples; i++)
+        {
+            float l = in[0][i];
+            float r = in[1][i];
+            float t = (pan - 0.5f)*2.0f;
+
+            buffer[0][i] = (1.0f - t)*l;
+            buffer[1][i] = (1.0f - t)*r + t*(l + r)*(0.5f + power*0.5f);
+        }
+        else for (int i=0; i<samples; i++)
+        {
+            float l = in[0][i];
+            float r = in[1][i];
+            float t = (0.5f - pan)*2.0f;
+
+            buffer[0][i] = (1.0f - t)*l + t*(l + r)*(0.5f + power*0.5f);
+            buffer[1][i] = (1.0f - t)*r;
+        }
     }
 }
