@@ -4,38 +4,33 @@ import com.samrj.devil.game.Keyboard;
 import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.Camera3DController;
 import com.samrj.devil.math.Util;
-import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
 import org.lwjgl.glfw.GLFW;
 
 public class Player
 {
-    private static final float Z_NEAR = 1.0f/64.0f, Z_FAR = 128.0f;
-    private static final float FOV = Util.toRadians(90.0f);
     private static final float SENSITIVTY = Util.toRadians(1.0f/8.0f);
     private static final float HEIGHT = 1.75f;
     private static final float SPEED = 0.75f, SPEED_SPRINT = 2.5f, ACC = 8.0f;
     
     private final Keyboard keyboard;
-    
     private final Vec3 pos, vel = new Vec3();
-    private final Camera3D camera;
     private final Camera3DController cameraController;
     
-    Player(Keyboard keyboard, Vec2i resolution)
+    Player(Keyboard keyboard, Camera3D camera)
     {
         this.keyboard = keyboard;
         
-        camera = new Camera3D(Z_NEAR, Z_FAR, FOV, (float)resolution.y/resolution.x);
         cameraController = new Camera3DController(camera);
         cameraController.sensitivity = SENSITIVTY;
         cameraController.height = HEIGHT;
         pos = cameraController.target;
     }
     
-    Camera3D getCamera()
+    void setCamera(Camera3D camera)
     {
-        return camera;
+        cameraController.setCamera(camera);
+        cameraController.update();
     }
     
     void onMouseMoved(float x, float y, float dx, float dy)

@@ -8,6 +8,7 @@ import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.GraphicsUtil;
 import com.samrj.devil.math.Mat3;
 import com.samrj.devil.math.Quat;
+import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
@@ -31,6 +32,9 @@ import org.lwjgl.opengl.GL13;
 
 public final class Main extends Game
 {
+    private static final float Z_NEAR = 1.0f/64.0f, Z_FAR = 128.0f;
+    private static final float FOV = Util.toRadians(90.0f);
+    
     public static final int SAMPLE_RATE = 48000;
     public static final double SAMPLE_WIDTH = 1.0/SAMPLE_RATE;
     public static final AudioFormat AUDIO_FORMAT = new AudioFormat(SAMPLE_RATE, 16, 2, true, false);
@@ -82,8 +86,8 @@ public final class Main extends Game
     
     private final VectorFont font;
     private final Crosshair crosshair;
+    private Camera3D camera;
     private final Player player;
-    private final Camera3D camera;
     private final Skybox skybox;
     private final FloorGrid floor;
     private final ArrayList<Panel> panels = new ArrayList<>();
@@ -110,8 +114,8 @@ public final class Main extends Game
         
         font = new VectorFont("kraftig/res/fonts/DejaVuSans.ttf");
         crosshair = new Crosshair();
-        player = new Player(keyboard, getResolution());
-        camera = player.getCamera();
+        camera = new Camera3D(Z_NEAR, Z_FAR, FOV, getResolution());
+        player = new Player(keyboard, camera);
         skybox = new Skybox();
         floor = new FloorGrid();
         
@@ -405,6 +409,8 @@ public final class Main extends Game
         
         //Load screen matrix to draw HUD.
         Vec2i res = getResolution();
+        if (res.x <= 0 || res.y <= 0) return;
+        
         GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glLoadIdentity();
         GL11.glOrtho(-res.x*0.5f, res.x*0.5f, -res.y*0.5f, res.y*0.5f, -1.0f, 1.0f);
@@ -415,6 +421,16 @@ public final class Main extends Game
             crosshair.renderCrosshair();
         
         if (deviceMenu != null) deviceMenu.render(1.0f);
+    }
+    
+    @Override
+    public void onResized(int width, int height)
+    {
+        if (width > 0 && height > 0)
+        {
+            camera = new Camera3D(Z_NEAR, Z_FAR, FOV, getResolution());
+            player.setCamera(camera);
+        }
     }
     
     @Override

@@ -23,8 +23,9 @@ public class DeviceMenu implements UIElement
     public DeviceMenu()
     {
         Vec2i res = Main.instance().getResolution();
+        float width = res.x/2.0f - 16.0f;
         float height = res.y/2.0f - 16.0f;
-        scrollBox = new ScrollBox(new Vec2(height*0.75f, height), Alignment.C);
+        scrollBox = new ScrollBox(new Vec2(Math.min(height*0.75f, width), height), Alignment.C);
         
         ColumnLayout sourceCat = new ColumnLayout(2.0f, Alignment.C,
                 new Label("Sources", 24.0f),

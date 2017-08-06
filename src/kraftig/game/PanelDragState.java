@@ -32,7 +32,7 @@ public class PanelDragState implements InteractionState
     {
         Player player = Main.instance().getPlayer();
         
-        Vec3 pos = new Vec3(player.getCamera().pos);
+        Vec3 pos = new Vec3(Main.instance().getCamera().pos);
         pos.madd(Main.instance().getMouseDir(), dist);
         pos.madd(panel.rightDir, -mp.x);
         pos.y -= mp.y;
