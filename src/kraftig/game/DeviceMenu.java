@@ -40,7 +40,8 @@ public class DeviceMenu implements UIElement
         ColumnLayout utilityCat = new ColumnLayout(2.0f, Alignment.C,
                 new Label("Utility", 24.0f),
                 new SpawnButton("Adder", Adder::new),
-                new SpawnButton("Splitter", Splitter::new));
+                new SpawnButton("Splitter", Splitter::new),
+                new SpawnButton("Stereo Splitter", StereoSplitter::new));
         
         ColumnLayout outputCat = new ColumnLayout(2.0f, Alignment.C,
                 new Label("Output", 24.0f),

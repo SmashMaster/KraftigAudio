@@ -114,8 +114,8 @@ public class OscilloscopeScreen implements UIElement
         GL11.glBegin(GL11.GL_LINES);
         for (int s = 1; s < sampleCount; s++)
         {
-            float l0 = clamp(buffer[0][s - 1]), l1 = clamp(buffer[0][s]);
-            float r0 = clamp(buffer[1][s - 1]), r1 = clamp(buffer[1][s]);
+            float l0 = buffer[0][s - 1], l1 = buffer[0][s];
+            float r0 = buffer[1][s - 1], r1 = buffer[1][s];
 
             float x0, x1, y0, y1;
 
@@ -139,8 +139,8 @@ public class OscilloscopeScreen implements UIElement
             float a = alpha*brightness/(dist + 0.01f);
 
             GL11.glColor4f(0.125f*a, 1.0f*a, 0.125f*a, 1.0f);
-            GL11.glVertex2f(x0, y0);
-            GL11.glVertex2f(x1, y1);
+            GL11.glVertex2f(clamp(x0), clamp(y0));
+            GL11.glVertex2f(clamp(x1), clamp(y1));
         }
         GL11.glEnd();
         
