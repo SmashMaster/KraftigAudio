@@ -3,6 +3,7 @@ package kraftig.game.device;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.util.stream.Stream;
+import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.audio.BiquadFilterKernel;
 import kraftig.game.gui.AudioInputJack;
@@ -21,7 +22,7 @@ public class BiquadFilter extends Panel implements AudioDevice
     private final BiquadFilterKernel kernelRight = new BiquadFilterKernel();
     private final BiquadResponseWindow responseWindow = new BiquadResponseWindow(new Vec2(64.0f, 48.0f));
     private final AudioInputJack inJack;
-    private final float[][] buffer = new float[2][48000];
+    private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private int filterMode;
     private float filterFreq;

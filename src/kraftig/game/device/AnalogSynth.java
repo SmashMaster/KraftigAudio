@@ -16,7 +16,7 @@ import kraftig.game.gui.RowLayout;
 
 public class AnalogSynth extends Panel implements AudioDevice
 {
-    private final float[][] buffer = new float[2][48000];
+    private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private final IntSet notes = new IntSet();
     

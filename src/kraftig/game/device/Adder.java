@@ -3,6 +3,7 @@ package kraftig.game.device;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.util.stream.Stream;
+import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
@@ -13,7 +14,7 @@ public class Adder extends Panel implements AudioDevice
 {
     private final AudioInputJack[] inJacks = new AudioInputJack[4];
     
-    private final float[][] buffer = new float[2][48000];
+    private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     public Adder()
     {

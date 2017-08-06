@@ -57,13 +57,8 @@ public class ScrollBox implements UIElement
     public ScrollBox setContent(UIElement content)
     {
         this.content = content;
-        
-        if (content != null)
-        {
-            content.setPos(new Vec2(pos.x - radius.x, pos.y + radius.y), Alignment.SE);
-            if (panel != null) content.updateMatrix(matrix, panel, front);
-        }
-        
+        setPos(pos, Alignment.C);
+        if (content != null && panel != null) content.updateMatrix(matrix, panel, front);
         return this;
     }
     
