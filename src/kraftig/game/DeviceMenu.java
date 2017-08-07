@@ -42,7 +42,7 @@ public class DeviceMenu implements UIElement
                 new SpawnButton("Adder", Adder::new),
                 new SpawnButton("Crossfade", Crossfade::new),
                 new SpawnButton("Splitter", Splitter::new),
-                new SpawnButton("Pan", Pan::new),
+                new SpawnButton("Balance", Pan::new),
                 new SpawnButton("Stereo Splitter", StereoSplitter::new));
         
         ColumnLayout outputCat = new ColumnLayout(2.0f, Alignment.C,

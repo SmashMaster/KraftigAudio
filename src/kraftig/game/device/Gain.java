@@ -48,7 +48,7 @@ public class Gain extends Panel implements AudioDevice
         
         if (displayMode == 0) //dB
         {
-            float db = (float)(10.0*Math.log10(gain));
+            float db = DSPMath.dB(gain);
             textBox.setText(String.format("%.1f", db) + " dB");
         }
         else

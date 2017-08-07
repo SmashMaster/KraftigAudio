@@ -8,33 +8,34 @@ import kraftig.game.Panel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.ColumnLayout;
+import kraftig.game.gui.CrossfadeCurveGraph;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
-import kraftig.game.gui.PanCurveGraph;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.util.DSPMath;
 
 public class Pan extends Panel implements AudioDevice
 {
     private final AudioInputJack inJack;
-    private final PanCurveGraph curveGraph = new PanCurveGraph(new Vec2(32.0f, 16.0f));
+    private final CrossfadeCurveGraph curveGraph;
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
-    private float pan, power;
+    private float fade, power;
 
     public Pan()
     {
         frontInterface.add(new RowLayout(8.0f, Alignment.C,
                     inJack = new AudioInputJack(),
-                    new ColumnLayout(4.0f, Alignment.C,
-                        new Label("Power Curve", 6.0f),
-                        curveGraph,
-                        new Knob(12.0f)
-                            .onValueChanged(v -> set(pan, v))
+                    curveGraph = new CrossfadeCurveGraph(new Vec2(64.0f, 48.0f)),
+                    new ColumnLayout(8.0f, Alignment.C,
+                        new Label("Pan", 6.0f),
+                        new Knob(24.0f)
+                            .onValueChanged(v -> set(v, power))
+                            .setValue(0.5f),
+                        new Label("Power", 6.0f),
+                        new Knob(24.0f)
+                            .onValueChanged(v -> set(fade, 1.0f - v*0.5f))
                             .setValue(0.5f)),
-                    new Knob(24.0f)
-                        .onValueChanged(v -> set(v, power))
-                        .setValue(0.5f),
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
@@ -43,12 +44,12 @@ public class Pan extends Panel implements AudioDevice
         setSizeFromContents(8.0f);
     }
     
-    private void set(float pan, float power)
+    private void set(float fade, float power)
     {
-        this.pan = pan;
+        this.fade = fade;
         this.power = power;
         
-        curveGraph.update(pan, power);
+        curveGraph.update(fade, power);
     }
     
     @Override
@@ -63,23 +64,16 @@ public class Pan extends Panel implements AudioDevice
         float[][] in = inJack.getBuffer();
         
         if (in == null) DSPMath.zero(buffer, samples);
-        else if (pan >= 0.5) for (int i=0; i<samples; i++)
+        else
         {
-            float l = in[0][i];
-            float r = in[1][i];
-            float t = (pan - 0.5f)*2.0f;
-
-            buffer[0][i] = (1.0f - t)*l;
-            buffer[1][i] = (1.0f - t)*r + t*(l + r)*(0.5f + power*0.5f);
-        }
-        else for (int i=0; i<samples; i++)
-        {
-            float l = in[0][i];
-            float r = in[1][i];
-            float t = (0.5f - pan)*2.0f;
-
-            buffer[0][i] = (1.0f - t)*l + t*(l + r)*(0.5f + power*0.5f);
-            buffer[1][i] = (1.0f - t)*r;
+            float lf = (float)(Math.pow(1.0 - fade, power));
+            float rf = (float)(Math.pow(fade, power));
+            
+            for (int i=0; i<samples; i++)
+            {
+                buffer[0][i] = in[0][i]*lf;
+                buffer[1][i] = in[1][i]*rf;
+            }
         }
     }
 }

@@ -56,6 +56,12 @@ public class DSPMath
         }
     }
     
+    //decibels
+    public static final float dB(float gain)
+    {
+        return (float)(10.0*Math.log10(gain));
+    }
+    
     private DSPMath()
     {
     }
