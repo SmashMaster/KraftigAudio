@@ -8,6 +8,7 @@ import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioOutputJack;
+import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.MidiInputJack;
@@ -26,14 +27,16 @@ public class AnalogSynth extends Panel implements AudioDevice
     
     public AnalogSynth()
     {
-        frontInterface.add(new RowLayout(32.0f, Alignment.C,
+        frontInterface.add(new RowLayout(12.0f, Alignment.C,
                     new MidiInputJack(this::receive),
                     new RadioButtons("Sine", "Triangle", "Sawtooth", "Square")
                         .onValueChanged(i -> waveform = i)
                         .setValue(0),
-                    new Knob(32.0f)
-                        .setValue(0.25f)
-                        .onValueChanged(f -> amplitude = f),
+                    new ColumnLayout(8.0f, Alignment.C,
+                        new Label("Amplitude", 6.0f),
+                        new Knob(24.0f)
+                            .setValue(0.25f)
+                            .onValueChanged(f -> amplitude = f)),
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         

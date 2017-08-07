@@ -35,7 +35,8 @@ public class DeviceMenu implements UIElement
         ColumnLayout effectCat = new ColumnLayout(2.0f, Alignment.C,
                 new Label("Effects", 24.0f),
                 new SpawnButton("Gain", Gain::new),
-                new SpawnButton("Biquad Filter", BiquadFilter::new));
+                new SpawnButton("Biquad Filter", BiquadFilter::new),
+                new SpawnButton("Delay", Delay::new));
         
         ColumnLayout utilityCat = new ColumnLayout(2.0f, Alignment.C,
                 new Label("Utility", 24.0f),
