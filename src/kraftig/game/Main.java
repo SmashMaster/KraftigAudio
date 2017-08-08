@@ -367,7 +367,7 @@ public final class Main extends Game
             device.getInputDevices().forEach(in ->
             {
                 dag.add(in);
-                dag.addEdgeSafe(in, device);
+                dag.addEdge(in, device);
             });
         }
         

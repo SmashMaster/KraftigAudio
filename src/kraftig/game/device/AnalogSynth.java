@@ -42,7 +42,7 @@ public class AnalogSynth extends Panel implements AudioDevice
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Phase", 6.0f),
                         phaseKnob = new Knob(24.0f)
-                            .setValue(0.25f)
+                            .setValue(0.5f)
                             .onValueChanged(v -> phase = v)),
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
