@@ -30,7 +30,8 @@ public class DeviceMenu implements UIElement
         ColumnLayout sourceCat = new ColumnLayout(2.0f, Alignment.C,
                 new Label("Sources", 24.0f),
                 new SpawnButton("System Input", SystemInput::new),
-                new SpawnButton("Analog Synth", AnalogSynth::new));
+                new SpawnButton("Analog Synth", AnalogSynth::new),
+                new SpawnButton("Noise Synth", NoiseSynth::new));
         
         ColumnLayout effectCat = new ColumnLayout(2.0f, Alignment.C,
                 new Label("Effects", 24.0f),
