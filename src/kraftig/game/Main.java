@@ -99,6 +99,7 @@ public final class Main extends Game
     private FocusQuery focus;
     private InteractionState interactionState;
     private DeviceMenu deviceMenu;
+    private long time;
     
     private double sampleRemainder = 0.0f;
     
@@ -282,6 +283,11 @@ public final class Main extends Game
         mouse.setGrabbed(!displayMouse());
     }
     
+    public long getTime()
+    {
+        return time;
+    }
+    
     @Override
     public void onMouseMoved(float x, float y, float dx, float dy)
     {
@@ -367,6 +373,7 @@ public final class Main extends Game
         
         //Update all devices.
         for (AudioDevice device : dag.sort()) device.process(samples);
+        time += samples;
     }
     
     @Override

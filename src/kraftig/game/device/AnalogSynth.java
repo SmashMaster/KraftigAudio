@@ -19,13 +19,12 @@ import kraftig.game.util.DSPUtil;
 
 public class AnalogSynth extends Panel implements AudioDevice
 {
-    private final Knob ampKnob;
+    private final Knob ampKnob, phaseKnob;
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private final IntSet notes = new IntSet();
     
-    private double time;
-    private float amplitude;
+    private float amplitude, phase;
     private int waveform;
     
     public AnalogSynth()
@@ -33,13 +32,18 @@ public class AnalogSynth extends Panel implements AudioDevice
         frontInterface.add(new RowLayout(12.0f, Alignment.C,
                     new MidiInputJack(this::receive),
                     new RadioButtons("Sine", "Triangle", "Sawtooth", "Square")
-                        .onValueChanged(i -> waveform = i)
+                        .onValueChanged(v -> waveform = v)
                         .setValue(0),
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Amplitude", 6.0f),
                         ampKnob = new Knob(24.0f)
                             .setValue(0.25f)
-                            .onValueChanged(f -> amplitude = f)),
+                            .onValueChanged(v -> amplitude = v)),
+                    new ColumnLayout(8.0f, Alignment.C,
+                        new Label("Phase", 6.0f),
+                        phaseKnob = new Knob(24.0f)
+                            .setValue(0.25f)
+                            .onValueChanged(v -> phase = v)),
                     new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
@@ -71,7 +75,7 @@ public class AnalogSynth extends Panel implements AudioDevice
     @Override
     public Stream<AudioDevice> getInputDevices()
     {
-        return DSPUtil.getDevices(ampKnob);
+        return DSPUtil.getDevices(ampKnob, phaseKnob);
     }
     
     @Override
@@ -81,6 +85,11 @@ public class AnalogSynth extends Panel implements AudioDevice
         {
             float v = 0.0f;
             
+            double time = (Main.instance().getTime() + i)*Main.SAMPLE_WIDTH;
+            
+            ampKnob.updateValue(i);
+            phaseKnob.updateValue(i);
+            
             for (int ni=0; ni<notes.size(); ni++)
             {
                 int note = notes.get(ni);
@@ -89,19 +98,16 @@ public class AnalogSynth extends Panel implements AudioDevice
                 
                 switch (waveform)
                 {
-                    case 0: v += Math.sin(Math.PI*2.0*freq*time); break; //Sine wave
-                    case 1: v += Math.abs((time % len)/len - 0.5)*4.0 - 1.0; break; //Triangle wave
-                    case 2: v += ((time % len)/len)*2.0 - 1.0; break; //Sawtooth wave
-                    case 3: v += (time % len) > len*0.5 ? -1.0 : 1.0; break; //Square wave
+                    case 0: v += Math.sin(Math.PI*2.0*(freq*time + phase)); break; //Sine wave
+                    case 1: v += Math.abs(((time + phase*len) % len)/len - 0.5)*4.0 - 1.0; break; //Triangle wave
+                    case 2: v += (((time + phase*len) % len)/len)*2.0 - 1.0; break; //Sawtooth wave
+                    case 3: v += ((time + phase*len) % len) > len*0.5 ? -1.0 : 1.0; break; //Square wave
                 }
             }
             
-            ampKnob.updateValue(i);
             v *= amplitude;
             buffer[0][i] = v;
             buffer[1][i] = v;
-            
-            time += Main.SAMPLE_WIDTH;
         }
     }
 }
