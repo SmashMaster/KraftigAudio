@@ -14,13 +14,14 @@ import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.gui.TextBox;
 import kraftig.game.util.CircularBuffer;
-import kraftig.game.util.DSPMath;
+import kraftig.game.util.DSPUtil;
 
 public class Delay extends Panel implements AudioDevice
 {
     private static final int MAX_DELAY = 48000;
     
     private final AudioInputJack inJack;
+    private final Knob delayKnob, feedbackKnob;
     private final TextBox textBox = new TextBox(new Vec2(48.0f, 16.0f), Alignment.E, 24.0f);
     
     private final CircularBuffer left = new CircularBuffer(MAX_DELAY + 8);
@@ -37,7 +38,7 @@ public class Delay extends Panel implements AudioDevice
                     inJack = new AudioInputJack(),
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Delay", 6.0f),
-                        new Knob(24.0f)
+                        delayKnob = new Knob(24.0f)
                             .onValueChanged(v -> set((int)Math.round(Math.pow(v, 3.0)*MAX_DELAY), displayMode, feedback))
                             .setValue(0.5f)),
                     new RadioButtons("N", "ms")
@@ -46,7 +47,7 @@ public class Delay extends Panel implements AudioDevice
                     textBox,
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Feedback", 6.0f),
-                        new Knob(24.0f)
+                        feedbackKnob = new Knob(24.0f)
                             .onValueChanged(v -> set(delay, displayMode, v))
                             .setValue(0.0f)),
                     new AudioOutputJack(this, buffer))
@@ -62,15 +63,12 @@ public class Delay extends Panel implements AudioDevice
         this.delay = delay;
         this.displayMode = displayMode;
         this.feedback = feedback;
-        
-        if (displayMode == 0) textBox.setText("" + delay);
-        else textBox.setText("" + ((delay*1000.0f)/Main.SAMPLE_RATE));
     }
     
     @Override
     public Stream<AudioDevice> getInputDevices()
     {
-        return inJack.getDevices();
+        return DSPUtil.getDevices(inJack, delayKnob, feedbackKnob);
     }
     
     @Override
@@ -80,23 +78,25 @@ public class Delay extends Panel implements AudioDevice
         
         if (in == null)
         {
-            DSPMath.zero(buffer, samples);
+            DSPUtil.updateKnobs(samples, delayKnob, feedbackKnob);
+            DSPUtil.zero(buffer, samples);
             left.clear();
             right.clear();
-        }
-        else if (delay == 0)
-        {
-            left.clear();
-            right.clear();
-            
-            for (int i=0; i<samples; i++)
-            { 
-                buffer[0][i] = in[0][i];
-                buffer[1][i] = in[1][i];
-            }
         }
         else for (int i=0; i<samples; i++)
         {
+            delayKnob.updateValue(i);
+            feedbackKnob.updateValue(i);
+            
+            if (delay == 0)
+            {
+                buffer[0][i] = in[0][i];
+                buffer[1][i] = in[1][i];
+                left.clear();
+                right.clear();
+                continue;
+            }
+            
             float l = in[0][i];
             float r = in[1][i];
             int size = left.getSize();
@@ -127,5 +127,13 @@ public class Delay extends Panel implements AudioDevice
                 right.write(r + fbr*feedback);
             }
         }
+    }
+    
+    @Override
+    public void render()
+    {
+        if (displayMode == 0) textBox.setText("" + delay);
+        else textBox.setText("" + ((delay*1000.0f)/Main.SAMPLE_RATE));
+        super.render();
     }
 }

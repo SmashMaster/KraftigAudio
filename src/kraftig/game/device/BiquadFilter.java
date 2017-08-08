@@ -14,13 +14,14 @@ import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
-import kraftig.game.util.DSPMath;
+import kraftig.game.util.DSPUtil;
 
 public class BiquadFilter extends Panel implements AudioDevice
 {
     private final BiquadFilterKernel kernelLeft = new BiquadFilterKernel();
     private final BiquadFilterKernel kernelRight = new BiquadFilterKernel();
     private final BiquadResponseGraph responseGraph = new BiquadResponseGraph(new Vec2(64.0f, 48.0f));
+    private final Knob freqKnob, qKnob;
     private final AudioInputJack inJack;
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
@@ -38,11 +39,11 @@ public class BiquadFilter extends Panel implements AudioDevice
                     responseGraph,
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Freq", 6.0f),
-                        new Knob(24.0f)
-                            .onValueChanged(v -> set(filterMode, (float)DSPMath.experp(20.0, 20000.0, v), filterQ))
+                        freqKnob = new Knob(24.0f)
+                            .onValueChanged(v -> set(filterMode, (float)DSPUtil.experp(20.0, 20000.0, v), filterQ))
                             .setValue(0.5f),
                         new Label("Q factor", 6.0f),
-                        new Knob(24.0f)
+                        qKnob = new Knob(24.0f)
                             .onValueChanged(v -> set(filterMode, filterFreq, (float)Math.pow(16.0, v*2.0 - 1.0)))
                             .setValue(0.5f)),
                     new AudioOutputJack(this, buffer))
@@ -69,13 +70,12 @@ public class BiquadFilter extends Panel implements AudioDevice
         }
         
         kernelRight.s.set(kernelLeft.s);
-        responseGraph.update(kernelLeft.s);
     }
     
     @Override
     public Stream<AudioDevice> getInputDevices()
     {
-        return inJack.getDevices();
+        return DSPUtil.getDevices(inJack, freqKnob, qKnob);
     }
     
     @Override
@@ -83,7 +83,22 @@ public class BiquadFilter extends Panel implements AudioDevice
     {
         float[][] in = inJack.getBuffer();
         
-        kernelLeft.apply(in != null ? in[0] : null, buffer[0], samples);
-        kernelRight.apply(in != null ? in[1] : null, buffer[1], samples);
+        float[] leftIn = in != null ? in[0] : null;
+        float[] rightIn = in != null ? in[1] : null;
+        
+        for (int i=0; i<samples; i++)
+        {
+            freqKnob.updateValue(i);
+            qKnob.updateValue(i);
+            kernelLeft.apply(leftIn, buffer[0], i);
+            kernelRight.apply(rightIn, buffer[1], i);
+        }
+    }
+    
+    @Override
+    public void render()
+    {
+        responseGraph.update(kernelLeft.s);
+        super.render();
     }
 }

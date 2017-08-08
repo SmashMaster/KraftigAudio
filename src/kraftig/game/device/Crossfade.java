@@ -12,10 +12,12 @@ import kraftig.game.gui.CrossfadeCurveGraph;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.util.DSPUtil;
 
 public class Crossfade extends Panel implements AudioDevice
 {
     private final AudioInputJack inJackA, inJackB;
+    private final Knob fadeKnob, powerKnob;
     private final CrossfadeCurveGraph curveGraph = new CrossfadeCurveGraph(new Vec2(64.0f, 48.0f));
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
@@ -30,11 +32,11 @@ public class Crossfade extends Panel implements AudioDevice
                     curveGraph,
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Fade", 6.0f),
-                        new Knob(24.0f)
+                        fadeKnob = new Knob(24.0f)
                             .onValueChanged(v -> set(v, power))
                             .setValue(0.5f),
                         new Label("Power", 6.0f),
-                        new Knob(24.0f)
+                        powerKnob = new Knob(24.0f)
                             .onValueChanged(v -> set(fade, 1.0f - v*0.5f))
                             .setValue(0.5f)),
                     new AudioOutputJack(this, buffer))
@@ -49,14 +51,12 @@ public class Crossfade extends Panel implements AudioDevice
     {
         this.fade = fade;
         this.power = power;
-        
-        curveGraph.update(fade, power);
     }
     
     @Override
     public Stream<AudioDevice> getInputDevices()
     {
-        return Stream.of(inJackA, inJackB).flatMap(AudioInputJack::getDevices);
+        return DSPUtil.getDevices(inJackA, inJackB, fadeKnob, powerKnob);
     }
     
     @Override
@@ -65,12 +65,14 @@ public class Crossfade extends Panel implements AudioDevice
         float[][] inA = inJackA.getBuffer();
         float[][] inB = inJackB.getBuffer();
         
-        float a = (float)Math.pow(1.0 - fade, power);
-        float b = (float)Math.pow(fade, power);
-        
         for (int i=0; i<samples; i++)
         {
             float vl = 0.0f, vr = 0.0f;
+            
+            fadeKnob.updateValue(i);
+            powerKnob.updateValue(i);
+            float a = (float)Math.pow(1.0 - fade, power);
+            float b = (float)Math.pow(fade, power);
             
             if (inA != null)
             {
@@ -87,5 +89,12 @@ public class Crossfade extends Panel implements AudioDevice
             buffer[0][i] = vl;
             buffer[1][i] = vr;
         }
+    }
+    
+    @Override
+    public void render()
+    {
+        curveGraph.update(fade, power);
+        super.render();
     }
 }

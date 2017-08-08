@@ -58,7 +58,7 @@ public class AudioOutputJack extends OutputJack
         GL11.glBegin(GL11.GL_LINE_LOOP);
         for (float t = 0.0f; t < T_END; t += DT)
         {
-            Vec2 p = Util.squareDir(t).normalize().mult(RADIUS_HALF);
+            Vec2 p = Util.squareDir(t).normalize().mult(radius*0.5f);
             GL11.glVertex2f(p.x, p.y);
         }
         GL11.glEnd();

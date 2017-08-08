@@ -9,7 +9,7 @@ import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
-import kraftig.game.util.DSPMath;
+import kraftig.game.util.DSPUtil;
 
 public class Negate extends Panel implements AudioDevice
 {
@@ -39,6 +39,13 @@ public class Negate extends Panel implements AudioDevice
     @Override
     public void process(int samples)
     {
-        DSPMath.apply(inJack.getBuffer(), buffer, samples, v -> -v);
+        float[][] in = inJack.getBuffer();
+        
+        if (in == null) DSPUtil.zero(buffer, samples);
+        else for (int i=0; i<samples; i++)
+        {
+            buffer[0][i] = -in[0][i];
+            buffer[1][i] = -in[1][i];
+        }
     }
 }

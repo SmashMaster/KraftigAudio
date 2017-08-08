@@ -15,12 +15,11 @@ public abstract class Jack implements UIElement
     public static final int SEGMENTS = 32;
     public static final float DT = 8.0f/(SEGMENTS - 1);
     public static final float T_END = 8.0f + DT*0.5f;
-    public static final float RADIUS = 24.0f;
-    public static final float RADIUS_SQ = RADIUS*RADIUS;
-    public static final float RADIUS_HALF = RADIUS/2.0f;
+    public static final float DEFAULT_RADIUS = 24.0f;
     public static final float WIRE_OFFSET = 16.0f;
     
     private final Vec2 pos = new Vec2();
+    protected final float radius;
     private final Mat4 matrix = new Mat4();
     private Panel panel;
     private boolean front;
@@ -28,13 +27,25 @@ public abstract class Jack implements UIElement
     private Runnable onWireChanged;
     private Wire wire;
     
+    public Jack(float radius)
+    {
+        this.radius = radius;
+    }
+    
     public Jack()
     {
+        this(DEFAULT_RADIUS);
+    }
+    
+    public Jack(float radius, Vec2 pos, Alignment align)
+    {
+        this(radius);
+        setPos(pos, align);
     }
     
     public Jack(Vec2 pos, Alignment align)
     {
-        setPos(pos, align);
+        this(DEFAULT_RADIUS, pos, align);
     }
     
     @Override
@@ -44,9 +55,9 @@ public abstract class Jack implements UIElement
     }
     
     @Override
-    public final Vec2 getRadius()
+    public Vec2 getRadius()
     {
-        return new Vec2(RADIUS);
+        return new Vec2(radius);
     }
     
     @Override
@@ -113,10 +124,10 @@ public abstract class Jack implements UIElement
     }
     
     @Override
-    public final UIFocusQuery checkFocus(float dist, Vec2 p)
+    public UIFocusQuery checkFocus(float dist, Vec2 p)
     {
         if (wire != null) return null;
-        else if (p.squareDist(pos) <= RADIUS_SQ) return new UIFocusQuery(this, dist, p);
+        else if (p.squareDist(pos) <= radius*radius) return new UIFocusQuery(this, dist, p);
         else return null;
     }
     
@@ -134,7 +145,7 @@ public abstract class Jack implements UIElement
         GL11.glBegin(GL11.GL_LINE_LOOP);
         for (float t = 0.0f; t < T_END; t += DT)
         {
-            Vec2 p = Util.squareDir(t).normalize().mult(RADIUS);
+            Vec2 p = Util.squareDir(t).normalize().mult(radius);
             GL11.glVertex2f(p.x, p.y);
         }
         GL11.glEnd();

@@ -12,15 +12,17 @@ import kraftig.game.gui.CrossfadeCurveGraph;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
-import kraftig.game.util.DSPMath;
+import kraftig.game.util.DSPUtil;
 
 public class Pan extends Panel implements AudioDevice
 {
     private final AudioInputJack inJack;
     private final CrossfadeCurveGraph curveGraph;
+    private final Knob panKnob, powerKnob;
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private float fade, power;
+    private float fLeft, fRight;
 
     public Pan()
     {
@@ -29,11 +31,11 @@ public class Pan extends Panel implements AudioDevice
                     curveGraph = new CrossfadeCurveGraph(new Vec2(64.0f, 48.0f)),
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Pan", 6.0f),
-                        new Knob(24.0f)
+                        panKnob = new Knob(24.0f)
                             .onValueChanged(v -> set(v, power))
                             .setValue(0.5f),
                         new Label("Power", 6.0f),
-                        new Knob(24.0f)
+                        powerKnob = new Knob(24.0f)
                             .onValueChanged(v -> set(fade, 1.0f - v*0.5f))
                             .setValue(0.5f)),
                     new AudioOutputJack(this, buffer))
@@ -49,13 +51,14 @@ public class Pan extends Panel implements AudioDevice
         this.fade = fade;
         this.power = power;
         
-        curveGraph.update(fade, power);
+        fLeft = (float)(Math.pow(1.0 - fade, power));
+        fRight = (float)(Math.pow(fade, power));
     }
     
     @Override
     public Stream<AudioDevice> getInputDevices()
     {
-        return inJack.getDevices();
+        return DSPUtil.getDevices(inJack, panKnob, powerKnob);
     }
     
     @Override
@@ -63,17 +66,24 @@ public class Pan extends Panel implements AudioDevice
     {
         float[][] in = inJack.getBuffer();
         
-        if (in == null) DSPMath.zero(buffer, samples);
-        else
+        if (in == null)
         {
-            float lf = (float)(Math.pow(1.0 - fade, power));
-            float rf = (float)(Math.pow(fade, power));
-            
-            for (int i=0; i<samples; i++)
-            {
-                buffer[0][i] = in[0][i]*lf;
-                buffer[1][i] = in[1][i]*rf;
-            }
+            DSPUtil.updateKnobs(samples, panKnob, powerKnob);
+            DSPUtil.zero(buffer, samples);
         }
+        else for (int i=0; i<samples; i++)
+        {
+            panKnob.updateValue(i);
+            powerKnob.updateValue(i);
+            buffer[0][i] = in[0][i]*fLeft;
+            buffer[1][i] = in[1][i]*fRight;
+        }
+    }
+    
+    @Override
+    public void render()
+    {
+        curveGraph.update(fade, power);
+        super.render();
     }
 }

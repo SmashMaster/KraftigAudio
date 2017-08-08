@@ -7,7 +7,7 @@ import kraftig.game.FocusQuery;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.audio.BiquadFilterKernel.Settings;
-import kraftig.game.util.DSPMath;
+import kraftig.game.util.DSPUtil;
 import org.lwjgl.opengl.GL11;
 
 public class BiquadResponseGraph implements UIElement
@@ -36,7 +36,7 @@ public class BiquadResponseGraph implements UIElement
         
         for (int i=0; i<SEGMENTS; i++)
         {
-            double freq = DSPMath.experp(MIN_FREQ, MAX_FREQ, i/(SEGMENTS - 1.0));
+            double freq = DSPUtil.experp(MIN_FREQ, MAX_FREQ, i/(SEGMENTS - 1.0));
             double w0 = Math.PI*2.0*freq/Main.SAMPLE_RATE;
             double cos1 = Math.cos(w0);
             double cos2 = Math.cos(w0*2.0);

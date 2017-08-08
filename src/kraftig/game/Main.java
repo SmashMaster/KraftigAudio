@@ -61,7 +61,7 @@ public final class Main extends Game
         hints.hint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
         return hints;
     }
-    
+            
     private static GameConfig config()
     {
         GameConfig config = new GameConfig();
@@ -361,7 +361,7 @@ public final class Main extends Game
             device.getInputDevices().forEach(in ->
             {
                 dag.add(in);
-                dag.addEdge(in, device);
+                dag.addEdgeSafe(in, device);
             });
         }
         

@@ -61,8 +61,8 @@ public class StereoSplitter extends Panel implements AudioDevice
         else
         {
             lBuffer[0] = in[0];
-            lBuffer[1] = EMPTY;
-            rBuffer[0] = EMPTY;
+            lBuffer[1] = in[0];
+            rBuffer[0] = in[1];
             rBuffer[1] = in[1];
         }
     }

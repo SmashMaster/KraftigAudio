@@ -1,6 +1,5 @@
 package kraftig.game.gui;
 
-import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
@@ -8,15 +7,11 @@ import java.util.function.Consumer;
 import kraftig.game.FocusQuery;
 import kraftig.game.InteractionState;
 import kraftig.game.Main;
-import kraftig.game.Panel;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-public class Knob implements UIElement
+public class Knob extends AudioInputJack implements UIElement
 {
-    private static final int SEGMENTS = 32;
-    private static final float DT = 8.0f/(SEGMENTS - 1);
-    private static final float T_END = 8.0f + DT*0.5f;
     private static final float DEAD_ZONE = (float)Math.toRadians(45.0);
     private static final int NOTCHES = 9;
     private static final float NOTCH_ANG0 = DEAD_ZONE + Util.PId2;
@@ -26,15 +21,12 @@ public class Knob implements UIElement
     private static final float NOTCH_LENGTH = 1.25f;
     private static final float SENSITIVITY = 1.0f/256.0f;
     
-    private final Vec2 pos = new Vec2();
-    private final float radius;
-    
     private float value = 0.0f;
     private Consumer<Float> callback;
     
     public Knob(float radius)
     {
-        this.radius = radius/NOTCH_LENGTH;
+        super(radius/NOTCH_LENGTH);
     }
     
     public Knob(float radius, Vec2 pos, Alignment align)
@@ -44,22 +36,9 @@ public class Knob implements UIElement
     }
     
     @Override
-    public final Vec2 getPos()
-    {
-        return new Vec2(pos);
-    }
-    
-    @Override
     public final Vec2 getRadius()
     {
-        return new Vec2(radius);
-    }
-    
-    @Override
-    public final Knob setPos(Vec2 pos, Alignment align)
-    {
-        align.align(pos, getRadius(), this.pos);
-        return this;
+        return new Vec2(radius*NOTCH_LENGTH);
     }
     
     public Knob onValueChanged(Consumer<Float> callback)
@@ -71,21 +50,19 @@ public class Knob implements UIElement
     
     public Knob setValue(float value)
     {
-        this.value = Util.saturate(value);
-        if (callback != null) callback.accept(value);
+        value = Util.saturate(value);
+        if (this.value != value)
+        {
+            this.value = value;
+            if (callback != null) callback.accept(this.value);
+        }
         return this;
     }
     
-    @Override
-    public void updateMatrix(Mat4 matrix, Panel panel, boolean front)
+    public void updateValue(int sampleIndex)
     {
-    }
-    
-    @Override
-    public UIFocusQuery checkFocus(float dist, Vec2 p)
-    {
-        if (p.squareDist(pos) <  radius*radius) return new UIFocusQuery(this, dist, p);
-        else return null;
+        float[][] buffer = getBuffer();
+        if (buffer != null) setValue(buffer[0][sampleIndex]*0.5f + 0.5f);
     }
     
     @Override
@@ -104,8 +81,7 @@ public class Knob implements UIElement
             @Override
             public void onMouseMoved(float x, float y, float dx, float dy)
             {
-                value = Util.saturate(value + dy*SENSITIVITY);
-                if (callback != null) callback.accept(value);
+                setValue(value + dy*SENSITIVITY);
             }
             
             @Override
@@ -118,27 +94,8 @@ public class Knob implements UIElement
     }
     
     @Override
-    public void delete()
+    public void renderSymbol()
     {
-    }
-    
-    @Override
-    public void render(float alpha)
-    {
-        GL11.glPushMatrix();
-        GL11.glTranslatef(pos.x, pos.y, 0.0f);
-        
-        GL11.glLineWidth(1.0f);
-        float color = Main.instance().getFocus() == this ? 0.75f : 1.0f;
-        GL11.glColor4f(color, color, 1.0f, alpha);
-        GL11.glBegin(GL11.GL_LINE_LOOP);
-        for (float t = 0.0f; t < T_END; t += DT)
-        {
-            Vec2 p = Util.squareDir(t).normalize().mult(radius);
-            GL11.glVertex2f(p.x, p.y);
-        }
-        GL11.glEnd();
-        
         GL11.glBegin(GL11.GL_LINES);
         for (float ang = NOTCH_ANG0; ang < NOTCH_END; ang += NOTCH_DA)
         {
@@ -154,7 +111,5 @@ public class Knob implements UIElement
         GL11.glVertex2f(0.0f, 0.0f);
         GL11.glVertex2f(vx, vy);
         GL11.glEnd();
-        
-        GL11.glPopMatrix();
     }
 }

@@ -3,6 +3,7 @@ package kraftig.game.device;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import com.samrj.devil.util.IntSet;
+import java.util.stream.Stream;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
@@ -14,9 +15,11 @@ import kraftig.game.gui.Label;
 import kraftig.game.gui.MidiInputJack;
 import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.util.DSPUtil;
 
 public class AnalogSynth extends Panel implements AudioDevice
 {
+    private final Knob ampKnob;
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private final IntSet notes = new IntSet();
@@ -34,7 +37,7 @@ public class AnalogSynth extends Panel implements AudioDevice
                         .setValue(0),
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Amplitude", 6.0f),
-                        new Knob(24.0f)
+                        ampKnob = new Knob(24.0f)
                             .setValue(0.25f)
                             .onValueChanged(f -> amplitude = f)),
                     new AudioOutputJack(this, buffer))
@@ -66,6 +69,12 @@ public class AnalogSynth extends Panel implements AudioDevice
     }
     
     @Override
+    public Stream<AudioDevice> getInputDevices()
+    {
+        return DSPUtil.getDevices(ampKnob);
+    }
+    
+    @Override
     public void process(int samples)
     {
         for (int i=0; i<samples; i++)
@@ -87,6 +96,7 @@ public class AnalogSynth extends Panel implements AudioDevice
                 }
             }
             
+            ampKnob.updateValue(i);
             v *= amplitude;
             buffer[0][i] = v;
             buffer[1][i] = v;

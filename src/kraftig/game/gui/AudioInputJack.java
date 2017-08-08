@@ -13,6 +13,11 @@ public class AudioInputJack extends InputJack
         super();
     }
     
+    public AudioInputJack(float radius)
+    {
+        super(radius);
+    }
+    
     public AudioInputJack(Vec2 pos, Alignment align)
     {
         super(pos, align);
@@ -50,8 +55,8 @@ public class AudioInputJack extends InputJack
     public void renderSymbol()
     {
         GL11.glBegin(GL11.GL_LINES);
-        GL11.glVertex2f(0.0f, -RADIUS_HALF);
-        GL11.glVertex2f(0.0f, RADIUS_HALF);
+        GL11.glVertex2f(0.0f, -radius*0.5f);
+        GL11.glVertex2f(0.0f, radius*0.5f);
         GL11.glEnd();
     }
 }

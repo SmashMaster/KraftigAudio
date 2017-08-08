@@ -9,6 +9,7 @@ import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.util.DSPUtil;
 
 public class Adder extends Panel implements AudioDevice
 {
@@ -38,7 +39,7 @@ public class Adder extends Panel implements AudioDevice
     @Override
     public Stream<AudioDevice> getInputDevices()
     {
-        return Stream.of(inJacks).flatMap(d -> d.getDevices());
+        return DSPUtil.getDevices(inJacks);
     }
     
     @Override

@@ -18,6 +18,11 @@ public abstract class InputJack extends Jack
         super();
     }
     
+    public InputJack(float radius)
+    {
+        super(radius);
+    }
+    
     public InputJack(Vec2 pos, Alignment align)
     {
         super(pos, align);

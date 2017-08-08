@@ -1,6 +1,11 @@
 package kraftig.game.util;
 
-public class DSPMath
+import java.util.stream.Stream;
+import kraftig.game.device.AudioDevice;
+import kraftig.game.gui.AudioInputJack;
+import kraftig.game.gui.Knob;
+
+public class DSPUtil
 {
     //exponential interpolation
     //returns a value between min and max, given t is between 0 and 1.
@@ -38,31 +43,24 @@ public class DSPMath
         zero(out[1], samples);
     }
     
-    public static final void apply(float[] in, float[] out, int samples, FloatFunction function)
-    {
-        if (in == null)
-            zero(out, samples);
-        else for (int i=0; i<samples; i++)
-            out[i] = function.apply(in[i]);
-    }
-    
-    public static final void apply(float[][] in, float[][] out, int samples, FloatFunction function)
-    {
-        if (in == null) zero(out, samples);
-        else
-        {
-            apply(in[0], out[0], samples, function);
-            apply(in[1], out[1], samples, function);
-        }
-    }
-    
     //decibels
     public static final float dB(float gain)
     {
         return (float)(10.0*Math.log10(gain));
     }
     
-    private DSPMath()
+    public static Stream<AudioDevice> getDevices(AudioInputJack... jacks)
+    {
+        return Stream.of(jacks).flatMap(AudioInputJack::getDevices);
+    }
+    
+    public static void updateKnobs(int samples, Knob... knobs)
+    {
+        int last = samples - 1;
+        for (Knob knob : knobs) knob.updateValue(last);
+    }
+    
+    private DSPUtil()
     {
     }
 }

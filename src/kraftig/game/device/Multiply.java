@@ -9,7 +9,7 @@ import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
-import kraftig.game.util.DSPMath;
+import kraftig.game.util.DSPUtil;
 
 public class Multiply extends Panel implements AudioDevice
 {
@@ -35,7 +35,7 @@ public class Multiply extends Panel implements AudioDevice
     @Override
     public Stream<AudioDevice> getInputDevices()
     {
-        return Stream.of(inJackA, inJackB).flatMap(d -> d.getDevices());
+        return DSPUtil.getDevices(inJackA, inJackB);
     }
     
     @Override
@@ -44,7 +44,7 @@ public class Multiply extends Panel implements AudioDevice
         float[][] inA = inJackA.getBuffer();
         float[][] inB = inJackB.getBuffer();
         
-        if (inA == null || inB == null) DSPMath.zero(buffer, samples);
+        if (inA == null || inB == null) DSPUtil.zero(buffer, samples);
         else for (int i=0; i<samples; i++)
         {
             buffer[0][i] = inA[0][i]*inB[0][i];

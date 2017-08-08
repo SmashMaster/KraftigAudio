@@ -12,7 +12,7 @@ import kraftig.game.gui.Label;
 import kraftig.game.gui.OscilloscopeScreen;
 import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
-import kraftig.game.util.DSPMath;
+import kraftig.game.util.DSPUtil;
 
 public class Oscilloscope extends Panel implements AudioDevice
 {
@@ -21,6 +21,7 @@ public class Oscilloscope extends Panel implements AudioDevice
     
     private final AudioInputJack inJack;
     private final OscilloscopeScreen screen;
+    private final Knob brightnessKnob;
     
     public Oscilloscope()
     {
@@ -32,9 +33,9 @@ public class Oscilloscope extends Panel implements AudioDevice
                             .onValueChanged(screen::setMode),
                         inJack = new AudioInputJack()),
                     screen,
-                    new Knob(16.0f)
+                    brightnessKnob = new Knob(16.0f)
                         .setValue(0.5f)
-                        .onValueChanged(v -> screen.setBrightness(DSPMath.experp(MIN_BRIGHTNESS, MAX_BRIGHTNESS, v))))
+                        .onValueChanged(v -> screen.setBrightness(DSPUtil.experp(MIN_BRIGHTNESS, MAX_BRIGHTNESS, v))))
                 .setPos(new Vec2(), Alignment.C));
         
         rearInterface.add(new Label(Main.instance().getFont(), "Oscilloscope", 48.0f, new Vec2(), Alignment.C));
@@ -52,6 +53,7 @@ public class Oscilloscope extends Panel implements AudioDevice
     public void process(int samples)
     {
         float[][] buffer = inJack.getBuffer();
+        DSPUtil.updateKnobs(samples, brightnessKnob);
         screen.process(buffer, samples);
     }
 }

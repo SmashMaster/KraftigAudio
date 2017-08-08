@@ -12,11 +12,12 @@ import kraftig.game.gui.Label;
 import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.gui.TextBox;
-import kraftig.game.util.DSPMath;
+import kraftig.game.util.DSPUtil;
 
 public class Gain extends Panel implements AudioDevice
 {
     private final AudioInputJack inJack;
+    private final Knob gainKnob;
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     private final TextBox textBox = new TextBox(new Vec2(72.0f, 20.0f), Alignment.E, 32.0f);
     private int displayMode;
@@ -29,7 +30,7 @@ public class Gain extends Panel implements AudioDevice
                     new RadioButtons("dB", "ratio")
                             .onValueChanged(v -> set(v, gain))
                             .setValue(0),
-                    new Knob(32.0f)
+                    gainKnob = new Knob(32.0f)
                             .onValueChanged(v -> set(displayMode, (float)Math.pow(16.0, v*2.0 - 1.0)))
                             .setValue(0.5f),
                     textBox,
@@ -48,7 +49,7 @@ public class Gain extends Panel implements AudioDevice
         
         if (displayMode == 0) //dB
         {
-            float db = DSPMath.dB(gain);
+            float db = DSPUtil.dB(gain);
             textBox.setText(String.format("%.1f", db) + " dB");
         }
         else
@@ -67,6 +68,18 @@ public class Gain extends Panel implements AudioDevice
     @Override
     public void process(int samples)
     {
-        DSPMath.apply(inJack.getBuffer(), buffer, samples, v -> v*gain);
+        float[][] in = inJack.getBuffer();
+        
+        if (in == null)
+        {
+            DSPUtil.updateKnobs(samples, gainKnob);
+            DSPUtil.zero(buffer, samples);
+        }
+        else for (int i=0; i<samples; i++)
+        {
+            gainKnob.updateValue(i);
+            buffer[0][i] = in[0][i]*gain;
+            buffer[1][i] = in[1][i]*gain;
+        }
     }
 }
