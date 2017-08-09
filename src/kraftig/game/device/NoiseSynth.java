@@ -99,17 +99,17 @@ public class NoiseSynth extends Panel implements AudioDevice
             
             ampKnob.updateValue(i);
             
-            for (int n=0; n<notes.size(); n++) switch (color)
+            if (notes.size() > 0) switch (color)
             {
                 case 0: //Violet
                     {
                         float white = rand();
                         float out = white - violetPrev;
                         violetPrev = white;
-                        v += out*0.5f;
+                        v = out*0.5f;
                     }
                     break;
-                case 1: v += rand(); break; //White
+                case 1: v = rand(); break; //White
                 case 2: //Pink
                     {
                         int k = Long.numberOfTrailingZeros(pinkCounter);
@@ -127,7 +127,7 @@ public class NoiseSynth extends Panel implements AudioDevice
                         newRand = pinkSeed >>> 13;
                         
                         int ifval = (pinkTotal + newRand) | 0x40000000;
-                        v += (Float.intBitsToFloat(ifval) - 3.0f)*2.0f;
+                        v = (Float.intBitsToFloat(ifval) - 3.0f)*2.0f;
                         
                         pinkCounter++;
                     }
@@ -137,7 +137,7 @@ public class NoiseSynth extends Panel implements AudioDevice
                         float white = rand();
                         float out = (redPrev + white*0.02f)/1.02f;
                         redPrev = out;
-                        v += out*5.0f;
+                        v = out*5.0f;
                     }
                     break;
             }
