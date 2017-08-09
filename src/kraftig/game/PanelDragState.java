@@ -37,6 +37,9 @@ public class PanelDragState implements InteractionState
         pos.madd(panel.rightDir, -mp.x);
         pos.y -= mp.y;
         
+        float floor = Grid.FLOOR_HEIGHT + panel.getHeight();
+        pos.y = Util.clamp(pos.y, floor, -floor);
+        
         float yaw = Util.reduceAngle(player.getYaw() + relYaw);
         
         panel.setPosYaw(pos, yaw);

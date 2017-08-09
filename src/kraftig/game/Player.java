@@ -10,8 +10,7 @@ import org.lwjgl.glfw.GLFW;
 public class Player
 {
     private static final float SENSITIVTY = Util.toRadians(1.0f/8.0f);
-    private static final float HEIGHT = 1.75f;
-    private static final float SPEED = 0.75f, SPEED_SPRINT = 2.5f, ACC = 8.0f;
+    private static final float SPEED = 0.5f, SPEED_SPRINT = 1.25f, ACC = 6.0f;
     
     private final Keyboard keyboard;
     private final Vec3 pos, vel = new Vec3();
@@ -23,7 +22,6 @@ public class Player
         
         cameraController = new Camera3DController(camera);
         cameraController.sensitivity = SENSITIVTY;
-        cameraController.height = HEIGHT;
         pos = cameraController.target;
     }
     

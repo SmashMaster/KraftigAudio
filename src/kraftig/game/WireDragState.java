@@ -1,5 +1,7 @@
 package kraftig.game;
 
+import com.samrj.devil.graphics.Camera3D;
+import com.samrj.devil.math.Vec3;
 import kraftig.game.Wire.WireNode;
 import kraftig.game.gui.InputJack;
 import kraftig.game.gui.Jack;
@@ -16,7 +18,10 @@ public class WireDragState implements InteractionState
     public WireDragState(WireNode node)
     {
         this.node = node;
-        dist = Main.instance().getCamera().pos.dist(node.pos);
+        
+        Camera3D camera = Main.instance().getCamera();
+        Vec3 fwd = new Vec3(camera.forward.x, 0.0f, camera.forward.z).div(camera.up.y);
+        dist = Vec3.sub(node.pos, camera.pos).dot(fwd);
         
         Wire wire = node.getWire();
         if (node.isFirst() && wire.getIn() != null) wire.disconnectIn();

@@ -164,8 +164,6 @@ public class Panel implements Drawable, Focusable
         }
     }
     
-    //Duplicated code here but no easy way to combine them.
-    
     public void projectRay(Vec3 pos, Vec3 dir, boolean[] rHit, float[] rDist, Vec2 rPos, int[] rSide)
     {
         Vec3 pDir = Vec3.sub(pos, this.pos);
@@ -241,14 +239,6 @@ public class Panel implements Drawable, Focusable
         GL11.glTranslatef(pos.x, pos.y, pos.z);
         GL11.glRotatef(Util.toDegrees(yaw), 0.0f, 1.0f, 0.0f);
         
-        //Shadow
-        GL11.glLineWidth(1.0f);
-        GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.5f*alpha);
-        GL11.glBegin(GL11.GL_LINES);
-        GL11.glVertex3f(-width, -pos.y, 0.0f);
-        GL11.glVertex3f(width, -pos.y, 0.0f);
-        GL11.glEnd();
-        
         //Background
         GL11.glColor4f(0.4375f, 0.4375f, 0.4375f, 0.875f*alpha);
         GL11.glBegin(GL11.GL_QUADS);
@@ -267,6 +257,14 @@ public class Panel implements Drawable, Focusable
         GL11.glVertex3f(-width, height, 0.0f);
         GL11.glVertex3f(width, height, 0.0f);
         GL11.glVertex3f(width, -height, 0.0f);
+        GL11.glEnd();
+        
+        //Shadow
+        GL11.glLineWidth(1.0f);
+        GL11.glColor4f(0.0f, 0.0f, 0.0f, 0.5f*alpha);
+        GL11.glBegin(GL11.GL_LINES);
+        GL11.glVertex3f(-width, Grid.FLOOR_HEIGHT - pos.y, 0.0f);
+        GL11.glVertex3f(width, Grid.FLOOR_HEIGHT - pos.y, 0.0f);
         GL11.glEnd();
         
         GL11.glScalef(UI_SCALE, UI_SCALE, UI_SCALE);

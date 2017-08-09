@@ -89,7 +89,7 @@ public final class Main extends Game
     private Camera3D camera;
     private final Player player;
     private final Skybox skybox;
-    private final FloorGrid floor;
+    private final Grid floor;
     private final ArrayList<Panel> panels = new ArrayList<>();
     private final ArrayList<Wire> wires = new ArrayList<>();
     private final InteractionState defaultState;
@@ -118,7 +118,7 @@ public final class Main extends Game
         camera = new Camera3D(Z_NEAR, Z_FAR, FOV, getResolution());
         player = new Player(keyboard, camera);
         skybox = new Skybox();
-        floor = new FloorGrid();
+        floor = new Grid();
         
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -301,10 +301,13 @@ public final class Main extends Game
                 Vec2i res = getResolution();
                 mPos.set((mouse.getX()/res.x)*2.0f - 1.0f, (mouse.getY()/res.y)*2.0f - 1.0f);
             }
-
-            Vec3.madd(camera.forward, camera.right, mPos.x*camera.hSlope, mouseDir);
+            
+            Vec3 fwd = camera.forward;
+            Vec3.madd(fwd, camera.right, mPos.x*camera.hSlope, mouseDir);
             mouseDir.madd(camera.up, mPos.y*camera.vSlope);
-            mouseDir.normalize();
+            
+            //Project mouse direction onto vertical plane.
+            mouseDir.div((mouseDir.x*fwd.x + mouseDir.z*fwd.z)/camera.up.y);
         }
         
         interactionState.onMouseMoved(x, y, dx, dy);
