@@ -5,15 +5,19 @@ import com.samrj.devil.graphics.GraphicsUtil;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import kraftig.game.gui.InputJack;
 import kraftig.game.gui.Jack;
 import kraftig.game.gui.OutputJack;
+import kraftig.game.util.Savable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-public class Wire
+public class Wire implements Savable
 {
     private static final float FOCUS_ANG_RADIUS = Util.toRadians(1.0f);
     private static final float FOCUS_SIN = (float)Math.sin(FOCUS_ANG_RADIUS);
@@ -315,4 +319,31 @@ public class Wire
             GL11.glEnd();
         }
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        ArrayList<Vec3> list = new ArrayList<>();
+        for (WireNode n = first; n != null; n = n.next) list.add(n.pos);
+        
+        out.writeInt(list.size());
+        for (Vec3 v : list) v.write(out);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        int length = in.readInt();
+        
+        first.pos.read(in);
+        last.pos.read(in);
+        
+        for (int i=2; i<length; i++)
+        {
+            last.makeCorner();
+            last.pos.read(in);
+        }
+    }
+    // </editor-fold>
 }
