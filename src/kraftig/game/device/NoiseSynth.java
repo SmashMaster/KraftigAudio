@@ -6,13 +6,14 @@ import com.samrj.devil.util.IntSet;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.stream.Stream;
+import java.util.List;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.ColumnLayout;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.MidiInputJack;
@@ -20,13 +21,15 @@ import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.util.DSPUtil;
 
-public class NoiseSynth extends Panel implements AudioDevice
+public class NoiseSynth extends Panel
 {
+    private final MidiInputJack miniInJack;
     private final RadioButtons colorRadio;
     private final Knob ampKnob;
-    private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
+    private final AudioOutputJack outJack;
     
     private final IntSet notes = new IntSet();
+    private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private float amplitude;
     private int color;
@@ -46,7 +49,7 @@ public class NoiseSynth extends Panel implements AudioDevice
     public NoiseSynth()
     {
         frontInterface.add(new RowLayout(12.0f, Alignment.C,
-                    new MidiInputJack(this::receive),
+                    miniInJack = new MidiInputJack(this::receive),
                     colorRadio = new RadioButtons("Violet", "White", "Pink", "Red")
                         .onValueChanged(v -> color = v)
                         .setValue(1),
@@ -55,7 +58,7 @@ public class NoiseSynth extends Panel implements AudioDevice
                         ampKnob = new Knob(24.0f)
                             .setValue(0.25f)
                             .onValueChanged(v -> amplitude = v)),
-                    new AudioOutputJack(this, buffer))
+                    outJack = new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
         rearInterface.add(new Label("Noise Synth", 48.0f, new Vec2(0.0f, 0.0f), Alignment.C));
@@ -84,9 +87,9 @@ public class NoiseSynth extends Panel implements AudioDevice
     }
     
     @Override
-    public Stream<AudioDevice> getInputDevices()
+    public List<Jack> getJacks()
     {
-        return DSPUtil.getDevices(ampKnob);
+        return DSPUtil.jacks(miniInJack, ampKnob, outJack);
     }
     
     private float rand()

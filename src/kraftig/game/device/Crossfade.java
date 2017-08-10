@@ -5,23 +5,26 @@ import com.samrj.devil.ui.Alignment;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.stream.Stream;
+import java.util.List;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.CrossfadeCurveGraph;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.util.DSPUtil;
 
-public class Crossfade extends Panel implements AudioDevice
+public class Crossfade extends Panel
 {
     private final AudioInputJack inJackA, inJackB;
-    private final Knob fadeKnob, powerKnob;
     private final CrossfadeCurveGraph curveGraph = new CrossfadeCurveGraph(new Vec2(64.0f, 48.0f));
+    private final Knob fadeKnob, powerKnob;
+    private final AudioOutputJack outJack;
+    
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private float fade, power;
@@ -42,7 +45,7 @@ public class Crossfade extends Panel implements AudioDevice
                         powerKnob = new Knob(24.0f)
                             .onValueChanged(v -> set(fade, 1.0f - v*0.5f))
                             .setValue(0.5f)),
-                    new AudioOutputJack(this, buffer))
+                    outJack = new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
         rearInterface.add(new Label("Crossfade", 48.0f, new Vec2(), Alignment.C));
@@ -57,9 +60,9 @@ public class Crossfade extends Panel implements AudioDevice
     }
     
     @Override
-    public Stream<AudioDevice> getInputDevices()
+    public List<Jack> getJacks()
     {
-        return DSPUtil.getDevices(inJackA, inJackB, fadeKnob, powerKnob);
+        return DSPUtil.jacks(inJackA, inJackB, fadeKnob, powerKnob, outJack);
     }
     
     @Override

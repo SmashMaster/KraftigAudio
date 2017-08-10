@@ -5,12 +5,13 @@ import com.samrj.devil.ui.Alignment;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.stream.Stream;
+import java.util.List;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.ColumnLayout;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RadioButtons;
@@ -19,14 +20,16 @@ import kraftig.game.gui.TextBox;
 import kraftig.game.util.CircularBuffer;
 import kraftig.game.util.DSPUtil;
 
-public class Delay extends Panel implements AudioDevice
+public class Delay extends Panel
 {
     private static final int MAX_DELAY = 48000;
     
     private final AudioInputJack inJack;
     private final RadioButtons displayRadio;
-    private final Knob delayKnob, feedbackKnob;
+    private final Knob delayKnob;
     private final TextBox textBox = new TextBox(new Vec2(48.0f, 16.0f), Alignment.E, 24.0f);
+    private final Knob feedbackKnob;
+    private final AudioOutputJack outJack;
     
     private final CircularBuffer left = new CircularBuffer(MAX_DELAY + 8);
     private final CircularBuffer right = new CircularBuffer(MAX_DELAY + 8);
@@ -54,7 +57,7 @@ public class Delay extends Panel implements AudioDevice
                         feedbackKnob = new Knob(24.0f)
                             .onValueChanged(v -> set(delay, displayMode, v))
                             .setValue(0.0f)),
-                    new AudioOutputJack(this, buffer))
+                    outJack = new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
         rearInterface.add(new Label("Delay", 48.0f, new Vec2(), Alignment.C));
@@ -70,9 +73,9 @@ public class Delay extends Panel implements AudioDevice
     }
     
     @Override
-    public Stream<AudioDevice> getInputDevices()
+    public List<Jack> getJacks()
     {
-        return DSPUtil.getDevices(inJack, delayKnob, feedbackKnob);
+        return DSPUtil.jacks(inJack, delayKnob, feedbackKnob, outJack);
     }
     
     @Override

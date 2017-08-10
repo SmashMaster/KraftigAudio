@@ -4,6 +4,7 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import javax.sound.midi.MidiDevice;
 import javax.sound.midi.MidiMessage;
@@ -11,10 +12,12 @@ import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
 import kraftig.game.Panel;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.ListBox;
 import kraftig.game.gui.MidiInputJack;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.util.DSPUtil;
 
 public class MidiOutput extends Panel
 {
@@ -42,6 +45,8 @@ public class MidiOutput extends Panel
         }
         else deviceUsage.put(device, i - 1);
     }
+    
+    private final MidiInputJack midiInJack;
     
     private MidiDevice outputDevice;
     private Receiver outputReceiver;
@@ -95,7 +100,7 @@ public class MidiOutput extends Panel
         });
         
         frontInterface.add(new RowLayout(8.0f, Alignment.C,
-                    new MidiInputJack(this::receive),
+                    midiInJack = new MidiInputJack(this::receive),
                     listBox)
                 .setPos(new Vec2(), Alignment.C));
         
@@ -107,6 +112,12 @@ public class MidiOutput extends Panel
     private void receive(MidiMessage message, long timeStamp)
     {
         if (outputReceiver != null) outputReceiver.send(message, timeStamp);
+    }
+    
+    @Override
+    public List<Jack> getJacks()
+    {
+        return DSPUtil.jacks(midiInJack);
     }
     
     @Override

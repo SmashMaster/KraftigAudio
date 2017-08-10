@@ -4,41 +4,41 @@ import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.util.function.Supplier;
-import kraftig.game.device.AudioDevice;
+import kraftig.game.Panel;
 import org.lwjgl.opengl.GL11;
 
 public class AudioOutputJack extends OutputJack
 {
-    private final AudioDevice device;
+    private final Panel panel;
     private final Supplier<float[][]> bufferSupplier;
     
-    public AudioOutputJack(AudioDevice device, Supplier<float[][]> bufferSupplier)
+    public AudioOutputJack(Panel panel, Supplier<float[][]> bufferSupplier)
     {
         super();
-        if (device == null || bufferSupplier == null) throw new NullPointerException();
-        this.device = device;
+        if (panel == null || bufferSupplier == null) throw new NullPointerException();
+        this.panel = panel;
         this.bufferSupplier = bufferSupplier;
     }
     
-    public AudioOutputJack(AudioDevice device, Supplier<float[][]> bufferSupplier, Vec2 pos, Alignment align)
+    public AudioOutputJack(Panel panel, Supplier<float[][]> bufferSupplier, Vec2 pos, Alignment align)
     {
-        this(device, bufferSupplier);
+        this(panel, bufferSupplier);
         setPos(pos, align);
     }
     
-    public AudioOutputJack(AudioDevice device, float[][] buffer)
+    public AudioOutputJack(Panel panel, float[][] buffer)
     {
-        this(device, () -> buffer);
+        this(panel, () -> buffer);
     }
     
-    public AudioOutputJack(AudioDevice device, float[][] buffer, Vec2 pos, Alignment align)
+    public AudioOutputJack(Panel panel, float[][] buffer, Vec2 pos, Alignment align)
     {
-        this(device, () -> buffer, pos, align);
+        this(panel, () -> buffer, pos, align);
     }
     
-    public AudioDevice getDevice()
+    public Panel getPanel()
     {
-        return device;
+        return panel;
     }
     
     public float[][] getBuffer()

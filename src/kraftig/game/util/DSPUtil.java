@@ -1,8 +1,10 @@
 package kraftig.game.util;
 
-import java.util.stream.Stream;
-import kraftig.game.device.AudioDevice;
-import kraftig.game.gui.AudioInputJack;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 
 public class DSPUtil
@@ -49,15 +51,24 @@ public class DSPUtil
         return (float)(10.0*Math.log10(gain));
     }
     
-    public static Stream<AudioDevice> getDevices(AudioInputJack... jacks)
-    {
-        return Stream.of(jacks).flatMap(AudioInputJack::getDevices);
-    }
-    
     public static void updateKnobs(int samples, Knob... knobs)
     {
         int last = samples - 1;
         for (Knob knob : knobs) knob.updateValue(last);
+    }
+    
+    public static List<Jack> jacks(Object... array)
+    {
+        ArrayList<Jack> out = new ArrayList<>(8);
+        
+        for (Object object : array)
+        {
+            if (object instanceof Object[]) out.addAll(Arrays.asList((Jack[])object));
+            else if (object instanceof Collection) out.addAll((Collection<Jack>)object);
+            else out.add((Jack)object);
+        }
+        
+        return out;
     }
     
     private DSPUtil()

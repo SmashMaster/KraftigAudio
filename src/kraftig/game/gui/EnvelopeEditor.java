@@ -6,12 +6,11 @@ import com.samrj.devil.ui.Alignment;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.stream.Stream;
+import java.util.Arrays;
+import java.util.List;
 import kraftig.game.FocusQuery;
 import kraftig.game.Panel;
 import kraftig.game.audio.Envelope;
-import kraftig.game.device.AudioDevice;
-import kraftig.game.util.DSPUtil;
 import kraftig.game.util.Savable;
 import org.lwjgl.opengl.GL11;
 
@@ -72,9 +71,9 @@ public class EnvelopeEditor implements UIElement, Savable
                             .setValue(0.5f))));
     }
     
-    public Stream<AudioDevice> getDevices()
+    public List<Jack> getJacks()
     {
-        return DSPUtil.getDevices(attackKnob, aCurveKnob, holdKnob, decayKnob, sustainKnob, releaseKnob, rCurveKnob);
+        return Arrays.asList(attackKnob, aCurveKnob, holdKnob, decayKnob, sustainKnob, releaseKnob, rCurveKnob);
     }
     
     public void updateValues(int sampleIndex)

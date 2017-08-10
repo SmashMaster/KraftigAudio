@@ -19,7 +19,6 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 import kraftig.game.Wire.WireNode;
-import kraftig.game.device.*;
 import kraftig.game.gui.Crosshair;
 import kraftig.game.util.VectorFont;
 import org.lwjgl.glfw.GLFW;
@@ -352,7 +351,7 @@ public final class Main extends Game
         }
         
         //Update all devices in topological order.
-        for (AudioDevice device : space.sortDevices()) device.process(samples);
+        for (Panel panel : space.sortPanels()) panel.process(samples);
         time += samples;
     }
     

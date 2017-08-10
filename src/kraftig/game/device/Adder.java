@@ -2,18 +2,20 @@ package kraftig.game.device;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
-import java.util.stream.Stream;
+import java.util.List;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.util.DSPUtil;
 
-public class Adder extends Panel implements AudioDevice
+public class Adder extends Panel
 {
     private final AudioInputJack[] inJacks = new AudioInputJack[4];
+    private final AudioOutputJack outJack;
     
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
@@ -28,7 +30,7 @@ public class Adder extends Panel implements AudioDevice
                     new Label("+", 48.0f),
                     inJacks[3] = new AudioInputJack(),
                     new Label("=", 48.0f),
-                    new AudioOutputJack(this, buffer))
+                    outJack = new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
         rearInterface.add(new Label("Adder", 48.0f, new Vec2(), Alignment.C));
@@ -37,9 +39,9 @@ public class Adder extends Panel implements AudioDevice
     }
     
     @Override
-    public Stream<AudioDevice> getInputDevices()
+    public List<Jack> getJacks()
     {
-        return DSPUtil.getDevices(inJacks);
+        return DSPUtil.jacks(inJacks, outJack);
     }
     
     @Override

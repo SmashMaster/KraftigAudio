@@ -2,8 +2,7 @@ package kraftig.game.gui;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
-import java.util.stream.Stream;
-import kraftig.game.device.AudioDevice;
+import kraftig.game.Panel;
 import org.lwjgl.opengl.GL11;
 
 public class AudioInputJack extends InputJack
@@ -28,15 +27,10 @@ public class AudioInputJack extends InputJack
         return (AudioOutputJack)getWire().getIn();
     }
     
-    public AudioDevice getDevice()
+    public Panel getPanel()
     {
-        if (hasLiveWire()) return getIn().getDevice();
+        if (hasLiveWire()) return getIn().getPanel();
         else return null;
-    }
-    
-    public Stream<AudioDevice> getDevices()
-    {
-        return hasLiveWire() ? Stream.of(getIn().getDevice()) : Stream.empty();
     }
     
     public float[][] getBuffer()

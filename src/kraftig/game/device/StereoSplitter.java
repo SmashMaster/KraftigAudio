@@ -2,20 +2,24 @@ package kraftig.game.device;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
-import java.util.stream.Stream;
+import java.util.List;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.ColumnLayout;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.util.DSPUtil;
 
-public class StereoSplitter extends Panel implements AudioDevice
+public class StereoSplitter extends Panel
 {
     private static final float[] EMPTY = new float[Main.BUFFER_SIZE];
     
     private final AudioInputJack inJack;
+    private final AudioOutputJack lOutJack, rOutJack;
+    
     private final float[][] lBuffer = new float[2][], rBuffer = new float[2][];
     
     public StereoSplitter()
@@ -26,10 +30,10 @@ public class StereoSplitter extends Panel implements AudioDevice
                     new ColumnLayout(4.0f, Alignment.E,
                         new RowLayout(4.0f, Alignment.C,
                             new Label("L", 48.0f),
-                            new AudioOutputJack(this, lBuffer)),
+                            lOutJack = new AudioOutputJack(this, lBuffer)),
                         new RowLayout(4.0f, Alignment.C,
                             new Label("R", 48.0f),
-                            new AudioOutputJack(this, rBuffer))))
+                            rOutJack = new AudioOutputJack(this, rBuffer))))
                 .setPos(new Vec2(), Alignment.C));
         
         rearInterface.add(new ColumnLayout(4.0f, Alignment.C,
@@ -41,9 +45,9 @@ public class StereoSplitter extends Panel implements AudioDevice
     }
     
     @Override
-    public Stream<AudioDevice> getInputDevices()
+    public List<Jack> getJacks()
     {
-        return inJack.getDevices();
+        return DSPUtil.jacks(inJack, lOutJack, rOutJack);
     }
     
     @Override

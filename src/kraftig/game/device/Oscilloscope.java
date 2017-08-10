@@ -5,11 +5,12 @@ import com.samrj.devil.ui.Alignment;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.stream.Stream;
+import java.util.List;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.ColumnLayout;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.OscilloscopeScreen;
@@ -17,7 +18,7 @@ import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.util.DSPUtil;
 
-public class Oscilloscope extends Panel implements AudioDevice
+public class Oscilloscope extends Panel
 {
     private final float MIN_BRIGHTNESS = 1.0f/128.0f;
     private final float MAX_BRIGHTNESS = 1.0f/4.0f;
@@ -48,9 +49,9 @@ public class Oscilloscope extends Panel implements AudioDevice
     }
     
     @Override
-    public Stream<AudioDevice> getInputDevices()
+    public List<Jack> getJacks()
     {
-        return inJack.getDevices();
+        return DSPUtil.jacks(inJack, brightnessKnob);
     }
     
     @Override

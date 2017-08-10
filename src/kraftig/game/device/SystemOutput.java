@@ -4,28 +4,30 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.stream.Stream;
+import java.util.List;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioInputJack;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.ListBox;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.util.DSPUtil;
 
-public class SystemOutput extends Panel implements AudioDevice
+public class SystemOutput extends Panel
 {
-    private final ListBox<OutputOption> listBox;
-    private final byte[] rawBytes = new byte[Main.BUFFER_SIZE*4];
     private final AudioInputJack inJack;
+    
+    private final byte[] rawBytes = new byte[Main.BUFFER_SIZE*4];
     
     private SourceDataLine outputLine;
     
     public SystemOutput()
     {
-        listBox = new ListBox<>(new Vec2(128.0f, 64.0f), () ->
+        ListBox<OutputOption> listBox = new ListBox<>(new Vec2(128.0f, 64.0f), () ->
         {
             ArrayList<OutputOption> options = new ArrayList<>();
             
@@ -72,9 +74,9 @@ public class SystemOutput extends Panel implements AudioDevice
     }
     
     @Override
-    public Stream<AudioDevice> getInputDevices()
+    public List<Jack> getJacks()
     {
-        return inJack.getDevices();
+        return DSPUtil.jacks(inJack);
     }
     
     @Override

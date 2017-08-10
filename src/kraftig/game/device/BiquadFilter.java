@@ -5,7 +5,7 @@ import com.samrj.devil.ui.Alignment;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.stream.Stream;
+import java.util.List;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.audio.BiquadFilterKernel;
@@ -13,20 +13,23 @@ import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.BiquadResponseGraph;
 import kraftig.game.gui.ColumnLayout;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.util.DSPUtil;
 
-public class BiquadFilter extends Panel implements AudioDevice
+public class BiquadFilter extends Panel
 {
-    private final BiquadFilterKernel kernelLeft = new BiquadFilterKernel();
-    private final BiquadFilterKernel kernelRight = new BiquadFilterKernel();
-    private final BiquadResponseGraph responseGraph = new BiquadResponseGraph(new Vec2(64.0f, 48.0f));
     private final AudioInputJack inJack;
     private final RadioButtons typeRadio;
+    private final BiquadResponseGraph responseGraph = new BiquadResponseGraph(new Vec2(64.0f, 48.0f));
     private final Knob freqKnob, qKnob;
+    private final AudioOutputJack outJack;
+    
+    private final BiquadFilterKernel kernelLeft = new BiquadFilterKernel();
+    private final BiquadFilterKernel kernelRight = new BiquadFilterKernel();
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private int filterMode;
@@ -50,7 +53,7 @@ public class BiquadFilter extends Panel implements AudioDevice
                         qKnob = new Knob(24.0f)
                             .onValueChanged(v -> set(filterMode, filterFreq, (float)Math.pow(16.0, v*2.0 - 1.0)))
                             .setValue(0.5f)),
-                    new AudioOutputJack(this, buffer))
+                    outJack = new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
         rearInterface.add(new Label("Biquad Filter", 48.0f, new Vec2(), Alignment.C));
@@ -77,9 +80,9 @@ public class BiquadFilter extends Panel implements AudioDevice
     }
     
     @Override
-    public Stream<AudioDevice> getInputDevices()
+    public List<Jack> getJacks()
     {
-        return DSPUtil.getDevices(inJack, freqKnob, qKnob);
+        return DSPUtil.jacks(inJack, freqKnob, qKnob, outJack);
     }
     
     @Override

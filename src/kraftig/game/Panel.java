@@ -9,6 +9,9 @@ import com.samrj.devil.math.Vec3;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.UI;
 import kraftig.game.util.Savable;
 import org.lwjgl.glfw.GLFW;
@@ -207,10 +210,14 @@ public abstract class Panel implements Savable, Drawable, Focusable
         return uiFocus != null ? uiFocus : panelFocus;
     }
     
-    public void delete()
+    public List<Jack> getJacks()
     {
-        frontInterface.delete();
-        rearInterface.delete();
+        return Collections.EMPTY_LIST;
+    }
+    
+    public void process(int samples)
+    {
+        
     }
     
     @Override
@@ -264,6 +271,12 @@ public abstract class Panel implements Savable, Drawable, Focusable
         }
         
         GL11.glPopMatrix();
+    }
+    
+    public void delete()
+    {
+        frontInterface.delete();
+        rearInterface.delete();
     }
     
     // <editor-fold defaultstate="collapsed" desc="Serialization">

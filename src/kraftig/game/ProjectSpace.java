@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
-import kraftig.game.device.AudioDevice;
+import kraftig.game.gui.AudioInputJack;
+import kraftig.game.gui.Jack;
 import kraftig.game.util.ConcatList;
 import kraftig.game.util.Savable;
 
@@ -63,18 +64,22 @@ public class ProjectSpace implements Savable
                 .orElse(null);
     }
     
-    public List<AudioDevice> sortDevices()
+    public List<Panel> sortPanels()
     {
-        DAG<AudioDevice> dag = new DAG<>();
-        for (Panel panel : panels) if (panel instanceof AudioDevice)
+        DAG<Panel> dag = new DAG<>();
+        for (Panel panel : panels)
         {
-            AudioDevice device = (AudioDevice)panel;
-            dag.add(device);
-            device.getInputDevices().forEach(in ->
+            dag.add(panel);
+            for (Jack jack : panel.getJacks()) if (jack instanceof AudioInputJack)
             {
-                dag.add(in);
-                dag.addEdge(in, device);
-            });
+                Panel inPanel = ((AudioInputJack)jack).getPanel();
+                
+                if (inPanel != null)
+                {
+                    dag.add(inPanel);
+                    dag.addEdge(inPanel, panel);
+                }
+            }
         }
         
         return dag.sort();

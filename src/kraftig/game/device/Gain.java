@@ -5,11 +5,12 @@ import com.samrj.devil.ui.Alignment;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.stream.Stream;
+import java.util.List;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.AudioOutputJack;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RadioButtons;
@@ -17,13 +18,16 @@ import kraftig.game.gui.RowLayout;
 import kraftig.game.gui.TextBox;
 import kraftig.game.util.DSPUtil;
 
-public class Gain extends Panel implements AudioDevice
+public class Gain extends Panel
 {
     private final AudioInputJack inJack;
     private final RadioButtons displayRadio;
     private final Knob gainKnob;
-    private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     private final TextBox textBox = new TextBox(new Vec2(72.0f, 20.0f), Alignment.E, 32.0f);
+    private final AudioOutputJack outJack;
+    
+    private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
+    
     private int displayMode;
     private float gain;
     
@@ -38,7 +42,7 @@ public class Gain extends Panel implements AudioDevice
                             .onValueChanged(v -> set(displayMode, (float)Math.pow(16.0, v*2.0 - 1.0)))
                             .setValue(0.5f),
                     textBox,
-                    new AudioOutputJack(this, buffer))
+                    outJack = new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
         rearInterface.add(new Label("Gain", 48.0f, new Vec2(), Alignment.C));
@@ -64,9 +68,9 @@ public class Gain extends Panel implements AudioDevice
     }
     
     @Override
-    public Stream<AudioDevice> getInputDevices()
+    public List<Jack> getJacks()
     {
-        return DSPUtil.getDevices(inJack, gainKnob);
+        return DSPUtil.jacks(inJack, gainKnob, outJack);
     }
     
     @Override

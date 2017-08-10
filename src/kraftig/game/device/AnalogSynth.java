@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
@@ -17,6 +16,7 @@ import kraftig.game.audio.Envelope;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.EnvelopeEditor;
+import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.MidiInputJack;
@@ -24,15 +24,17 @@ import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.util.DSPUtil;
 
-public class AnalogSynth extends Panel implements AudioDevice
+public class AnalogSynth extends Panel
 {
+    private final MidiInputJack midiInJack;
     private final EnvelopeEditor envEditor;
     private final RadioButtons waveRadio;
     private final Knob ampKnob, phaseKnob;
-    private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
+    private final AudioOutputJack outJack;
     
-    private final List<Note> notes = new ArrayList();
     private final Envelope envelope = new Envelope();
+    private final List<Note> notes = new ArrayList();
+    private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private float amplitude, phase;
     private int waveform;
@@ -40,7 +42,7 @@ public class AnalogSynth extends Panel implements AudioDevice
     public AnalogSynth()
     {
         frontInterface.add(new RowLayout(12.0f, Alignment.C,
-                    new MidiInputJack(this::receive),
+                    midiInJack = new MidiInputJack(this::receive),
                     envEditor = new EnvelopeEditor(envelope),
                     waveRadio = new RadioButtons("Sine", "Triangle", "Sawtooth", "Square")
                         .onValueChanged(v -> waveform = v)
@@ -55,7 +57,7 @@ public class AnalogSynth extends Panel implements AudioDevice
                         phaseKnob = new Knob(24.0f)
                             .setValue(0.5f)
                             .onValueChanged(v -> phase = v)),
-                    new AudioOutputJack(this, buffer))
+                    outJack = new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
         rearInterface.add(new Label("Analog Synth", 48.0f, new Vec2(0.0f, 0.0f), Alignment.C));
@@ -85,9 +87,9 @@ public class AnalogSynth extends Panel implements AudioDevice
     }
     
     @Override
-    public Stream<AudioDevice> getInputDevices()
+    public List<Jack> getJacks()
     {
-        return Stream.concat(DSPUtil.getDevices(ampKnob, phaseKnob), envEditor.getDevices());
+        return DSPUtil.jacks(midiInJack, envEditor.getJacks(), ampKnob, phaseKnob, outJack);
     }
     
     @Override
