@@ -62,7 +62,7 @@ public class Gain extends Panel implements AudioDevice
     @Override
     public Stream<AudioDevice> getInputDevices()
     {
-        return inJack.getDevices();
+        return DSPUtil.getDevices(inJack, gainKnob);
     }
     
     @Override
