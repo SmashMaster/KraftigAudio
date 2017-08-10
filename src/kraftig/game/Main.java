@@ -134,8 +134,9 @@ public final class Main extends Game
             
             private void updateFocus()
             {
-                focus = Stream.concat(panels.stream().map(p -> p.checkFocus(camera.pos, mouseDir)),
-                                      wires.stream().map(w -> w.checkFocus(camera.pos, mouseDir)))
+                Vec3 dir = Vec3.normalize(mouseDir);
+                focus = Stream.concat(panels.stream().map(p -> p.checkFocus(camera.pos, dir)),
+                                      wires.stream().map(w -> w.checkFocus(camera.pos, dir)))
                         .filter(q -> q != null)
                         .reduce((a, b) -> a.dist < b.dist ? a : b)
                         .orElse(null);
