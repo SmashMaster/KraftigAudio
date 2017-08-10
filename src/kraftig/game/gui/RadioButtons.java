@@ -3,13 +3,17 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.function.IntConsumer;
 import kraftig.game.FocusQuery;
 import kraftig.game.Main;
 import kraftig.game.Panel;
+import kraftig.game.util.Savable;
 import org.lwjgl.opengl.GL11;
 
-public class RadioButtons implements UIElement
+public class RadioButtons implements UIElement, Savable
 {
     private final ToggleButton[] buttons;
     private final ColumnLayout columns;
@@ -132,4 +136,18 @@ public class RadioButtons implements UIElement
         GL11.glVertex2f(pos.x + radius.x, pos.y - radius.y);
         GL11.glEnd();
     }
+
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        out.writeInt(value);
+    }
+
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        setValue(in.readInt());
+    }
+    // </editor-fold>
 }

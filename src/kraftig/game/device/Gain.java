@@ -2,6 +2,9 @@ package kraftig.game.device;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.stream.Stream;
 import kraftig.game.Main;
 import kraftig.game.Panel;
@@ -17,6 +20,7 @@ import kraftig.game.util.DSPUtil;
 public class Gain extends Panel implements AudioDevice
 {
     private final AudioInputJack inJack;
+    private final RadioButtons displayRadio;
     private final Knob gainKnob;
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     private final TextBox textBox = new TextBox(new Vec2(72.0f, 20.0f), Alignment.E, 32.0f);
@@ -27,7 +31,7 @@ public class Gain extends Panel implements AudioDevice
     {
         frontInterface.add(new RowLayout(8.0f, Alignment.C,
                     inJack = new AudioInputJack(),
-                    new RadioButtons("dB", "ratio")
+                    displayRadio = new RadioButtons("dB", "ratio")
                             .onValueChanged(v -> set(v, gain))
                             .setValue(0),
                     gainKnob = new Knob(32.0f)
@@ -82,4 +86,22 @@ public class Gain extends Panel implements AudioDevice
             buffer[1][i] = in[1][i]*gain;
         }
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        super.save(out);
+        displayRadio.save(out);
+        gainKnob.save(out);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        super.load(in);
+        displayRadio.load(in);
+        gainKnob.load(in);
+    }
+    // </editor-fold>
 }

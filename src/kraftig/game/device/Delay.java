@@ -2,6 +2,9 @@ package kraftig.game.device;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.stream.Stream;
 import kraftig.game.Main;
 import kraftig.game.Panel;
@@ -21,6 +24,7 @@ public class Delay extends Panel implements AudioDevice
     private static final int MAX_DELAY = 48000;
     
     private final AudioInputJack inJack;
+    private final RadioButtons displayRadio;
     private final Knob delayKnob, feedbackKnob;
     private final TextBox textBox = new TextBox(new Vec2(48.0f, 16.0f), Alignment.E, 24.0f);
     
@@ -41,7 +45,7 @@ public class Delay extends Panel implements AudioDevice
                         delayKnob = new Knob(24.0f)
                             .onValueChanged(v -> set((int)Math.round(Math.pow(v, 3.0)*MAX_DELAY), displayMode, feedback))
                             .setValue(0.5f)),
-                    new RadioButtons("N", "ms")
+                    displayRadio = new RadioButtons("N", "ms")
                         .onValueChanged(v -> set(delay, v, feedback))
                         .setValue(0),
                     textBox,
@@ -136,4 +140,24 @@ public class Delay extends Panel implements AudioDevice
         else textBox.setText("" + ((delay*1000.0f)/Main.SAMPLE_RATE));
         super.render();
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        super.save(out);
+        delayKnob.save(out);
+        displayRadio.save(out);
+        feedbackKnob.save(out);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        super.load(in);
+        delayKnob.load(in);
+        displayRadio.load(in);
+        feedbackKnob.load(in);
+    }
+    // </editor-fold>
 }

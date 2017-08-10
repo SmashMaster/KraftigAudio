@@ -6,11 +6,15 @@ import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec3;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import kraftig.game.gui.UI;
+import kraftig.game.util.Savable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-public class Panel implements Drawable, Focusable
+public abstract class Panel implements Savable, Drawable, Focusable
 {
     public static final float UI_SCALE = 1.0f/2048.0f; //Pixels per meter.
     
@@ -50,7 +54,7 @@ public class Panel implements Drawable, Focusable
         rearInterface.updateMatrix(rearMatrix, this, false);
     }
     
-    public void updateEdge()
+    public final void updateEdge()
     {
         Vec2 edge = new Vec2(rightDir.x, rightDir.z).mult(width);
         Vec2 p2 = new Vec2(pos.x, pos.z);
@@ -65,7 +69,7 @@ public class Panel implements Drawable, Focusable
     }
     
     @Override
-    public float edgeRayHit(Vec2 p, Vec2 d)
+    public final float edgeRayHit(Vec2 p, Vec2 d)
     {
         //Calculate hit position and return zero if missed.
         Vec2 pa = Vec2.sub(p, ea);
@@ -77,24 +81,24 @@ public class Panel implements Drawable, Focusable
         return dr.dot(d);
     }
     
-    public Vec3 getPos()
+    public final Vec3 getPos()
     {
         return new Vec3(pos);
     }
     
-    public float getYaw()
+    public final float getYaw()
     {
         return yaw;
     }
     
     @Override
-    public float getY()
+    public final float getY()
     {
         return pos.y;
     }
     
     @Override
-    public float getHeight()
+    public final float getHeight()
     {
         return height;
     }
@@ -140,31 +144,15 @@ public class Panel implements Drawable, Focusable
         return this;
     }
     
-    public class PanelFocusQuery extends FocusQuery
-    {
-        private final float x, y;
-        
-        private PanelFocusQuery(float dist, float x, float y)
-        {
-            super(Panel.this, dist);
-            
-            this.x = x; this.y = y;
-        }
-    }
-    
     @Override
     public void onMouseButton(FocusQuery query, int button, int action, int mods)
     {
-        PanelFocusQuery q = (PanelFocusQuery)query;
-        
         //Panel drag.
         if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_RIGHT)
-        {
             Main.instance().setState(new PanelDragState(this));
-        }
     }
     
-    public void projectRay(Vec3 pos, Vec3 dir, boolean[] rHit, float[] rDist, Vec2 rPos, int[] rSide)
+    public final void projectRay(Vec3 pos, Vec3 dir, boolean[] rHit, float[] rDist, Vec2 rPos, int[] rSide)
     {
         Vec3 pDir = Vec3.sub(pos, this.pos);
         float pDot = pDir.dot(frontDir);
@@ -189,13 +177,13 @@ public class Panel implements Drawable, Focusable
         else rSide[0] = -1; //Hit rear.
     }
     
-    public void projectMouse(boolean[] rHit, float[] rDist, Vec2 rPos, int[] rSide)
+    public final void projectMouse(boolean[] rHit, float[] rDist, Vec2 rPos, int[] rSide)
     {
         Main main = Main.instance();
         projectRay(main.getCamera().pos, main.getMouseDir(), rHit, rDist, rPos, rSide);
     }
     
-    public FocusQuery checkFocus(Vec3 pos, Vec3 dir)
+    public final FocusQuery checkFocus(Vec3 pos, Vec3 dir)
     {
         boolean[] hit = {false};
         float[] dist = {0.0f};
@@ -206,7 +194,7 @@ public class Panel implements Drawable, Focusable
         
         if (!hit[0]) return null;
         
-        FocusQuery panelFocus = new PanelFocusQuery(dist[0], rPos.x, rPos.y);
+        FocusQuery panelFocus = new FocusQuery(this, dist[0]);
         FocusQuery uiFocus = null;
         
         switch (side[0])
@@ -277,4 +265,26 @@ public class Panel implements Drawable, Focusable
         
         GL11.glPopMatrix();
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        pos.write(out);
+        out.writeFloat(yaw);
+        out.writeFloat(width);
+        out.writeFloat(height);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        pos.read(in);
+        yaw = in.readFloat();
+        width = in.readFloat();
+        height = in.readFloat();
+        setPosYaw(pos, yaw);
+        updateMatrices();
+    }
+    // </editor-fold>
 }

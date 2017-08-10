@@ -3,6 +3,9 @@ package kraftig.game.device;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import com.samrj.devil.util.IntSet;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.stream.Stream;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
@@ -19,6 +22,7 @@ import kraftig.game.util.DSPUtil;
 
 public class NoiseSynth extends Panel implements AudioDevice
 {
+    private final RadioButtons colorRadio;
     private final Knob ampKnob;
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
@@ -43,7 +47,7 @@ public class NoiseSynth extends Panel implements AudioDevice
     {
         frontInterface.add(new RowLayout(12.0f, Alignment.C,
                     new MidiInputJack(this::receive),
-                    new RadioButtons("Violet", "White", "Pink", "Red")
+                    colorRadio = new RadioButtons("Violet", "White", "Pink", "Red")
                         .onValueChanged(v -> color = v)
                         .setValue(1),
                     new ColumnLayout(8.0f, Alignment.C,
@@ -147,4 +151,22 @@ public class NoiseSynth extends Panel implements AudioDevice
             buffer[1][i] = v;
         }
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        super.save(out);
+        colorRadio.save(out);
+        ampKnob.save(out);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        super.load(in);
+        colorRadio.load(in);
+        ampKnob.load(in);
+    }
+    // </editor-fold>
 }

@@ -2,6 +2,9 @@ package kraftig.game.device;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.stream.Stream;
 import kraftig.game.Main;
 import kraftig.game.Panel;
@@ -21,8 +24,9 @@ public class BiquadFilter extends Panel implements AudioDevice
     private final BiquadFilterKernel kernelLeft = new BiquadFilterKernel();
     private final BiquadFilterKernel kernelRight = new BiquadFilterKernel();
     private final BiquadResponseGraph responseGraph = new BiquadResponseGraph(new Vec2(64.0f, 48.0f));
-    private final Knob freqKnob, qKnob;
     private final AudioInputJack inJack;
+    private final RadioButtons typeRadio;
+    private final Knob freqKnob, qKnob;
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private int filterMode;
@@ -33,7 +37,7 @@ public class BiquadFilter extends Panel implements AudioDevice
     {
         frontInterface.add(new RowLayout(16.0f, Alignment.C,
                     inJack = new AudioInputJack(),
-                    new RadioButtons("Low Pass", "Band Pass", "High Pass", "Band Reject", "All Pass")
+                    typeRadio = new RadioButtons("Low Pass", "Band Pass", "High Pass", "Band Reject", "All Pass")
                         .onValueChanged(mode -> set(mode, filterFreq, filterQ))
                         .setValue(0),
                     responseGraph,
@@ -101,4 +105,24 @@ public class BiquadFilter extends Panel implements AudioDevice
         responseGraph.update(kernelLeft.s);
         super.render();
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        super.save(out);
+        typeRadio.save(out);
+        freqKnob.save(out);
+        qKnob.save(out);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        super.load(in);
+        typeRadio.load(in);
+        freqKnob.load(in);
+        qKnob.load(in);
+    }
+    // </editor-fold>
 }

@@ -2,6 +2,9 @@ package kraftig.game.device;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.stream.Stream;
 import kraftig.game.Main;
 import kraftig.game.Panel;
@@ -20,6 +23,7 @@ public class Oscilloscope extends Panel implements AudioDevice
     private final float MAX_BRIGHTNESS = 1.0f/4.0f;
     
     private final AudioInputJack inJack;
+    private final RadioButtons modeRadio;
     private final OscilloscopeScreen screen;
     private final Knob brightnessKnob;
     
@@ -29,7 +33,7 @@ public class Oscilloscope extends Panel implements AudioDevice
         
         frontInterface.add(new RowLayout(8.0f, Alignment.C,
                     new ColumnLayout(8.0f, Alignment.C,
-                        new RadioButtons("X:Time, Y:Amp", "X:Left, Y:Right")
+                        modeRadio = new RadioButtons("X:Time, Y:Amp", "X:Left, Y:Right")
                             .onValueChanged(screen::setMode),
                         inJack = new AudioInputJack()),
                     screen,
@@ -56,4 +60,22 @@ public class Oscilloscope extends Panel implements AudioDevice
         DSPUtil.updateKnobs(samples, brightnessKnob);
         screen.process(buffer, samples);
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        super.save(out);
+        modeRadio.save(out);
+        brightnessKnob.save(out);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        super.load(in);
+        modeRadio.load(in);
+        brightnessKnob.load(in);
+    }
+    // </editor-fold>
 }

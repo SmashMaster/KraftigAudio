@@ -2,6 +2,9 @@ package kraftig.game.device;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -24,6 +27,7 @@ import kraftig.game.util.DSPUtil;
 public class AnalogSynth extends Panel implements AudioDevice
 {
     private final EnvelopeEditor envEditor;
+    private final RadioButtons waveRadio;
     private final Knob ampKnob, phaseKnob;
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
@@ -38,7 +42,7 @@ public class AnalogSynth extends Panel implements AudioDevice
         frontInterface.add(new RowLayout(12.0f, Alignment.C,
                     new MidiInputJack(this::receive),
                     envEditor = new EnvelopeEditor(envelope),
-                    new RadioButtons("Sine", "Triangle", "Sawtooth", "Square")
+                    waveRadio = new RadioButtons("Sine", "Triangle", "Sawtooth", "Square")
                         .onValueChanged(v -> waveform = v)
                         .setValue(0),
                     new ColumnLayout(8.0f, Alignment.C,
@@ -150,4 +154,26 @@ public class AnalogSynth extends Panel implements AudioDevice
             if (!hasEnded()) endTime = Main.instance().getTime()*Main.SAMPLE_WIDTH;;
         }
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        super.save(out);
+        envEditor.save(out);
+        waveRadio.save(out);
+        ampKnob.save(out);
+        phaseKnob.save(out);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        super.load(in);
+        envEditor.load(in);
+        waveRadio.load(in);
+        ampKnob.load(in);
+        phaseKnob.load(in);
+    }
+    // </editor-fold>
 }

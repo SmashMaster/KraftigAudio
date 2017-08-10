@@ -3,15 +3,19 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.stream.Stream;
 import kraftig.game.FocusQuery;
 import kraftig.game.Panel;
 import kraftig.game.audio.Envelope;
 import kraftig.game.device.AudioDevice;
 import kraftig.game.util.DSPUtil;
+import kraftig.game.util.Savable;
 import org.lwjgl.opengl.GL11;
 
-public class EnvelopeEditor implements UIElement
+public class EnvelopeEditor implements UIElement, Savable
 {
     private static final float KNOB_SEPARATION = 2.0f;
     private static final float KNOB_LABEL_SEPARATION = 2.0f;
@@ -146,4 +150,30 @@ public class EnvelopeEditor implements UIElement
         GL11.glVertex2f(x1, y0);
         GL11.glEnd();
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        attackKnob.save(out);
+        aCurveKnob.save(out);
+        holdKnob.save(out);
+        decayKnob.save(out);
+        sustainKnob.save(out);
+        releaseKnob.save(out);
+        rCurveKnob.save(out);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        attackKnob.load(in);
+        aCurveKnob.load(in);
+        holdKnob.load(in);
+        decayKnob.load(in);
+        sustainKnob.load(in);
+        releaseKnob.load(in);
+        rCurveKnob.load(in);
+    }
+    // </editor-fold>
 }

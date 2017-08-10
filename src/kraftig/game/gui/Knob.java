@@ -3,14 +3,18 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.function.Consumer;
 import kraftig.game.FocusQuery;
 import kraftig.game.InteractionState;
 import kraftig.game.Main;
+import kraftig.game.util.Savable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-public class Knob extends AudioInputJack implements UIElement
+public class Knob extends AudioInputJack implements UIElement, Savable
 {
     private static final float DEAD_ZONE = (float)Math.toRadians(45.0);
     private static final int NOTCHES = 9;
@@ -112,4 +116,18 @@ public class Knob extends AudioInputJack implements UIElement
         GL11.glVertex2f(vx, vy);
         GL11.glEnd();
     }
+
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        out.writeFloat(value);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        setValue(in.readFloat());
+    }
+    // </editor-fold>
 }

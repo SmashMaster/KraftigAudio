@@ -12,10 +12,7 @@ import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
-import com.samrj.devil.math.topo.DAG;
 import com.samrj.devil.ui.Alignment;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.DataLine;
@@ -24,7 +21,6 @@ import javax.sound.sampled.TargetDataLine;
 import kraftig.game.Wire.WireNode;
 import kraftig.game.device.*;
 import kraftig.game.gui.Crosshair;
-import kraftig.game.util.ConcatList;
 import kraftig.game.util.VectorFont;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
@@ -90,8 +86,7 @@ public final class Main extends Game
     private final Player player;
     private final Skybox skybox;
     private final Grid floor;
-    private final ArrayList<Panel> panels = new ArrayList<>();
-    private final ArrayList<Wire> wires = new ArrayList<>();
+    private final ProjectSpace space;
     private final InteractionState defaultState;
     
     private boolean displayMouse = false;
@@ -119,6 +114,7 @@ public final class Main extends Game
         player = new Player(keyboard, camera);
         skybox = new Skybox();
         floor = new Grid();
+        space = new ProjectSpace();
         
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -134,12 +130,7 @@ public final class Main extends Game
             
             private void updateFocus()
             {
-                Vec3 dir = Vec3.normalize(mouseDir);
-                focus = Stream.concat(panels.stream().map(p -> p.checkFocus(camera.pos, dir)),
-                                      wires.stream().map(w -> w.checkFocus(camera.pos, dir)))
-                        .filter(q -> q != null)
-                        .reduce((a, b) -> a.dist < b.dist ? a : b)
-                        .orElse(null);
+                focus = space.getFocus(camera.pos, Vec3.normalize(mouseDir));
             }
             
             @Override
@@ -197,7 +188,7 @@ public final class Main extends Game
                 {
                     Panel p = (Panel)focus.focus;
                     p.delete();
-                    panels.remove(p);
+                    space.remove(p);
                     focus = null;
                 }
                 else if (focus.focus instanceof WireNode)
@@ -209,7 +200,7 @@ public final class Main extends Game
                     {
                         if (w.getIn() != null) w.disconnectIn();
                         if (w.getOut() != null) w.disconnectOut();
-                        wires.remove(w);
+                        space.remove(w);
                     }
                     focus = null;
                 }
@@ -261,19 +252,17 @@ public final class Main extends Game
     
     public void addWire(Wire wire)
     {
-        wires.add(wire);
+        space.add(wire);
     }
     
     public void addPanel(Panel panel)
     {
-        panels.add(panel);
+        space.add(panel);
     }
     
     public Stream<FocusQuery> focusStream()
     {
-        return Stream.concat(panels.stream().map(p -> p.checkFocus(camera.pos, mouseDir)),
-                             wires.stream().map(w -> w.checkFocus(camera.pos, mouseDir)))
-                .filter(q -> q != null);
+        return space.focusStream(camera.pos, mouseDir);
     }
     
     public void closeDeviceMenu()
@@ -362,21 +351,8 @@ public final class Main extends Game
             sampleRemainder -= extra;
         }
         
-        //Sort devices by topological order.
-        DAG<AudioDevice> dag = new DAG<>();
-        for (Panel panel : panels) if (panel instanceof AudioDevice)
-        {
-            AudioDevice device = (AudioDevice)panel;
-            dag.add(device);
-            device.getInputDevices().forEach(in ->
-            {
-                dag.add(in);
-                dag.addEdge(in, device);
-            });
-        }
-        
-        //Update all devices.
-        for (AudioDevice device : dag.sort()) device.process(samples);
+        //Update all devices in topological order.
+        for (AudioDevice device : space.sortDevices()) device.process(samples);
         time += samples;
     }
     
@@ -393,30 +369,7 @@ public final class Main extends Game
         GraphicsUtil.glLoadMatrix(camera.viewMat, GL11.GL_MODELVIEW);
         
         floor.render();
-        
-        //Update panel positions.
-        for (Panel p : panels) p.updateEdge();
-        
-        //Calculate wire splits.
-        List<? extends Drawable> drawList = panels;
-        for (Wire w : wires) drawList = new ConcatList<>(drawList, w.updateSplits(panels));
-        
-        //Sort and draw world objects.
-        DAG<Drawable> overlapGraph = new DAG<>();
-        for (Drawable draw : drawList) overlapGraph.add(draw);
-        
-        for (int i=0; i<drawList.size(); i++) for (int j=i+1; j<drawList.size(); j++)
-        {
-            Drawable a = drawList.get(i), b = drawList.get(j);
-            
-            switch (Overlap.get(a, b, camera))
-            {
-                case A_BEHIND_B: overlapGraph.addEdge(a, b); break;
-                case B_BEHIND_A: overlapGraph.addEdge(b, a); break;
-            }
-        }
-        
-        for (Drawable draw : overlapGraph.sort()) draw.render();
+        space.render();
         
         //Load screen matrix to draw HUD.
         Vec2i res = getResolution();
@@ -447,7 +400,7 @@ public final class Main extends Game
     @Override
     public void onDestroy()
     {
-        for (Panel panel : panels) panel.delete();
+        space.delete();
         DGL.destroy();
     }
 }
