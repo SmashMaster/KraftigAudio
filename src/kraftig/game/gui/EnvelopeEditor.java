@@ -37,7 +37,7 @@ public class EnvelopeEditor implements UIElement, Savable
                     new ColumnLayout(KNOB_LABEL_SEPARATION, Alignment.C,
                         new Label("Attack", KNOB_LABEL_SIZE),
                         attackKnob = new Knob(KNOB_SIZE)
-                            .onValueChanged(v -> env.attack = v*v)
+                            .onValueChanged(v -> env.attack = (float)Math.pow(v, 4.0f)*8.0f)
                             .setValue(0.125f)),
                     new ColumnLayout(KNOB_LABEL_SEPARATION, Alignment.C,
                         new Label("A-curve", KNOB_LABEL_SIZE),
@@ -47,13 +47,13 @@ public class EnvelopeEditor implements UIElement, Savable
                     new ColumnLayout(KNOB_LABEL_SEPARATION, Alignment.C,
                         new Label("Hold", KNOB_LABEL_SIZE),
                         holdKnob = new Knob(KNOB_SIZE)
-                            .onValueChanged(v -> env.hold = v)
+                            .onValueChanged(v -> env.hold = v*v*8.0f)
                             .setValue(0.0f)),
                     new ColumnLayout(KNOB_LABEL_SEPARATION, Alignment.C,
                         new Label("Decay", KNOB_LABEL_SIZE),
                         decayKnob = new Knob(KNOB_SIZE)
-                            .onValueChanged(v -> env.decay = v)
-                            .setValue(0.125f)),
+                            .onValueChanged(v -> env.decay = v*v*4.0f)
+                            .setValue(0.0625f)),
                     new ColumnLayout(KNOB_LABEL_SEPARATION, Alignment.C,
                         new Label("Sustain", KNOB_LABEL_SIZE),
                         sustainKnob = new Knob(KNOB_SIZE)
@@ -62,13 +62,13 @@ public class EnvelopeEditor implements UIElement, Savable
                     new ColumnLayout(KNOB_LABEL_SEPARATION, Alignment.C,
                         new Label("Release", KNOB_LABEL_SIZE),
                         releaseKnob = new Knob(KNOB_SIZE)
-                            .onValueChanged(v -> env.release = v)
-                            .setValue(0.125f)),
+                            .onValueChanged(v -> env.release = v*v*8.0f)
+                            .setValue(0.0625f)),
                     new ColumnLayout(KNOB_LABEL_SEPARATION, Alignment.C,
                         new Label("D/R-curve", KNOB_LABEL_SIZE),
                         rCurveKnob = new Knob(KNOB_SIZE)
                             .onValueChanged(v -> env.rCurve = (float)Math.pow(8.0, v*2.0 - 1.0))
-                            .setValue(0.5f))));
+                            .setValue(0.625f))));
     }
     
     public List<Jack> getJacks()

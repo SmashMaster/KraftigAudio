@@ -10,14 +10,12 @@ import org.lwjgl.opengl.GL11;
 
 public class EnvelopeGraph implements UIElement
 {
-    private static final float GRAPH_LENGTH = 10.0f;
-    private static final float HOLD_TIME = 1.0f;
-    private static final int SEGMENTS = 128;
+    private static final int CURVE_SEGMENTS = 16;
     
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
     
-    private final float[] env = new float[SEGMENTS];
+    private Envelope envelope = new Envelope();
     
     public EnvelopeGraph(Vec2 radius)
     {
@@ -26,15 +24,7 @@ public class EnvelopeGraph implements UIElement
     
     public EnvelopeGraph update(Envelope envelope)
     {
-        double h = envelope.attack + envelope.hold + envelope.decay + HOLD_TIME;
-        
-        for (int i=0; i<SEGMENTS; i++)
-        {
-            double t = i*GRAPH_LENGTH/(SEGMENTS - 1.0);
-            double r = (t > h) ? t - h : Double.NaN;
-            env[i] = (float)envelope.evaluate(t, r);
-        }
-        
+        this.envelope = envelope;
         return this;
     }
     
@@ -77,6 +67,25 @@ public class EnvelopeGraph implements UIElement
     public void delete()
     {
     }
+    
+    private Vec2 curve(int i, float curve)
+    {
+        float t = i/(CURVE_SEGMENTS - 1.0f);
+        float x, y;
+        
+        if (curve > 1.0f)
+        {
+            x = (float)Math.pow(t, curve);
+            y = t;
+        }
+        else
+        {
+            x = t;
+            y = (float)Math.pow(t, 1.0f/curve);
+        }
+        
+        return new Vec2(x, y);
+    }
 
     @Override
     public void render(float alpha)
@@ -94,12 +103,35 @@ public class EnvelopeGraph implements UIElement
         GL11.glVertex2f(1.0f, -1.0f);
         GL11.glEnd();
         
+        float subtotal = envelope.attack + envelope.hold + envelope.decay + envelope.release;
+        float sustainTime = Math.max(subtotal*0.25f, 1.0f/64.f);
+        float total = subtotal + sustainTime;
+        
+        GL11.glTranslatef(-1.0f, -1.0f, 0.0f);
+        GL11.glScalef(2.0f/total, 2.0f, 1.0f);
+        
+        float holdStart = envelope.attack;
+        float decayStart = holdStart + envelope.hold;
+        float releaseStart = decayStart + envelope.decay + sustainTime;
+        
         GL11.glBegin(GL11.GL_LINE_STRIP);
-        for (int i=0; i<SEGMENTS; i++)
+        for (int i=0; i<CURVE_SEGMENTS; i++)
         {
-            float x = i*2.0f/(SEGMENTS - 1.0f) - 1.0f;
-            float y = env[i]*2.0f - 1.0f;
-            GL11.glVertex2f(x, y);
+            Vec2 p = curve(i, envelope.aCurve);
+            
+            GL11.glVertex2f(p.y*holdStart, p.x);
+        }
+        for (int i=0; i<CURVE_SEGMENTS; i++)
+        {
+            Vec2 p = curve(i, envelope.rCurve);
+            
+            GL11.glVertex2f(decayStart + p.x*envelope.decay, (envelope.sustain - 1.0f)*p.y + 1.0f);
+        }
+        for (int i=0; i<CURVE_SEGMENTS; i++)
+        {
+            Vec2 p = curve(i, envelope.rCurve);
+            
+            GL11.glVertex2f(releaseStart + p.x*envelope.release, envelope.sustain*(1.0f - p.y));
         }
         GL11.glEnd();
         
