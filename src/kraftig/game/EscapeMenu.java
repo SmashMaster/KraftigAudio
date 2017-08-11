@@ -24,10 +24,12 @@ public class EscapeMenu implements UIElement
                 new ColumnLayout(8.0f, Alignment.C,
                     new LabelButton("Resume", 24.0f, 4.0f)
                         .onClick(instance::closeMenu),
+                    new LabelButton("New", 24.0f, 4.0f)
+                        .onClick(instance::newProject),
+                    new LabelButton("Open", 24.0f, 4.0f)
+                        .onClick(instance::open),
                     new LabelButton("Save", 24.0f, 4.0f)
                         .onClick(instance::save),
-                    new LabelButton("Load", 24.0f, 4.0f)
-                        .onClick(instance::load),
                     new LabelButton("Exit", 24.0f, 4.0f)
                         .onClick(instance::exit)));
     }

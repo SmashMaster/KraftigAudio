@@ -292,6 +292,20 @@ public final class Main extends Game
         mouse.setGrabbed(!displayMouse());
     }
     
+    public void newProject()
+    {
+        boolean result = TinyFileDialogs.tinyfd_messageBox("Kr\u00E4ftig Audio",
+                "Are you sure you want to start a new project? All unsaved work will be lost.",
+                "okcancel", "question", false);
+        
+        if (result)
+        {
+            space.delete();
+            space = new ProjectSpace();
+            closeMenu();
+        }
+    }
+    
     // <editor-fold defaultstate="collapsed" desc="Serialization">
     public void save()
     {
@@ -320,12 +334,12 @@ public final class Main extends Game
         }
     }
     
-    public void load()
+    public void open()
     {
         PointerBuffer filterP = PointerBuffer.allocateDirect(1);
         filterP.put(MemStack.wrap("*.krpf"));
         filterP.rewind();
-        String path = TinyFileDialogs.tinyfd_openFileDialog("Load Project", null, filterP, null, false);
+        String path = TinyFileDialogs.tinyfd_openFileDialog("Open Project", null, filterP, null, false);
         MemStack.pop();
         
         if (path != null)
