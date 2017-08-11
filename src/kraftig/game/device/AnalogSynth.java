@@ -56,7 +56,7 @@ public class AnalogSynth extends Panel
                         new Label("Phase", 6.0f),
                         phaseKnob = new Knob(24.0f)
                             .setValue(0.5f)
-                            .onValueChanged(v -> phase = v)),
+                            .onValueChanged(v -> phase = v*4.0f)),
                     outJack = new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
