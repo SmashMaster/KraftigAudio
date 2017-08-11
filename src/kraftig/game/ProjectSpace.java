@@ -121,6 +121,8 @@ public class ProjectSpace implements Savable
     public void delete()
     {
         for (Panel panel : panels) panel.delete();
+        panels.clear();
+        wires.clear();
     }
     
     // <editor-fold defaultstate="collapsed" desc="Serialization">
@@ -182,6 +184,7 @@ public class ProjectSpace implements Savable
             }
             
             wire.load(in);
+            wires.add(wire);
         }
     }
     

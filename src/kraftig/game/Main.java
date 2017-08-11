@@ -6,6 +6,7 @@ import com.samrj.devil.game.GameConfig;
 import com.samrj.devil.gl.DGL;
 import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.GraphicsUtil;
+import com.samrj.devil.io.MemStack;
 import com.samrj.devil.math.Mat3;
 import com.samrj.devil.math.Quat;
 import com.samrj.devil.math.Util;
@@ -13,17 +14,26 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.math.Vec3;
 import com.samrj.devil.ui.Alignment;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.stream.Stream;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
+import javax.swing.UIManager;
 import kraftig.game.Wire.WireNode;
 import kraftig.game.gui.Crosshair;
+import kraftig.game.gui.UIElement;
 import kraftig.game.util.VectorFont;
+import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 public final class Main extends Game
 {
@@ -85,14 +95,14 @@ public final class Main extends Game
     private final Player player;
     private final Skybox skybox;
     private final Grid floor;
-    private final ProjectSpace space;
+    private ProjectSpace space;
     private final InteractionState defaultState;
     
     private boolean displayMouse = false;
     private final Vec3 mouseDir = new Vec3(0.0f, 0.0f, -1.0f);
     private FocusQuery focus;
     private InteractionState interactionState;
-    private DeviceMenu deviceMenu;
+    private UIElement menu;
     private long time;
     
     private double sampleRemainder = 0.0f;
@@ -135,10 +145,10 @@ public final class Main extends Game
             @Override
             public void onMouseMoved(float x, float y, float dx, float dy)
             {
-                if (deviceMenu != null)
+                if (menu != null)
                 {
                     Vec2i res = getResolution();
-                    focus = deviceMenu.checkFocus(0.0f, new Vec2(x - res.x*0.5f, y - res.y*0.5f));
+                    focus = menu.checkFocus(0.0f, new Vec2(x - res.x*0.5f, y - res.y*0.5f));
                 }
                 else updateFocus();
             }
@@ -146,7 +156,7 @@ public final class Main extends Game
             @Override
             public void step(float dt)
             {
-                if (deviceMenu == null) updateFocus();
+                if (menu == null) updateFocus();
             }
             
             @Override
@@ -162,21 +172,15 @@ public final class Main extends Game
                 
                 if (key == GLFW.GLFW_KEY_SPACE)
                 {
-                    if (deviceMenu != null) closeDeviceMenu();
-                    else
-                    {
-                        if (!displayMouse())
-                        {
-                            mouse.setPosDirty();
-                            mouse.setGrabbed(false);
-                            Vec2i res = getResolution();
-                            mouse.setPos(res.x/2.0f, res.y/2.0f);
-                        }
-                        
-                        deviceMenu = new DeviceMenu();
-                        deviceMenu.setPos(new Vec2(), Alignment.C);
-                    }
-                    
+                    if (menu instanceof DeviceMenu) closeMenu();
+                    else if (menu == null) openMenu(new DeviceMenu());
+                    return;
+                }
+                
+                if (key == GLFW.GLFW_KEY_ESCAPE)
+                {
+                    if (menu != null) closeMenu();
+                    else openMenu(new EscapeMenu());
                     return;
                 }
                 
@@ -205,11 +209,13 @@ public final class Main extends Game
                 }
             }
         };
+        
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     }
     
     private boolean displayMouse()
     {
-        return (deviceMenu != null) || (displayMouse && interactionState.isCursorVisible());
+        return (menu != null) || (displayMouse && interactionState.isCursorVisible());
     }
     
     public VectorFont getFont()
@@ -264,12 +270,103 @@ public final class Main extends Game
         return space.focusStream(camera.pos, mouseDir);
     }
     
-    public void closeDeviceMenu()
+    public void openMenu(UIElement menu)
     {
-        if (deviceMenu == null) return;
+        if (!displayMouse())
+        {
+            mouse.setPosDirty();
+            mouse.setGrabbed(false);
+            Vec2i res = getResolution();
+            mouse.setPos(res.x/2.0f, res.y/2.0f);
+        }
+
+        this.menu = menu;
+        menu.setPos(new Vec2(), Alignment.C);
+    }
+    
+    public void closeMenu()
+    {
+        if (menu == null) return;
         
-        deviceMenu = null;
+        menu = null;
         mouse.setGrabbed(!displayMouse());
+    }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    public void save()
+    {
+        PointerBuffer filterP = PointerBuffer.allocateDirect(1);
+        filterP.put(MemStack.wrap("*.krpf"));
+        filterP.rewind();
+        String path = TinyFileDialogs.tinyfd_saveFileDialog("Save Project", null, filterP, null);
+        MemStack.pop();
+        
+        if (path != null)
+        {
+            if (!path.toLowerCase().endsWith(".krpf")) path += ".krpf";
+            
+            try (DataOutputStream out = new DataOutputStream(new FileOutputStream(path)))
+            {
+                out.writeUTF("Kr\u00E4ftig");
+                space.save(out);
+                closeMenu();
+            }
+            catch (Exception e)
+            {
+                TinyFileDialogs.tinyfd_messageBox("Kr\u00E4ftig Audio",
+                        "Failed to save project: " + e.toString(),
+                        "ok", "error", false);
+            }
+        }
+    }
+    
+    public void load()
+    {
+        PointerBuffer filterP = PointerBuffer.allocateDirect(1);
+        filterP.put(MemStack.wrap("*.krpf"));
+        filterP.rewind();
+        String path = TinyFileDialogs.tinyfd_openFileDialog("Load Project", null, filterP, null, false);
+        MemStack.pop();
+        
+        if (path != null)
+        {
+            try (DataInputStream in = new DataInputStream(new FileInputStream(path)))
+            {
+                try
+                {
+                    String header = in.readUTF();
+                    if (!header.equals("Kr\u00E4ftig")) throw new IOException();
+                }
+                catch (IOException e)
+                {
+                    throw new IOException("Corrupt/unknown file format.");
+                }
+                
+                ProjectSpace newSpace = new ProjectSpace();
+                newSpace.load(in);
+                
+                space.delete();
+                space = newSpace;
+                
+                closeMenu();
+            }
+            catch (Exception e)
+            {
+                TinyFileDialogs.tinyfd_messageBox("Kr\u00E4ftig Audio",
+                        "Failed to load project: " + e.toString(),
+                        "ok", "error", false);
+            }
+        }
+    }
+    // </editor-fold>
+    
+    public void exit()
+    {
+        boolean result = TinyFileDialogs.tinyfd_messageBox("Kr\u00E4ftig Audio",
+                "Are you sure you want to exit? All unsaved work will be lost.",
+                "okcancel", "question", false);
+        
+        if (result) stop();
     }
     
     public long getTime()
@@ -280,7 +377,7 @@ public final class Main extends Game
     @Override
     public void onMouseMoved(float x, float y, float dx, float dy)
     {
-        if (deviceMenu == null)
+        if (menu == null)
         {
             if (!displayMouse && interactionState.canPlayerAim()) player.onMouseMoved(x, y, dx, dy);
 
@@ -317,9 +414,7 @@ public final class Main extends Game
     @Override
     public void onKey(int key, int action, int mods)
     {
-        if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_ESCAPE) stop();
-        
-        if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_TAB && deviceMenu == null)
+        if (action == GLFW.GLFW_PRESS && key == GLFW.GLFW_KEY_TAB && menu == null)
         {
             displayMouse = !displayMouse;
             boolean display = displayMouse();
@@ -380,10 +475,10 @@ public final class Main extends Game
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
         GL11.glLoadIdentity();
         
-        if (deviceMenu == null && !displayMouse && interactionState == defaultState)
+        if (menu == null && !displayMouse && interactionState == defaultState)
             crosshair.renderCrosshair();
         
-        if (deviceMenu != null) deviceMenu.render(1.0f);
+        if (menu != null) menu.render(1.0f);
     }
     
     @Override

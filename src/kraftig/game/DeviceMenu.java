@@ -153,7 +153,7 @@ public class DeviceMenu implements UIElement
             
             Panel panel = constructor.get();
             main.addPanel(panel);
-            main.closeDeviceMenu();
+            main.closeMenu();
             main.onMouseMoved(0.0f, 0.0f, 0.0f, 0.0f);
             
             panel.setPosYaw(Vec3.madd(main.getCamera().pos, main.getMouseDir(), 0.5f), main.getPlayer().getYaw());
