@@ -5,14 +5,11 @@ import com.samrj.devil.ui.Alignment;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import javax.sound.midi.MidiMessage;
-import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
 import kraftig.game.Panel;
-import kraftig.game.audio.Envelope;
+import kraftig.game.audio.MidiInstrument;
+import kraftig.game.audio.MidiNote;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.EnvelopeEditor;
@@ -32,8 +29,7 @@ public class AnalogSynth extends Panel
     private final Knob ampKnob, phaseKnob;
     private final AudioOutputJack outJack;
     
-    private final Envelope envelope = new Envelope();
-    private final List<Note> notes = new ArrayList();
+    private final MidiInstrument<MidiNote> instrument = MidiInstrument.make();
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private float amplitude, phase;
@@ -42,8 +38,8 @@ public class AnalogSynth extends Panel
     public AnalogSynth()
     {
         frontInterface.add(new RowLayout(12.0f, Alignment.C,
-                    midiInJack = new MidiInputJack(this::receive),
-                    envEditor = new EnvelopeEditor(envelope),
+                    midiInJack = new MidiInputJack(instrument),
+                    envEditor = new EnvelopeEditor(instrument.envelope),
                     waveRadio = new RadioButtons("Sine", "Triangle", "Sawtooth", "Square")
                         .onValueChanged(v -> waveform = v)
                         .setValue(0),
@@ -65,27 +61,6 @@ public class AnalogSynth extends Panel
         setSizeFromContents(8.0f);
     }
     
-    private synchronized void receive(MidiMessage message, long timeStamp)
-    {
-        if (message instanceof ShortMessage)
-        {
-            ShortMessage msg = (ShortMessage)message;
-            
-            switch (msg.getCommand())
-            {
-                case ShortMessage.NOTE_ON:
-                    notes.add(new Note(msg.getData1()));
-                    break;
-                case ShortMessage.NOTE_OFF:
-                    int midi = msg.getData1();
-                    for (Note note : notes) if (note.midi == midi) note.end();
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-    
     @Override
     public List<Jack> getJacks()
     {
@@ -95,6 +70,8 @@ public class AnalogSynth extends Panel
     @Override
     public synchronized void process(int samples)
     {
+        List<MidiNote> notes = instrument.getNotes();
+        
         for (int i=0; i<samples; i++)
         {
             float v = 0.0f;
@@ -104,12 +81,12 @@ public class AnalogSynth extends Panel
             ampKnob.updateValue(i);
             phaseKnob.updateValue(i);
             
-            for (Note note : notes)
+            for (MidiNote note : notes)
             {
                 int midi = note.midi;
                 double freq = (440.0/32.0)*Math.pow(2.0, (midi - 9)/12.0);
                 double len = 1.0/freq;
-                double env = envelope.evaluate(time - note.startTime, time - note.endTime);
+                double env = note.getEnvelope(instrument.envelope, time);
                 
                 switch (waveform)
                 {
@@ -125,36 +102,7 @@ public class AnalogSynth extends Panel
             buffer[1][i] = v;
         }
         
-        double time = (Main.instance().getTime() + samples)*Main.SAMPLE_WIDTH;
-        
-        for (Iterator<Note> it = notes.iterator(); it.hasNext();)
-        {
-            Note note = it.next();
-            if (note.hasEnded() && (time - note.endTime >= envelope.release)) it.remove();
-        }
-    }
-    
-    private class Note
-    {
-        private final int midi;
-        private final double startTime;
-        private double endTime = Double.NaN;
-        
-        private Note(int midi)
-        {
-            this.midi = midi;
-            startTime = Main.instance().getTime()*Main.SAMPLE_WIDTH;
-        }
-        
-        private boolean hasEnded()
-        {
-            return endTime == endTime;
-        }
-        
-        private void end()
-        {
-            if (!hasEnded()) endTime = Main.instance().getTime()*Main.SAMPLE_WIDTH;;
-        }
+        instrument.update(samples);
     }
     
     // <editor-fold defaultstate="collapsed" desc="Serialization">

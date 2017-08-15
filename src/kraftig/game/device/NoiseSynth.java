@@ -2,17 +2,17 @@ package kraftig.game.device;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
-import com.samrj.devil.util.IntSet;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
-import javax.sound.midi.MidiMessage;
-import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
 import kraftig.game.Panel;
+import kraftig.game.audio.MidiInstrument;
+import kraftig.game.audio.MidiNote;
 import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.ColumnLayout;
+import kraftig.game.gui.EnvelopeEditor;
 import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
@@ -24,32 +24,22 @@ import kraftig.game.util.DSPUtil;
 public class NoiseSynth extends Panel
 {
     private final MidiInputJack miniInJack;
+    private final EnvelopeEditor envEditor;
     private final RadioButtons colorRadio;
     private final Knob ampKnob;
     private final AudioOutputJack outJack;
     
-    private final IntSet notes = new IntSet();
+    private final MidiInstrument<NoiseNote> instrument = new MidiInstrument<>(NoiseNote::new);
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private float amplitude;
     private int color;
     
-    //Violet noise variables
-    private float violetPrev;
-    
-    //Pink noise variables
-    private int pinkCounter;
-    private final int[] pinkDice = new int[16];
-    private int pinkSeed;
-    private int pinkTotal;
-    
-    //Red noise variables
-    private float redPrev;
-    
     public NoiseSynth()
     {
         frontInterface.add(new RowLayout(12.0f, Alignment.C,
-                    miniInJack = new MidiInputJack(this::receive),
+                    miniInJack = new MidiInputJack(instrument),
+                    envEditor = new EnvelopeEditor(instrument.envelope),
                     colorRadio = new RadioButtons("Violet", "White", "Pink", "Red")
                         .onValueChanged(v -> color = v)
                         .setValue(1),
@@ -66,30 +56,10 @@ public class NoiseSynth extends Panel
         setSizeFromContents(8.0f);
     }
     
-    private void receive(MidiMessage message, long timeStamp)
-    {
-        if (message instanceof ShortMessage)
-        {
-            ShortMessage msg = (ShortMessage)message;
-            
-            switch (msg.getCommand())
-            {
-                case ShortMessage.NOTE_ON:
-                    notes.add(msg.getData1());
-                    break;
-                case ShortMessage.NOTE_OFF:
-                    notes.remove(msg.getData1());
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-    
     @Override
     public List<Jack> getJacks()
     {
-        return DSPUtil.jacks(miniInJack, ampKnob, outJack);
+        return DSPUtil.jacks(miniInJack, envEditor.getJacks(), ampKnob, outJack);
     }
     
     private float rand()
@@ -100,58 +70,83 @@ public class NoiseSynth extends Panel
     @Override
     public void process(int samples)
     {
+        List<NoiseNote> notes = instrument.getNotes();
+        
         for (int i=0; i<samples; i++)
         {
             float v = 0.0f;
+            double time = (Main.instance().getTime() + i)*Main.SAMPLE_WIDTH;
             
             ampKnob.updateValue(i);
             
-            if (notes.size() > 0) switch (color)
+            for (NoiseNote note : notes)
             {
-                case 0: //Violet
-                    {
-                        float white = rand();
-                        float out = white - violetPrev;
-                        violetPrev = white;
-                        v = out*0.5f;
-                    }
-                    break;
-                case 1: v = rand(); break; //White
-                case 2: //Pink
-                    {
-                        int k = Long.numberOfTrailingZeros(pinkCounter);
-                        k &= 15;
-                        
-                        int prevRand = pinkDice[k];
-                        
-                        pinkSeed = 1664525*pinkSeed + 1013904223;
-                        int newRand = pinkSeed >>> 13;
-                        pinkDice[k] = newRand;
-                        
-                        pinkTotal += newRand - prevRand;
-                        
-                        pinkSeed = 1664525*pinkSeed + 1013904223;
-                        newRand = pinkSeed >>> 13;
-                        
-                        int ifval = (pinkTotal + newRand) | 0x40000000;
-                        v = (Float.intBitsToFloat(ifval) - 3.0f)*2.0f;
-                        
-                        pinkCounter++;
-                    }
-                    break;
-                case 3: //Red
-                    {
-                        float white = rand();
-                        float out = (redPrev + white*0.02f)/1.02f;
-                        redPrev = out;
-                        v = out*5.0f;
-                    }
-                    break;
+                double env = note.getEnvelope(instrument.envelope, time);
+                
+                switch (color)
+                {
+                    case 0: //Violet
+                        {
+                            float white = rand();
+                            float out = white - note.prev;
+                            note.prev = white;
+                            v += env*out*0.5f;
+                        }
+                        break;
+                    case 1: v += env*rand(); break; //White
+                    case 2: //Pink
+                        {
+                            int k = Long.numberOfTrailingZeros(note.pinkCounter++);
+                            k &= 15;
+
+                            int prevRand = note.pinkDice[k];
+
+                            note.pinkSeed = 1664525*note.pinkSeed + 1013904223;
+                            int newRand = note.pinkSeed >>> 13;
+                            note.pinkDice[k] = newRand;
+
+                            note.pinkTotal += newRand - prevRand;
+
+                            note.pinkSeed = 1664525*note.pinkSeed + 1013904223;
+                            newRand = note.pinkSeed >>> 13;
+
+                            int ifval = (note.pinkTotal + newRand) | 0x40000000;
+                            v += env*(Float.intBitsToFloat(ifval) - 3.0f)*2.0f;
+                        }
+                        break;
+                    case 3: //Red
+                        {
+                            float white = rand();
+                            float out = (note.prev + white*0.02f)/1.02f;
+                            note.prev = out;
+                            v += env*out*5.0f;
+                        }
+                        break;
+                }
             }
             
             v *= amplitude;
             buffer[0][i] = v;
             buffer[1][i] = v;
+        }
+        
+        instrument.update(samples);
+    }
+    
+    private class NoiseNote extends MidiNote
+    {
+        //Pink noise variables
+        private int pinkCounter;
+        private final int[] pinkDice = new int[16];
+        private int pinkSeed;
+        private int pinkTotal;
+
+        //Violet/Red noise variables
+        private float prev;
+        
+        private NoiseNote(int midi)
+        {
+            super(midi);
         }
     }
     
