@@ -40,7 +40,7 @@ public class NoiseSynth extends Panel
         frontInterface.add(new RowLayout(12.0f, Alignment.C,
                     miniInJack = new MidiInputJack(instrument),
                     envEditor = new EnvelopeEditor(instrument.envelope),
-                    colorRadio = new RadioButtons("Violet", "White", "Pink", "Red")
+                    colorRadio = new RadioButtons("Violet", "White", "Red")
                         .onValueChanged(v -> color = v)
                         .setValue(1),
                     new ColumnLayout(8.0f, Alignment.C,
@@ -94,27 +94,7 @@ public class NoiseSynth extends Panel
                         }
                         break;
                     case 1: v += env*rand(); break; //White
-                    case 2: //Pink
-                        {
-                            int k = Long.numberOfTrailingZeros(note.pinkCounter++);
-                            k &= 15;
-
-                            int prevRand = note.pinkDice[k];
-
-                            note.pinkSeed = 1664525*note.pinkSeed + 1013904223;
-                            int newRand = note.pinkSeed >>> 13;
-                            note.pinkDice[k] = newRand;
-
-                            note.pinkTotal += newRand - prevRand;
-
-                            note.pinkSeed = 1664525*note.pinkSeed + 1013904223;
-                            newRand = note.pinkSeed >>> 13;
-
-                            int ifval = (note.pinkTotal + newRand) | 0x40000000;
-                            v += env*(Float.intBitsToFloat(ifval) - 3.0f)*2.0f;
-                        }
-                        break;
-                    case 3: //Red
+                    case 2: //Red
                         {
                             float white = rand();
                             float out = (note.prev + white*0.02f)/1.02f;
@@ -135,13 +115,6 @@ public class NoiseSynth extends Panel
     
     private class NoiseNote extends MidiNote
     {
-        //Pink noise variables
-        private int pinkCounter;
-        private final int[] pinkDice = new int[16];
-        private int pinkSeed;
-        private int pinkTotal;
-
-        //Violet/Red noise variables
         private float prev;
         
         private NoiseNote(int midi, long sample)
