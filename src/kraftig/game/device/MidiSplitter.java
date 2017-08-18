@@ -39,8 +39,8 @@ public class MidiSplitter extends Panel
         return DSPUtil.jacks(inJack, outJacks);
     }
     
-    private void receive(MidiMessage message, long timeStamp)
+    private void receive(MidiMessage message, long sample)
     {
-        for (MidiOutputJack jack : outJacks) jack.send(message, timeStamp);
+        for (MidiOutputJack jack : outJacks) jack.send(message, sample);
     }
 }

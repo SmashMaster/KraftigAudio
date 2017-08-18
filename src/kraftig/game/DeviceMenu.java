@@ -59,7 +59,8 @@ public class DeviceMenu implements UIElement
                 new Label("MIDI", 24.0f),
                 new SpawnButton("MIDI Input", MidiInput::new),
                 new SpawnButton("MIDI Splitter", MidiSplitter::new),
-                new SpawnButton("MIDI Output", MidiOutput::new));
+                new SpawnButton("MIDI Output", MidiOutput::new),
+                new SpawnButton("Sequencer", Sequencer::new));
         
         RowLayout row1 = new RowLayout(32.0f, Alignment.C, sourceCat, effectCat);
         RowLayout row2 = new RowLayout(32.0f, Alignment.C, utilityCat, outputCat);

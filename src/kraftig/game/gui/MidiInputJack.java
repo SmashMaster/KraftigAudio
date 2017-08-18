@@ -4,7 +4,7 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import javax.sound.midi.MidiMessage;
 import kraftig.game.Main;
-import kraftig.game.util.MidiReceiver;
+import kraftig.game.audio.MidiReceiver;
 import kraftig.game.util.VectorFont;
 
 public class MidiInputJack extends InputJack
@@ -23,9 +23,9 @@ public class MidiInputJack extends InputJack
         setPos(pos, align);
     }
     
-    public void receive(MidiMessage message, long timeStamp)
+    public void receive(MidiMessage message, long sample)
     {
-        receiver.send(message, timeStamp);
+        receiver.send(message, sample);
     }
     
     @Override

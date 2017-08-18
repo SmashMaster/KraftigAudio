@@ -87,13 +87,14 @@ public class AnalogSynth extends Panel
                 double freq = (440.0/32.0)*Math.pow(2.0, (midi - 9)/12.0);
                 double len = 1.0/freq;
                 double env = note.getEnvelope(instrument.envelope, time);
+                double noteTime = time - note.getStartTime();
                 
                 switch (waveform)
                 {
-                    case 0: v += env*(Math.sin(Math.PI*2.0*(freq*time + phase))); break; //Sine wave
-                    case 1: v += env*(Math.abs(((time + phase*len) % len)/len - 0.5)*4.0 - 1.0); break; //Triangle wave
-                    case 2: v += env*((((time + phase*len) % len)/len)*2.0 - 1.0); break; //Sawtooth wave
-                    case 3: v += env*(((time + phase*len) % len) > len*0.5 ? -1.0 : 1.0); break; //Square wave
+                    case 0: v += env*(Math.sin(Math.PI*2.0*(freq*noteTime + phase))); break; //Sine wave
+                    case 1: v += env*(Math.abs(((noteTime + phase*len) % len)/len - 0.5)*4.0 - 1.0); break; //Triangle wave
+                    case 2: v += env*((((noteTime + phase*len) % len)/len)*2.0 - 1.0); break; //Sawtooth wave
+                    case 3: v += env*(((noteTime + phase*len) % len) > len*0.5 ? -1.0 : 1.0); break; //Square wave
                 }
             }
             

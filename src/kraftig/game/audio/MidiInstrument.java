@@ -1,13 +1,12 @@
 package kraftig.game.audio;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
-import kraftig.game.util.MidiReceiver;
 
 public class MidiInstrument<T extends MidiNote> implements MidiReceiver
 {
@@ -18,17 +17,18 @@ public class MidiInstrument<T extends MidiNote> implements MidiReceiver
     
     public final Envelope envelope = new Envelope();
     
+    private final ArrayList<T> newNotes = new ArrayList();
     private final ArrayList<T> notes = new ArrayList();
-    private final Function<Integer, T> noteFunction;
+    private final MidiNoteMaker<T> noteFunction;
     
-    public MidiInstrument(Function<Integer, T> noteFunction)
+    public MidiInstrument(MidiNoteMaker<T> noteMaker)
     {
-        if (noteFunction == null) throw new NullPointerException();
-        this.noteFunction = noteFunction;
+        if (noteMaker == null) throw new NullPointerException();
+        this.noteFunction = noteMaker;
     }
     
     @Override
-    public synchronized void send(MidiMessage message, long timeStamp)
+    public synchronized void send(MidiMessage message, long sample)
     {
         if (message instanceof ShortMessage)
         {
@@ -37,11 +37,12 @@ public class MidiInstrument<T extends MidiNote> implements MidiReceiver
             switch (msg.getCommand())
             {
                 case ShortMessage.NOTE_ON:
-                    notes.add(noteFunction.apply(msg.getData1()));
+                    newNotes.add(noteFunction.make(msg.getData1(), sample));
                     break;
                 case ShortMessage.NOTE_OFF:
                     int midi = msg.getData1();
-                    for (T note : notes) if (note.midi == midi) note.end();
+                    for (T note : notes) if (note.midi == midi) note.end(sample);
+                    for (T note : newNotes) if (note.midi == midi) note.end(sample);
                     break;
                 default:
                     break;
@@ -51,7 +52,11 @@ public class MidiInstrument<T extends MidiNote> implements MidiReceiver
     
     public synchronized List<T> getNotes()
     {
-        return (List<T>)notes.clone();
+        for (T note : newNotes) note.ensureNotInPast();
+        notes.addAll(newNotes);
+        newNotes.clear();
+        
+        return Collections.unmodifiableList(notes);
     }
     
     public synchronized void update(int samples)
@@ -66,5 +71,11 @@ public class MidiInstrument<T extends MidiNote> implements MidiReceiver
     @Override
     public void close()
     {
+    }
+    
+    @FunctionalInterface
+    public static interface MidiNoteMaker<T extends MidiNote>
+    {
+        public T make(int midi, long sample);
     }
 }

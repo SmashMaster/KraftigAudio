@@ -144,9 +144,9 @@ public class NoiseSynth extends Panel
         //Violet/Red noise variables
         private float prev;
         
-        private NoiseNote(int midi)
+        private NoiseNote(int midi, long sample)
         {
-            super(midi);
+            super(midi, sample);
         }
     }
     

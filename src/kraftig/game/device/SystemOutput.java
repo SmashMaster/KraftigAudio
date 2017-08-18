@@ -19,6 +19,8 @@ import kraftig.game.util.DSPUtil;
 
 public class SystemOutput extends Panel
 {
+    private static final int MAX_LATENCY = 4800;
+    
     private final AudioInputJack inJack;
     
     private final byte[] rawBytes = new byte[Main.BUFFER_SIZE*4];
@@ -83,6 +85,9 @@ public class SystemOutput extends Panel
     public void process(int samples)
     {
         if (outputLine == null) return;
+        
+        int latency = (outputLine.getBufferSize() - outputLine.available())/4;
+        if (latency > MAX_LATENCY) outputLine.flush();
         
         float[][] buffer = inJack.getBuffer();
         

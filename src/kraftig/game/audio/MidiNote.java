@@ -6,32 +6,38 @@ public class MidiNote
 {
     public final int midi;
 
-    private final double startTime;
-    private double endTime = Double.NaN;
+    private double startTime;
+    private double endTime = Double.POSITIVE_INFINITY;
 
-    public MidiNote(int midi)
+    public MidiNote(int midi, long sample)
     {
         this.midi = midi;
-        startTime = Main.instance().getTime()*Main.SAMPLE_WIDTH;
+        startTime = sample*Main.SAMPLE_WIDTH;
     }
     
-    public boolean hasEnded()
+    public final void ensureNotInPast()
     {
-        return endTime == endTime;
+        startTime = Math.max(startTime, Main.instance().getTime()*Main.SAMPLE_WIDTH);
     }
     
-    public void end()
+    public final void end(long sample)
     {
-        if (!hasEnded()) endTime = Main.instance().getTime()*Main.SAMPLE_WIDTH;;
+        long sampleNotInPast = Math.max(sample, Main.instance().getTime());
+        endTime = Math.min(sampleNotInPast*Main.SAMPLE_WIDTH, endTime);
+    }
+    
+    public final double getStartTime()
+    {
+        return startTime;
     }
 
-    public double getEnvelope(Envelope envelope, double time)
+    public final double getEnvelope(Envelope envelope, double time)
     {
         return envelope.evaluate(time - startTime, time - endTime);
     }
     
-    public boolean hasStopped(Envelope envelope, double time)
+    public final boolean hasStopped(Envelope envelope, double time)
     {
-        return hasEnded() && (time - endTime >= envelope.release);
+        return (time >= endTime) && (time - endTime >= envelope.release);
     }
 }

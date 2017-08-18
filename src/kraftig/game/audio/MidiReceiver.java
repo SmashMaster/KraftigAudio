@@ -1,4 +1,4 @@
-package kraftig.game.util;
+package kraftig.game.audio;
 
 import javax.sound.midi.Receiver;
 

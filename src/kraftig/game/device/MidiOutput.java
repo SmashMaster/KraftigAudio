@@ -11,6 +11,7 @@ import javax.sound.midi.MidiMessage;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
+import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
@@ -109,9 +110,9 @@ public class MidiOutput extends Panel
         setSizeFromContents(8.0f);
     }
     
-    private void receive(MidiMessage message, long timeStamp)
+    private void receive(MidiMessage message, long sample)
     {
-        if (outputReceiver != null) outputReceiver.send(message, timeStamp);
+        if (outputReceiver != null) outputReceiver.send(message, Math.round(sample*(1_000_000.0*Main.SAMPLE_WIDTH)));
     }
     
     @Override

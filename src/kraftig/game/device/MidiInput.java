@@ -7,10 +7,13 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiMessage;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Transmitter;
+import kraftig.game.Main;
 import kraftig.game.Panel;
+import kraftig.game.audio.MidiReceiver;
 import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.ListBox;
@@ -21,6 +24,7 @@ import kraftig.game.util.DSPUtil;
 public class MidiInput extends Panel
 {
     private static final Map<MidiDevice, Integer> USAGE = new IdentityHashMap<>();
+    private static final Map<MidiDevice, Long> TIME = new IdentityHashMap<>();
     
     private static void useDevice(MidiDevice device) throws MidiUnavailableException
     {
@@ -28,6 +32,8 @@ public class MidiInput extends Panel
         if (i == null)
         {
             device.open();
+            long time = System.nanoTime();
+            TIME.put(device, time);
             USAGE.put(device, 1);
         }
         else USAGE.put(device, i + 1);
@@ -40,6 +46,7 @@ public class MidiInput extends Panel
         else if (i <= 1)
         {
             device.close();
+            TIME.remove(device);
             USAGE.remove(device);
         }
         else USAGE.put(device, i - 1);
@@ -84,7 +91,7 @@ public class MidiInput extends Panel
                 inputDevice = option.device;
                 useDevice(inputDevice);
                 inputTransmitter = option.device.getTransmitter();
-                inputTransmitter.setReceiver(outJack);
+                inputTransmitter.setReceiver(MidiReceiver.of(this::receive));
             }
             catch (Exception e)
             {
@@ -107,6 +114,13 @@ public class MidiInput extends Panel
         rearInterface.add(new Label("MIDI In", 48.0f, new Vec2(), Alignment.C));
         
         setSizeFromContents(8.0f);
+    }
+    
+    private void receive(MidiMessage message, long timeStamp)
+    {
+        long nanoTime = TIME.get(inputDevice) - Main.instance().getStartNanoTime() + timeStamp*1000L;
+        long sampleTime = Math.round(nanoTime*(Main.SAMPLE_RATE/1_000_000_000.0));
+        outJack.send(message, sampleTime);
     }
     
     @Override

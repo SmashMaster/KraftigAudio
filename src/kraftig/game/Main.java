@@ -105,6 +105,8 @@ public final class Main extends Game
     private UIElement menu;
     private long time;
     
+    private long startNanoTime;
+    private boolean onFirstFrame = true;
     private double sampleRemainder = 0.0f;
     
     private Main() throws Exception
@@ -388,6 +390,11 @@ public final class Main extends Game
         return time;
     }
     
+    public long getStartNanoTime()
+    {
+        return startNanoTime;
+    }
+    
     @Override
     public void onMouseMoved(float x, float y, float dx, float dy)
     {
@@ -457,6 +464,13 @@ public final class Main extends Game
             int extra = (int)Math.floor(sampleRemainder);
             samples += extra;
             sampleRemainder -= extra;
+        }
+        
+        //Set first frame time if not set.
+        if (onFirstFrame)
+        {
+            startNanoTime = System.nanoTime();
+            onFirstFrame = false;
         }
         
         //Update all devices in topological order.

@@ -4,7 +4,7 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import javax.sound.midi.MidiMessage;
 import kraftig.game.Main;
-import kraftig.game.util.MidiReceiver;
+import kraftig.game.audio.MidiReceiver;
 import kraftig.game.util.VectorFont;
 
 public class MidiOutputJack extends OutputJack implements MidiReceiver
@@ -20,9 +20,9 @@ public class MidiOutputJack extends OutputJack implements MidiReceiver
     }
     
     @Override
-    public void send(MidiMessage message, long timeStamp)
+    public void send(MidiMessage message, long sample)
     {
-        if (hasLiveWire()) ((MidiInputJack)getWire().getOut()).receive(message, timeStamp);
+        if (hasLiveWire()) ((MidiInputJack)getWire().getOut()).receive(message, sample);
     }
     
     @Override

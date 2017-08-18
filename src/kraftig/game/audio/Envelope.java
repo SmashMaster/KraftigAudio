@@ -6,6 +6,8 @@ public class Envelope
     
     private double active(double time)
     {
+        if (time < 0.0) return 0.0;
+        
         if (time < attack) return Math.pow(time/attack, aCurve);
 
         double endHold = attack + hold;
@@ -19,13 +21,14 @@ public class Envelope
     
     public double evaluate(double timeSinceStart, double timeSinceEnd)
     {
-        if (timeSinceEnd != timeSinceEnd) return active(timeSinceStart); //Note is currently active.
+        if (timeSinceEnd <= 0.0) return active(timeSinceStart); //Note is currently active.
         
         if (timeSinceEnd < release) //Note has been released.
         {
-            double endEnv = active(timeSinceStart - timeSinceEnd);
-            return endEnv*Math.pow((release - timeSinceEnd)/release, rCurve);
+            double env = active(timeSinceStart);
+            return env*Math.pow((release - timeSinceEnd)/release, rCurve);
         }
-        else return 0.0; //Note has ended.
+        
+        return 0.0; //Note has ended.
     }
 }
