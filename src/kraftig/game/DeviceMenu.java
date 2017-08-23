@@ -38,7 +38,8 @@ public class DeviceMenu implements UIElement
                 new SpawnButton("Gain", Gain::new),
                 new SpawnButton("Biquad Filter", BiquadFilter::new),
                 new SpawnButton("Delay", Delay::new),
-                new SpawnButton("Negate", Negate::new));
+                new SpawnButton("Negate", Negate::new),
+                new SpawnButton("Absolute Value", AbsoluteValue::new));
         
         ColumnLayout utilityCat = new ColumnLayout(2.0f, Alignment.C,
                 new Label("Utility", 24.0f),
