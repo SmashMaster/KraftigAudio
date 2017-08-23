@@ -112,26 +112,26 @@ public class Delay extends Panel
             {
                 buffer[0][i] = 0.0f;
                 buffer[1][i] = 0.0f;
-                left.write(l);
-                right.write(r);
+                left.push(l);
+                right.push(r);
             }
             else
             {
                 while (size > delay)
                 {
-                    left.read();
-                    right.read();
+                    left.poll();
+                    right.poll();
                     size = left.getSize();
                 }
                 
-                float fbl = left.read();
-                float fbr = right.read();
+                float fbl = left.poll();
+                float fbr = right.poll();
                 
                 buffer[0][i] = fbl;
                 buffer[1][i] = fbr;
                 
-                left.write(l + fbl*feedback);
-                right.write(r + fbr*feedback);
+                left.push(l + fbl*feedback);
+                right.push(r + fbr*feedback);
             }
         }
     }

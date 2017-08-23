@@ -5,20 +5,22 @@ import com.samrj.devil.ui.Alignment;
 import kraftig.game.Main;
 import org.lwjgl.opengl.GL11;
 
-public abstract class SymbolButton extends Button
+public class SymbolButton extends Button
 {
-    public SymbolButton(Vec2 radius)
+    private final Runnable symbol;
+    
+    public SymbolButton(Vec2 radius, Runnable symbol)
     {
         super(radius);
+        
+        this.symbol = symbol;
     }
     
-    public SymbolButton(Vec2 radius, Vec2 pos, Alignment align)
+    public SymbolButton(Vec2 radius, Runnable symbol, Vec2 pos, Alignment align)
     {
-        this(radius);
+        this(radius, symbol);
         setPos(pos, align);
     }
-    
-    public abstract void renderSymbol();
     
     @Override
     public void render(float alpha)
@@ -40,7 +42,7 @@ public abstract class SymbolButton extends Button
         GL11.glVertex2f(1.0f, -1.0f);
         GL11.glEnd();
         
-        renderSymbol();
+        symbol.run();
         
         GL11.glPopMatrix();
     }

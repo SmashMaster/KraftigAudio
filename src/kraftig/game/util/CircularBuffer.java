@@ -22,12 +22,17 @@ public class CircularBuffer
         return size;
     }
     
+    public boolean isFull()
+    {
+        return size == array.length;
+    }
+    
     public void clear()
     {
         size = 0;
     }
     
-    public void write(float v)
+    public void push(float v)
     {
         if (size == array.length) throw new ArrayIndexOutOfBoundsException();
         
@@ -36,7 +41,7 @@ public class CircularBuffer
         size++;
     }
     
-    public float read()
+    public float poll()
     {
         if (size == 0) throw new ArrayIndexOutOfBoundsException();
         
@@ -45,5 +50,21 @@ public class CircularBuffer
         size--;
         
         return v;
+    }
+    
+    public void read(float[] array, int start, int length)
+    {
+        if (length < 0) throw new ArrayIndexOutOfBoundsException();
+        if (length > size) throw new ArrayIndexOutOfBoundsException();
+        
+        int end = read + length;
+        
+        if (end > this.array.length)
+        {
+            int len0 = this.array.length - read;
+            System.arraycopy(this.array, read, array, 0, len0);
+            System.arraycopy(this.array, 0, array, len0, end - this.array.length);
+        }
+        else System.arraycopy(this.array, read, array, start, length);
     }
 }

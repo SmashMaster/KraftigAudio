@@ -19,13 +19,14 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.stream.Stream;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
-import javax.swing.UIManager;
 import kraftig.game.Wire.WireNode;
+import kraftig.game.audio.FFT;
 import kraftig.game.gui.Crosshair;
 import kraftig.game.gui.UIElement;
 import kraftig.game.util.VectorFont;
@@ -78,15 +79,24 @@ public final class Main extends Game
     
     public static void main(String[] args)
     {
-        try
-        {
-            run(Main::new);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            System.exit(-1);
-        }
+        int len = 2;
+        float[][] twiddle = FFT.twiddle(len);
+        float[] input = new float[len];
+        input[0] = 1.0f;
+        
+        float[] result = FFT.fft(input, twiddle[0]);
+        
+        System.out.println(Arrays.toString(result));
+        
+//        try
+//        {
+//            run(Main::new);
+//        }
+//        catch (Exception e)
+//        {
+//            e.printStackTrace();
+//            System.exit(-1);
+//        }
     }
     
     private final VectorFont font;
@@ -211,8 +221,6 @@ public final class Main extends Game
                 }
             }
         };
-        
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     }
     
     private boolean displayMouse()
