@@ -83,8 +83,7 @@ public class AnalogSynth extends Panel
             
             for (MidiNote note : notes)
             {
-                int midi = note.midi;
-                double freq = (440.0/32.0)*Math.pow(2.0, (midi - 9)/12.0);
+                double freq = DSPUtil.freqFromMidi(note.midi);
                 double len = 1.0/freq;
                 double env = note.getEnvelope(instrument.envelope, time);
                 double noteTime = time - note.getStartTime();

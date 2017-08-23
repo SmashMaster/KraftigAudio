@@ -29,6 +29,7 @@ import kraftig.game.Wire.WireNode;
 import kraftig.game.audio.FFT;
 import kraftig.game.gui.Crosshair;
 import kraftig.game.gui.UIElement;
+import kraftig.game.util.DSPUtil;
 import kraftig.game.util.VectorFont;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.glfw.GLFW;
@@ -79,24 +80,15 @@ public final class Main extends Game
     
     public static void main(String[] args)
     {
-        int len = 2;
-        float[][] twiddle = FFT.twiddle(len);
-        float[] input = new float[len];
-        input[0] = 1.0f;
-        
-        float[] result = FFT.fft(input, twiddle[0]);
-        
-        System.out.println(Arrays.toString(result));
-        
-//        try
-//        {
-//            run(Main::new);
-//        }
-//        catch (Exception e)
-//        {
-//            e.printStackTrace();
-//            System.exit(-1);
-//        }
+        try
+        {
+            run(Main::new);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            System.exit(-1);
+        }
     }
     
     private final VectorFont font;

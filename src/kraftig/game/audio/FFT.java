@@ -1,10 +1,11 @@
 package kraftig.game.audio;
 
 import com.samrj.devil.math.Util;
-import java.util.Arrays;
 
 public class FFT
 {
+    private static final int REAL = 0, IMAG = 1;
+    
     public static final float[][] twiddle(int n)
     {
         if (!Util.isPower2(n)) throw new IllegalArgumentException();
@@ -12,17 +13,17 @@ public class FFT
         
         int len = n/2;
         float[] real = new float[len];
-        float[] complex = new float[len];
+        float[] imag = new float[len];
         
         for (int k=0; k<len; k++)
         {
             double x = (2.0*Math.PI*k)/n;
             
             real[k] = (float)Math.cos(x);
-            complex[k] = (float)-Math.sin(x);
+            imag[k] = (float)-Math.sin(x);
         }
         
-        return new float[][]{real, complex};
+        return new float[][]{real, imag};
     }
     
     public static final float[] window(int n)
@@ -38,18 +39,19 @@ public class FFT
         return out;
     }
     
-    public static final float[] fft(float[] input, float[] twiddle)
+    public static final float[][] fft(float[][] input, float[][] twiddle)
     {
         //Check consistency of all input.
-        int n = input.length;
+        int n = input[REAL].length;
         if (!Util.isPower2(n)) throw new IllegalArgumentException();
         if (n < 2) throw new IllegalArgumentException();
-        if (twiddle.length != n/2) throw new IllegalArgumentException();
+        if (twiddle[REAL].length != n/2) throw new IllegalArgumentException();
         
         //Prepare buffers.
-        float[] read = new float[n];
-        float[] write = new float[n];
-        System.arraycopy(input, 0, read, 0, n);
+        float[][] read = new float[2][n];
+        float[][] write = new float[2][n];
+        System.arraycopy(input[REAL], 0, read[REAL], 0, n);
+        System.arraycopy(input[IMAG], 0, read[IMAG], 0, n);
         
         //Perform butterfly operations.
         int stages = 31 - Integer.numberOfLeadingZeros(n);
@@ -60,40 +62,49 @@ public class FFT
             int stride = 1 << (stages - stage - 1);
             int twidFac = 1 << stage;
             
-            System.out.println(stage + " " + stride);
-            
             for (int i=0; i<n; i++)
             {
                 if ((i & stride) == 0)
                 {
-                    System.out.println("    " + i + " " + (i & stride));
-                    write[i] = read[i] + read[i + stride];
+                    int fork = i + stride;
+                    write[REAL][i] = read[REAL][i] + read[REAL][fork];
+                    write[IMAG][i] = read[IMAG][i] + read[IMAG][fork];
                 }
                 else
                 {
-                    System.out.println("    " + i + " " + (i & stride) + " " + (i%stride)*twidFac);
-                    write[i] = (read[i - stride] - read[i])*twiddle[(i%stride)*twidFac];
+                    int fork = i - stride;
+                    float realA = read[REAL][fork] - read[REAL][i];
+                    float imagA = read[IMAG][fork] - read[IMAG][i];
+                    
+                    int twidIndex = (i%stride)*twidFac;
+                    float realB = twiddle[REAL][twidIndex];
+                    float imagB = twiddle[IMAG][twidIndex];
+                    
+                    write[REAL][i] = realA*realB - imagA*imagB;
+                    write[IMAG][i] = realA*imagB + realB*imagA;
                 }
             }
             
             //Swap buffers.
-            float[] temp = read;
+            float[][] temp = read;
             read = write;
             write = temp;
         }
         
         //Perform final index bit-reversal.
-        for (int i=0; i<n; i++) write[Integer.reverse(i) >>> revOff] = read[i];
+        for (int i=0; i<n; i++)
+        {
+            int reversed = Integer.reverse(i) >>> revOff;
+            write[REAL][reversed] = read[REAL][i];
+            write[IMAG][reversed] = read[IMAG][i];
+        }
         
         return write;
     }
     
     public static final float[][] fft(float[] input, float[][] twiddle)
     {
-        float[] real = fft(input, twiddle[0]);
-        float[] complex = fft(input, twiddle[1]);
-        
-        return new float[][]{real, complex};
+        return fft(new float[][]{input, input}, twiddle);
     }
     
     public static final float[][] fft(float[] input, float[] window, float[][] twiddle)

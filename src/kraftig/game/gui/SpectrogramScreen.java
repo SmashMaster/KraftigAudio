@@ -5,14 +5,19 @@ import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import kraftig.game.FocusQuery;
+import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.audio.FFT;
 import kraftig.game.util.CircularBuffer;
+import kraftig.game.util.DSPUtil;
 import org.lwjgl.opengl.GL11;
 
 public class SpectrogramScreen implements UIElement
 {
-    private static final int WINDOW_LENGTH = 1024;
+    private static final int WINDOW_LENGTH = 4096;
+    private static final int HALF_WINDOW = WINDOW_LENGTH/2;
+    private static final float BIN_RESOLUTION = Main.SAMPLE_RATE*0.5f/HALF_WINDOW;
+    private static final float MAX_MIDI = (float)DSPUtil.midiFromFreq(Main.SAMPLE_RATE*0.5f);
     private static final float[][] TWIDDLE_TABLE = FFT.twiddle(WINDOW_LENGTH);
     private static final float[] WINDOW_TABLE = FFT.window(WINDOW_LENGTH);
     
@@ -104,20 +109,21 @@ public class SpectrogramScreen implements UIElement
         
         float[] buffer = new float[WINDOW_LENGTH];
         circle.read(buffer, 0, Math.min(WINDOW_LENGTH, circle.getSize()));
-        float[][] fft = FFT.fft(buffer, TWIDDLE_TABLE);
+        float[][] fft = FFT.fft(buffer, WINDOW_TABLE, TWIDDLE_TABLE);
         
         GL11.glLineWidth(1.0f);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
         GL11.glBegin(GL11.GL_LINE_STRIP);
-        for (int i=0; i<WINDOW_LENGTH; i++)
+        for (int i=0; i<=HALF_WINDOW; i++)
         {
             float real = fft[0][i];
             float imag = fft[1][i];
             
+            float midi = Math.max((float)DSPUtil.midiFromFreq(i*BIN_RESOLUTION), 0.0f);
             float mag = (float)Math.sqrt(real*real + imag*imag);
             
-            float x = (i/(WINDOW_LENGTH - 1.0f))*2.0f - 1.0f;
-            float y = mag/8.0f - 1.0f;
+            float x = (midi/MAX_MIDI)*2.0f - 1.0f;
+            float y = mag*8.0f/HALF_WINDOW - 1.0f;
             
             GL11.glVertex2f(x, clamp(y));
         }

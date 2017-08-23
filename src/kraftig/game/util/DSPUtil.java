@@ -71,6 +71,16 @@ public class DSPUtil
         return out;
     }
     
+    public static double freqFromMidi(double midi)
+    {
+        return (440.0/32.0)*Math.pow(2.0, (midi - 9)/12.0);
+    }
+    
+    public static double midiFromFreq(double freq)
+    {
+        return Math.log(freq*(32.0/440.0))/Math.log(2.0)*12.0 + 9.0;
+    }
+    
     private DSPUtil()
     {
     }
