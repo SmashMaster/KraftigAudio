@@ -1,5 +1,6 @@
 package kraftig.game.util;
 
+import com.samrj.devil.math.Util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -80,6 +81,58 @@ public class DSPUtil
     {
         return Math.log(freq*(32.0/440.0))/Math.log(2.0)*12.0 + 9.0;
     }
+    
+    private static float samp(float[] array, int index)
+    {
+        if (index < 0 || index >= array.length) return 0.0f;
+        return array[index];
+    }
+    
+    public static float linearSamp(float[] array, float index)
+    {
+        int i0 = Util.floor(index);
+        int i1 = Util.ceil(index);
+        if (i0 == i1) return samp(array, i0);
+        
+        float t = index - i0;
+        float p0 = samp(array, i0);
+        float p1 = samp(array, i1);
+        return Util.lerp(p0, p1, t);
+    }
+    
+    public static float cubicSamp(float[] array, float index)
+    {
+        int i0 = Util.floor(index);
+        int i1 = Util.ceil(index);
+        if (i0 == i1) return samp(array, i0);
+        
+        float t = index - i0;
+        float p0 = samp(array, i0);
+        float p1 = samp(array, i1);
+        float m0 = (p1 - samp(array, i0 - 1))*0.5f;
+        float m1 = (samp(array, i1 + 1) - p0)*0.5f;
+        
+        float t2 = t*t;
+        float t3 = t2*t;
+        
+        float hp0 = 2.0f*t3 - 3.0f*t2 + 1.0f;
+        float hm0 = t3 - 2.0f*t2 + t;
+        float hp1 = -2.0f*t3 + 3.0f*t2;
+        float hm1 = t3 - t2;
+        return hp0*p0 + hm0*m0 + hp1*p1 + hm1*m1;
+    }
+    
+//    //Lanczos A=3 sampling
+//    public static float sincSamp(float[] array, float index)
+//    {
+//        int i0 = Util.floor(index);
+//        int i1 = Util.ceil(index);
+//        if (i0 == i1) return samp(array, i0);
+//        
+//        //Do shit here
+//        
+//        return 0.0f;
+//    }
     
     private DSPUtil()
     {

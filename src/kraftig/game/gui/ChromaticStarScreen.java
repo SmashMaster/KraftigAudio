@@ -3,7 +3,6 @@ package kraftig.game.gui;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
-import com.samrj.devil.math.Vec4;
 import com.samrj.devil.ui.Alignment;
 import kraftig.game.FocusQuery;
 import kraftig.game.Main;
@@ -15,7 +14,7 @@ import org.lwjgl.opengl.GL11;
 
 public class ChromaticStarScreen implements UIElement
 {
-    private static final int WINDOW_LENGTH = 4096;
+    private static final int WINDOW_LENGTH = 8192;
     private static final int HALF_WINDOW = WINDOW_LENGTH/2;
     private static final float BIN_RESOLUTION = Main.SAMPLE_RATE*0.5f/HALF_WINDOW;
     private static final float[][] TWIDDLE_TABLE = FFT.twiddle(WINDOW_LENGTH);
@@ -26,6 +25,8 @@ public class ChromaticStarScreen implements UIElement
     
     private final CircularBuffer circle = new CircularBuffer(WINDOW_LENGTH);
     
+    private float brightness;
+    
     public ChromaticStarScreen(Vec2 radius)
     {
         this.radius.set(radius);
@@ -35,6 +36,11 @@ public class ChromaticStarScreen implements UIElement
     {
         this(radius);
         setPos(pos, align);
+    }
+    
+    public void setBrightness(float b)
+    {
+        brightness = b;
     }
     
     @Override
@@ -131,26 +137,63 @@ public class ChromaticStarScreen implements UIElement
         float[] buffer = new float[WINDOW_LENGTH];
         circle.read(buffer, 0, Math.min(WINDOW_LENGTH, circle.getSize()));
         float[][] fft = FFT.fft(buffer, WINDOW_TABLE, TWIDDLE_TABLE);
+        float[] fftAmps = new float[HALF_WINDOW + 1];
+        
+        //Calculate FFT amplitudes to be interpolated.
+        for (int i=0; i<=HALF_WINDOW; i++)
+        {
+            float real = fft[0][i];
+            float imag = fft[1][i];
+            fftAmps[i] = (float)Math.sqrt(real*real + imag*imag);
+        }
         
         //Draw chromatic star.
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
-        GL11.glBegin(GL11.GL_LINE_STRIP);
-        
-        for (int i=0; i<HALF_WINDOW; i++)
+        GL11.glLineWidth(8.0f);
+        GL11.glBegin(GL11.GL_LINES);
+        for (float midi=0.0f; midi<=127.0f; midi += 0.0625f)
         {
-            float midi = Math.max((float)DSPUtil.midiFromFreq(i*BIN_RESOLUTION), 0.0f);
+            float freq = (float)DSPUtil.freqFromMidi(midi);
             float angle = (midi%12.0f)*Util.PIm2/12.0f;
             float dx = (float)Math.sin(angle);
             float dy = (float)Math.cos(angle);
-
-            float real = fft[0][i];
-            float imag = fft[1][i];
-            float amplitude = (float)Math.sqrt(real*real + imag*imag);
-            float r = amplitude*8.0f/HALF_WINDOW;
-
-            GL11.glVertex2f(dx*r, dy*r);
+            
+            float index = freq/BIN_RESOLUTION;
+            float amplitude = DSPUtil.cubicSamp(fftAmps, index);
+            
+            float colorF = Util.linstep(36, 108, midi);
+            float r = 1.0f - Util.saturate(Util.linstep(0.0f, 0.5f, colorF));
+            float g = 1.0f - Math.abs(0.5f - colorF)*2.0f;
+            float b = Util.saturate(Util.linstep(0.5f, 1.0f, colorF));
+            float a = (float)(Math.pow(midi/127.0f, 2.0)*amplitude*brightness);
+            
+            GL11.glColor4f(r, g, b, a*alpha);
+            GL11.glVertex2f(0.0f, 0.0f);
+            GL11.glVertex2f(dx*1.5f, dy*1.5f);
         }
         GL11.glEnd();
+
+//        GL11.glLineWidth(1.0f);
+//        GL11.glBegin(GL11.GL_LINE_STRIP);
+//        for (float midi=0.0f; midi<=127.0f; midi += 0.25f)
+//        {
+//            float freq = (float)DSPUtil.freqFromMidi(midi);
+//            float angle = (midi%12.0f)*Util.PIm2/12.0f;
+//            float dx = (float)Math.sin(angle);
+//            float dy = (float)Math.cos(angle);
+//            
+//            float index = freq/BIN_RESOLUTION;
+//            float amplitude = DSPUtil.cubicSamp(fftAmps, index);
+//            float rad = amplitude*8.0f/HALF_WINDOW;
+//            
+//            float colorF = Util.linstep(36, 108, midi);
+//            float r = 1.0f - Util.saturate(Util.linstep(0.0f, 0.5f, colorF));
+//            float g = 1.0f - Math.abs(0.5f - colorF)*2.0f;
+//            float b = Util.saturate(Util.linstep(0.5f, 1.0f, colorF));
+//            
+//            GL11.glColor4f(r, g, b, alpha);
+//            GL11.glVertex2f(dx*rad, dy*rad);
+//        }
+//        GL11.glEnd();
         
         GL11.glDisable(GL11.GL_STENCIL_TEST);
         GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);

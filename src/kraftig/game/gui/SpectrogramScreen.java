@@ -116,18 +116,33 @@ public class SpectrogramScreen implements UIElement
         GL11.glBegin(GL11.GL_LINE_STRIP);
         for (int i=0; i<=HALF_WINDOW; i++)
         {
+            float midi = Math.max((float)DSPUtil.midiFromFreq(i*BIN_RESOLUTION), 0.0f);
+            float x = (midi/MAX_MIDI)*2.0f - 1.0f;
+            
             float real = fft[0][i];
             float imag = fft[1][i];
-            
-            float midi = Math.max((float)DSPUtil.midiFromFreq(i*BIN_RESOLUTION), 0.0f);
-            float mag = (float)Math.sqrt(real*real + imag*imag);
-            
-            float x = (midi/MAX_MIDI)*2.0f - 1.0f;
-            float y = mag*8.0f/HALF_WINDOW - 1.0f;
+            float amplitude = (float)Math.sqrt(real*real + imag*imag);
+            float y = amplitude*8.0f/HALF_WINDOW - 1.0f;
             
             GL11.glVertex2f(x, clamp(y));
         }
         GL11.glEnd();
+
+//        GL11.glBegin(GL11.GL_TRIANGLE_STRIP);
+//        for (int i=0; i<=HALF_WINDOW; i++)
+//        {
+//            float midi = Math.max((float)DSPUtil.midiFromFreq(i*BIN_RESOLUTION), 0.0f);
+//            float x = (midi/MAX_MIDI)*2.0f - 1.0f;
+//
+//            float real = fft[0][i];
+//            float imag = fft[1][i];
+//            float amplitude = (float)Math.sqrt(real*real + imag*imag);
+//
+//            GL11.glColor4f(1.0f, 1.0f, 1.0f, amplitude*alpha/100.0f);
+//            GL11.glVertex2f(x, -1.0f);
+//            GL11.glVertex2f(x, 1.0f);
+//        }
+//        GL11.glEnd();
         
         GL11.glPopMatrix();
     }
