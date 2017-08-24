@@ -55,7 +55,8 @@ public class DeviceMenu implements UIElement
                 new Label("Output", 24.0f),
                 new SpawnButton("System Output", SystemOutput::new),
                 new SpawnButton("Oscilloscope", Oscilloscope::new),
-                new SpawnButton("Spectrogram", Spectrogram::new));
+                new SpawnButton("Spectrogram", Spectrogram::new),
+                new SpawnButton("Chromatic Star", ChromaticStar::new));
         
         ColumnLayout midiCat = new ColumnLayout(2.0f, Alignment.C,
                 new Label("MIDI", 24.0f),
