@@ -5,6 +5,7 @@ import com.samrj.devil.ui.Alignment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
@@ -20,6 +21,7 @@ import kraftig.game.util.DSPUtil;
 public class SystemOutput extends Panel
 {
     private static final int MAX_LATENCY = 4800;
+    private static final Random RANDOM = new Random();
     
     private final AudioInputJack inJack;
     
@@ -101,10 +103,13 @@ public class SystemOutput extends Panel
             {
                 float fLeft = Math.min(Math.max(buffer[0][k], -1.0f), 1.0f);
                 float fRight = Math.min(Math.max(buffer[1][k++], -1.0f), 1.0f);
-
-                short left = (short)Math.round(fLeft*32767.5f - 0.5f);
-                short right = (short)Math.round(fRight*32767.5f - 0.5f);
-
+                
+//                short left = (short)Math.round(fLeft*32767.5f - 0.5f);
+//                short right = (short)Math.round(fRight*32767.5f - 0.5f);
+                
+                short left = (short)Math.round(fLeft*32767.0f + RANDOM.nextFloat() - 1.0f);
+                short right = (short)Math.round(fRight*32767.0f + RANDOM.nextFloat() - 1.0f);
+                
                 rawBytes[i++] = (byte)(left & 0xFF);
                 rawBytes[i++] = (byte)((left >>> 8) & 0xFF);
                 rawBytes[i++] = (byte)(right & 0xFF);

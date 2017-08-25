@@ -93,11 +93,6 @@ public class ChromaticStarScreen implements UIElement
     {
     }
     
-    private static float clamp(float x)
-    {
-        return Util.clamp(x, -1.0f, 1.0f);
-    }
-
     @Override
     public void render(float alpha)
     {
