@@ -8,11 +8,11 @@ import kraftig.game.Main;
 import kraftig.game.Panel;
 import org.lwjgl.opengl.GL11;
 
-public class SequencerScreen implements UIElement
+public class MidiSequencerScreen implements UIElement
 {
     private final UIElement layout;
     
-    public SequencerScreen()
+    public MidiSequencerScreen()
     {
         layout = new RowLayout(4.0f, Alignment.C, new Label("screen", 32.0f));
     }
@@ -30,7 +30,7 @@ public class SequencerScreen implements UIElement
     }
 
     @Override
-    public SequencerScreen setPos(Vec2 pos, Alignment align)
+    public MidiSequencerScreen setPos(Vec2 pos, Alignment align)
     {
         layout.setPos(pos, align);
         return this;

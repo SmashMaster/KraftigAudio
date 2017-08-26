@@ -8,13 +8,18 @@ public class BiquadFilterKernel
     
     private float x1, x2, y1, y2;
     
-    public void apply(float[] input, float[] output, int index)
+    public float apply(float x)
     {
-        float x = input != null ? input[index] : 0.0f;
         float y = (float)(s.b0*x + s.b1*x1 + s.b2*x2 - s.a1*y1 - s.a2*y2);
         x2 = x1; x1 = x;
         y2 = y1; y1 = y;
-        output[index] = y;
+        return y;
+    }
+    
+    public void apply(float[] input, float[] output, int index)
+    {
+        float x = input != null ? input[index] : 0.0f;
+        output[index] = apply(x);
     }
     
     public class Settings

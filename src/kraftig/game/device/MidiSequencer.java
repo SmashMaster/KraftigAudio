@@ -13,20 +13,20 @@ import kraftig.game.gui.Label;
 import kraftig.game.gui.MidiInputJack;
 import kraftig.game.gui.MidiOutputJack;
 import kraftig.game.gui.RowLayout;
-import kraftig.game.gui.SequencerScreen;
+import kraftig.game.gui.MidiSequencerScreen;
 import kraftig.game.gui.SymbolButton;
 import kraftig.game.util.DSPUtil;
 import org.lwjgl.opengl.GL11;
 
-public class Sequencer extends Panel
+public class MidiSequencer extends Panel
 {
     private static final float CONTROL_BUTTON_SIZE = 8.0f;
     
     private final MidiInputJack midiInJack;
-    private final SequencerScreen screen;
+    private final MidiSequencerScreen screen;
     private final MidiOutputJack midiOutJack;
     
-    public Sequencer()
+    public MidiSequencer()
     {
         frontInterface.add(new RowLayout(8.0f, Alignment.C,
                     midiInJack = new MidiInputJack(this::receive),
@@ -35,7 +35,7 @@ public class Sequencer extends Panel
                             new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawPlaySymbol),
                             new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawStopSymbol),
                             new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawRecordSymbol)),
-                        screen = new SequencerScreen()),
+                        screen = new MidiSequencerScreen()),
                     midiOutJack = new MidiOutputJack())
                 .setPos(new Vec2(), Alignment.C));
         
