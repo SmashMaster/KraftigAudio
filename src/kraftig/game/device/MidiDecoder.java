@@ -59,7 +59,7 @@ public class MidiDecoder extends Panel
         
         setSizeFromContents(8.0f);
         
-        smoother.s.lowPass(120.0f, 0.5f);
+        smoother.s.lowPass(60.0f, 0.5f);
     }
     
     private void receive(MidiMessage message, long sample)

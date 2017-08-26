@@ -1,5 +1,6 @@
 package kraftig.game.device;
 
+import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.io.DataInputStream;
@@ -26,13 +27,13 @@ public class AnalogSynth extends Panel
     private final MidiInputJack midiInJack;
     private final EnvelopeEditor envEditor;
     private final RadioButtons waveRadio;
-    private final Knob ampKnob, phaseKnob;
+    private final Knob ampKnob, pitchKnob, phaseKnob;
     private final AudioOutputJack outJack;
     
-    private final MidiInstrument<MidiNote> instrument = MidiInstrument.make();
+    private final MidiInstrument<AnalogNote> instrument = new MidiInstrument(AnalogNote::new);
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
-    private float amplitude, phase;
+    private float amplitude, pitchBend, phase;
     private int waveform;
     
     public AnalogSynth()
@@ -49,10 +50,15 @@ public class AnalogSynth extends Panel
                             .setValue(0.25f)
                             .onValueChanged(v -> amplitude = v)),
                     new ColumnLayout(8.0f, Alignment.C,
+                        new Label("Pitch", 6.0f),
+                        pitchKnob = new Knob(24.0f)
+                            .setValue(0.5f)
+                            .onValueChanged(v -> pitchBend = (float)(Math.pow(2.0, v*2.0 - 1.0) - 1.0))),
+                    new ColumnLayout(8.0f, Alignment.C,
                         new Label("Phase", 6.0f),
                         phaseKnob = new Knob(24.0f)
                             .setValue(0.5f)
-                            .onValueChanged(v -> phase = v*4.0f)),
+                            .onValueChanged(v -> phase = v*4.0f - 2.0f)),
                     outJack = new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
@@ -64,13 +70,13 @@ public class AnalogSynth extends Panel
     @Override
     public List<Jack> getJacks()
     {
-        return DSPUtil.jacks(midiInJack, envEditor.getJacks(), ampKnob, phaseKnob, outJack);
+        return DSPUtil.jacks(midiInJack, envEditor.getJacks(), ampKnob, pitchKnob, phaseKnob, outJack);
     }
     
     @Override
     public synchronized void process(int samples)
     {
-        List<MidiNote> notes = instrument.getNotes();
+        List<AnalogNote> notes = instrument.getNotes();
         
         for (int i=0; i<samples; i++)
         {
@@ -79,22 +85,26 @@ public class AnalogSynth extends Panel
             double time = (Main.instance().getTime() + i)*Main.SAMPLE_WIDTH;
             
             ampKnob.updateValue(i);
+            pitchKnob.updateValue(i);
             phaseKnob.updateValue(i);
             
-            for (MidiNote note : notes)
+            for (AnalogNote note : notes)
             {
                 double freq = DSPUtil.freqFromMidi(note.midi);
                 double len = 1.0/freq;
                 double env = note.getEnvelope(instrument.envelope, time);
                 double noteTime = time - note.getStartTime();
+                double p = phase + note.bendIntegral*freq;
                 
                 switch (waveform)
                 {
-                    case 0: v += env*(Math.sin(Math.PI*2.0*(freq*noteTime + phase))); break; //Sine wave
-                    case 1: v += env*(Math.abs(((noteTime + phase*len) % len)/len - 0.5)*4.0 - 1.0); break; //Triangle wave
-                    case 2: v += env*((((noteTime + phase*len) % len)/len)*2.0 - 1.0); break; //Sawtooth wave
-                    case 3: v += env*(((noteTime + phase*len) % len) > len*0.5 ? -1.0 : 1.0); break; //Square wave
+                    case 0: v += env*(Math.sin(Math.PI*2.0*(freq*noteTime + p))); break; //Sine wave
+                    case 1: v += env*(Math.abs(((noteTime + p*len) % len)/len - 0.5)*4.0 - 1.0); break; //Triangle wave
+                    case 2: v += env*((((noteTime + p*len) % len)/len)*2.0 - 1.0); break; //Sawtooth wave
+                    case 3: v += env*(((noteTime + p*len) % len) > len*0.5 ? -1.0 : 1.0); break; //Square wave
                 }
+                
+                note.bendIntegral += pitchBend*Main.SAMPLE_WIDTH; //Euler integration.
             }
             
             v *= amplitude;
@@ -105,6 +115,16 @@ public class AnalogSynth extends Panel
         instrument.update(samples);
     }
     
+    private class AnalogNote extends MidiNote
+    {
+        private double bendIntegral;
+        
+        private AnalogNote(int midi, long sample)
+        {
+            super(midi, sample);
+        }
+    }
+    
     // <editor-fold defaultstate="collapsed" desc="Serialization">
     @Override
     public void save(DataOutputStream out) throws IOException
@@ -113,6 +133,7 @@ public class AnalogSynth extends Panel
         envEditor.save(out);
         waveRadio.save(out);
         ampKnob.save(out);
+        pitchKnob.save(out);
         phaseKnob.save(out);
     }
     
@@ -123,6 +144,7 @@ public class AnalogSynth extends Panel
         envEditor.load(in);
         waveRadio.load(in);
         ampKnob.load(in);
+        pitchKnob.load(in);
         phaseKnob.load(in);
     }
     // </editor-fold>
