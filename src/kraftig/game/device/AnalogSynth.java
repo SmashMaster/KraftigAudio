@@ -53,7 +53,7 @@ public class AnalogSynth extends Panel
                         new Label("Pitch", 6.0f),
                         pitchKnob = new Knob(24.0f)
                             .setValue(0.5f)
-                            .onValueChanged(v -> pitchBend = (float)(Math.pow(2.0, v*2.0 - 1.0) - 1.0))),
+                            .onValueChanged(v -> pitchBend = (float)(Math.pow(2.0, v*4.0 - 2.0) - 1.0))),
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Phase", 6.0f),
                         phaseKnob = new Knob(24.0f)
