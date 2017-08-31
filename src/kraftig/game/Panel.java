@@ -171,13 +171,12 @@ public abstract class Panel implements Savable, Drawable, Focusable
         
         rPos.set(x, hitPos.y);
         
-        if (Math.abs(hitPos.y) > height) return; //Missed above/below panel.
-        if (Math.abs(x) > width) return; //Missed left/right of panel.
-        
-        rHit[0] = true;
         if (Math.abs(pDot) < 0.001f) rSide[0] = 0; //Hit edge of panel.
         else if (pDot > 0.0f) rSide[0] = 1; //Hit front.
         else rSide[0] = -1; //Hit rear.
+        
+        //Check if actually hit.
+        if (Math.abs(hitPos.y) <= height && Math.abs(x) <= width) rHit[0] = true;
     }
     
     public final void projectMouse(boolean[] rHit, float[] rDist, Vec2 rPos, int[] rSide)

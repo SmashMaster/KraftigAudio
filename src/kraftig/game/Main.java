@@ -167,6 +167,12 @@ public final class Main extends Game
             }
             
             @Override
+            public void onMouseScroll(float dx, float dy)
+            {
+                if (focus != null) focus.focus.onMouseScroll(focus, dx, dy);
+            }
+            
+            @Override
             public void onKey(int key, int action, int mods)
             {
                 if (action != GLFW.GLFW_PRESS) return;

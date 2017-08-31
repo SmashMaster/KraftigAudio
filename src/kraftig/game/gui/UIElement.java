@@ -18,6 +18,12 @@ public interface UIElement extends Focusable
     
     @Override
     public void onMouseButton(FocusQuery query, int button, int action, int mods);
+    
+    @Override
+    public default void onMouseScroll(FocusQuery query, float dx, float dy)
+    {
+    }
+    
     public void delete();
     public void render(float alpha);
 }

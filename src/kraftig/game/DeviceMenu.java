@@ -7,6 +7,7 @@ import com.samrj.devil.math.Vec3;
 import com.samrj.devil.ui.Alignment;
 import java.util.function.Supplier;
 import kraftig.game.device.*;
+import kraftig.game.device.sequencer.MidiSequencer;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.LabelButton;
@@ -64,7 +65,7 @@ public class DeviceMenu implements UIElement
                 new SpawnButton("MIDI Splitter", MidiSplitter::new),
                 new SpawnButton("MIDI Output", MidiOutput::new),
                 new SpawnButton("MIDI Decoder", MidiDecoder::new),
-                new SpawnButton("Sequencer", MidiSequencer::new));
+                new SpawnButton("MIDI Sequencer", MidiSequencer::new));
         
         RowLayout row1 = new RowLayout(32.0f, Alignment.C, sourceCat, effectCat);
         RowLayout row2 = new RowLayout(32.0f, Alignment.C, utilityCat, outputCat);

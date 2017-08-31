@@ -1,6 +1,5 @@
 package kraftig.game.device;
 
-import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import java.io.DataInputStream;
