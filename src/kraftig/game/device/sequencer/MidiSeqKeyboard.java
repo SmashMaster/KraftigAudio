@@ -1,30 +1,41 @@
 package kraftig.game.device.sequencer;
 
 import com.samrj.devil.math.Mat4;
+import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.ShortMessage;
 import kraftig.game.FocusQuery;
+import kraftig.game.Focusable;
+import kraftig.game.InteractionState;
+import kraftig.game.Main;
 import kraftig.game.Panel;
+import kraftig.game.audio.MidiReceiver;
 import kraftig.game.gui.UIElement;
 import kraftig.game.gui.UIFocusQuery;
+import kraftig.game.util.DSPUtil;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 public class MidiSeqKeyboard implements UIElement
 {
     private final MidiSeqCamera camera;
+    private final MidiReceiver receiver;
+    private final Key[] keys = new Key[128];
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
     
-    public MidiSeqKeyboard(MidiSeqCamera camera, Vec2 radius)
+    
+    
+    public MidiSeqKeyboard(MidiSeqCamera camera, MidiReceiver receiver, Vec2 radius)
     {
         this.camera = camera;
+        this.receiver = receiver;
+        for (int i=0; i<128; i++) keys[i] = new Key(i);
         this.radius.set(radius);
-    }
-    
-    public MidiSeqKeyboard(MidiSeqCamera camera, Vec2 radius, Vec2 pos, Alignment align)
-    {
-        this(camera, radius);
-        setPos(pos, align);
     }
     
     @Override
@@ -57,12 +68,25 @@ public class MidiSeqKeyboard implements UIElement
         if (p.x < pos.x - radius.x || p.x > pos.x + radius.x) return null;
         if (p.y < pos.y - radius.y || p.y > pos.y + radius.y) return null;
         
-        return null;
+        Vec2 s = new Vec2(p.x, (p.y - pos.y)*0.5f/radius.y);
+        Vec2 w = camera.toWorld(s);
+        
+        if (w.y >= 0.0f && w.y < 128.0f) return new UIFocusQuery(keys[Util.floor(w.y)], dist, p);
+        
+        return new UIFocusQuery(this, dist, p);
     }
     
     @Override
     public void onMouseButton(FocusQuery query, int button, int action, int mods)
     {
+        if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) camera.drag(false, true);
+    }
+    
+    @Override
+    public void onMouseScroll(FocusQuery query, float dx, float dy)
+    {
+        float factor = (float)Math.pow(1.5, dy);
+        camera.zoomY(factor);
     }
 
     @Override
@@ -79,7 +103,8 @@ public class MidiSeqKeyboard implements UIElement
         
         //Draw outline.
         GL11.glLineWidth(1.0f);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
+        float color = Main.instance().getFocus() == this ? 0.75f : 1.0f;
+        GL11.glColor4f(color, color, 1.0f, alpha);
         GL11.glBegin(GL11.GL_LINE_LOOP);
         GL11.glVertex2f(-1.0f, -1.0f);
         GL11.glVertex2f(-1.0f, 1.0f);
@@ -107,11 +132,126 @@ public class MidiSeqKeyboard implements UIElement
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
         
         //Draw masked stuff here.
+        camera.multYMatrix();
+        
+        GL11.glLineWidth(1.0f);
+        Key focus = null;
+        for (Key key : keys)
+        {
+            if (key == Main.instance().getFocus()) focus = key;
+            else key.render(alpha);
+        }
+        if (focus != null) focus.render(alpha);
         
         //Return to normal stencil state.
         GL11.glDisable(GL11.GL_STENCIL_TEST);
         GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
         
         GL11.glPopMatrix();
+    }
+    
+    private class Key implements Focusable
+    {
+        private final int midi;
+        private final boolean isBlack;
+        
+        private Key(int midi)
+        {
+            this.midi = midi;
+            isBlack = DSPUtil.isMidiKeyBlack(midi);
+        }
+        
+        @Override
+        public void onMouseButton(FocusQuery query, int button, int action, int mods)
+        {
+            if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE)
+            {
+                MidiSeqKeyboard.this.onMouseButton(query, button, action, mods);
+                return;
+            }
+            
+            if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
+            {
+                try
+                {
+                    ShortMessage msg = new ShortMessage(ShortMessage.NOTE_ON, 0, midi, 0);
+                    receiver.send(msg, Main.instance().getTime());
+                }
+                catch (InvalidMidiDataException ex)
+                {
+                }
+                    
+                Main.instance().setState(new InteractionState()
+                {
+                    @Override
+                    public boolean canPlayerAim()
+                    {
+                        return true;
+                    }
+
+                    @Override
+                    public void onMouseButton(int button, int action, int mods)
+                    {
+                        if (action == GLFW.GLFW_RELEASE && button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
+                        {
+                            try
+                            {
+                                ShortMessage msg = new ShortMessage(ShortMessage.NOTE_OFF, 0, midi, 0);
+                                receiver.send(msg, Main.instance().getTime());
+                            }
+                            catch (InvalidMidiDataException ex)
+                            {
+                            }
+
+                            Main.instance().setDefaultState();
+                        }
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onMouseScroll(FocusQuery query, float dx, float dy)
+        {
+            MidiSeqKeyboard.this.onMouseScroll(query, dx, dy);
+        }
+        
+        private void render(float alpha)
+        {
+            float y0 = midi;
+            float y1 = midi + 1;
+            
+            if (isBlack)
+            {
+                GL11.glColor4f(0.0f, 0.0f, 0.0f, alpha*0.5f);
+                GL11.glBegin(GL11.GL_QUADS);
+                GL11.glVertex2f(-1.0f, y0);
+                GL11.glVertex2f(-1.0f, y1);
+                GL11.glVertex2f(1.0f, y1);
+                GL11.glVertex2f(1.0f, y0);
+                GL11.glEnd();
+            }
+            
+            if (Main.instance().getFocus() == this)
+            {
+                GL11.glColor4f(0.75f, 0.75f, 1.0f, alpha);
+                GL11.glBegin(GL11.GL_LINE_LOOP);
+                GL11.glVertex2f(-1.0f, y0);
+                GL11.glVertex2f(-1.0f, y1);
+                GL11.glVertex2f(1.0f, y1);
+                GL11.glVertex2f(1.0f, y0);
+                GL11.glEnd();
+            }
+            else
+            {
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha*0.5f);
+                GL11.glBegin(GL11.GL_LINES);
+                GL11.glVertex2f(-1.0f, y0);
+                GL11.glVertex2f(1.0f, y0);
+                GL11.glVertex2f(-1.0f, y1);
+                GL11.glVertex2f(1.0f, y1);
+                GL11.glEnd();
+            }
+        }
     }
 }

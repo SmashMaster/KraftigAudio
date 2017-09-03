@@ -26,8 +26,9 @@ public class MidiSequencer extends Panel
     
     private final MidiInputJack midiInJack;
     private final MidiSeqKeyboard keyboard;
+    private final MidiSeqTimeline timeline;
     private final MidiSeqScreen screen;
-    private final MidiOutputJack midiOutJack;
+    private final MidiOutputJack midiOutJack = new MidiOutputJack();
     
     public MidiSequencer()
     {
@@ -40,10 +41,12 @@ public class MidiSequencer extends Panel
                             new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawPlaySymbol),
                             new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawStopSymbol),
                             new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawRecordSymbol)),
-                        new RowLayout(0.0f, Alignment.C,
-                            keyboard = new MidiSeqKeyboard(camera, new Vec2(12.0f, 64.0f)),
-                            screen = new MidiSeqScreen(camera, new Vec2(128.0f, 64.0f)))),
-                    midiOutJack = new MidiOutputJack())
+                        new RowLayout(0.0f, Alignment.S,
+                            keyboard = new MidiSeqKeyboard(camera, midiOutJack, new Vec2(12.0f, 64.0f)),
+                            new ColumnLayout(0.0f, Alignment.C,
+                                timeline = new MidiSeqTimeline(camera, new Vec2(128.0f, 6.0f)),
+                                screen = new MidiSeqScreen(camera, new Vec2(128.0f, 64.0f))))),
+                    midiOutJack)
                 .setPos(new Vec2(), Alignment.C));
         
         rearInterface.add(new ColumnLayout(4.0f, Alignment.C,

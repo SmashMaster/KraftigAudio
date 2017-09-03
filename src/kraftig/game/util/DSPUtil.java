@@ -82,6 +82,13 @@ public class DSPUtil
         return Math.log(freq*(32.0/440.0))/Math.log(2.0)*12.0 + 9.0;
     }
     
+    private static final boolean[] MIDI_BLACK = {false, true, false, true, false, false, true, false, true, false, true, false};
+    
+    public static boolean isMidiKeyBlack(int midi)
+    {
+        return MIDI_BLACK[midi%12];
+    }
+    
     private static float samp(float[] array, int index)
     {
         if (index < 0 || index >= array.length) return 0.0f;

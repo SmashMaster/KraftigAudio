@@ -12,7 +12,7 @@ import org.lwjgl.opengl.GL11;
 public class MidiSeqCamera
 {
     private final MidiSequencer seq;
-    private final Axis x = new Axis(1.0f/64.0f, 2.0f), y = new Axis(1.0f/64.0f, 2.0f);
+    private final Axis x = new Axis(1.0f/64.0f, 2.0f), y = new Axis(1.0f/256.0f, 1.0f/4.0f);
     private final Deque<SmoothZoom> zooms = new ArrayDeque<>();
     
     public MidiSeqCamera(MidiSequencer seq)
@@ -20,7 +20,7 @@ public class MidiSeqCamera
         this.seq = seq;
         
         x.scale = 1.0f/8.0f; x.tgtScale = x.scale;
-        y.scale = 1.0f/8.0f; y.tgtScale = y.scale;
+        y.scale = 1.0f/16.0f; y.tgtScale = y.scale;
     }
     
     public Vec2 toWorld(Vec2 v)
@@ -96,6 +96,30 @@ public class MidiSeqCamera
                 0f, h, 0f, 0f,
                 0f, 0f, 0f, 0f,
                 -x.pos*w, -y.pos*h, 0f, 1f);
+        GL11.nglMultMatrixf(address);
+        MemStack.pop();
+    }
+    
+    public void multXMatrix()
+    {
+        float w = 2.0f*x.scale;
+        long address = MemStack.wrapf(
+                w, 0f, 0f, 0f,
+                0f, 1.0f, 0f, 0f,
+                0f, 0f, 0f, 0f,
+                -x.pos*w, 0.0f, 0f, 1f);
+        GL11.nglMultMatrixf(address);
+        MemStack.pop();
+    }
+    
+    public void multYMatrix()
+    {
+        float h = 2.0f*y.scale;
+        long address = MemStack.wrapf(
+                1.0f, 0f, 0f, 0f,
+                0f, h, 0f, 0f,
+                0f, 0f, 0f, 0f,
+                0.0f, -y.pos*h, 0f, 1f);
         GL11.nglMultMatrixf(address);
         MemStack.pop();
     }
