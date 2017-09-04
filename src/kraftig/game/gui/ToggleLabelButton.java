@@ -42,13 +42,17 @@ public class ToggleLabelButton implements UIElement, Savable
     public ToggleLabelButton onValueChanged(Consumer<Boolean> callback)
     {
         this.callback = callback;
+        callback.accept(value);
         return this;
     }
     
     public ToggleLabelButton setValue(boolean value)
     {
-        this.value = value;
-        if (callback != null) callback.accept(value);
+        if (this.value != value)
+        {
+            this.value = value;
+            if (callback != null) callback.accept(this.value);
+        }
         return this;
     }
     

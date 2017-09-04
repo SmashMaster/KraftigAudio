@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import kraftig.game.Main;
 import kraftig.game.gui.Jack;
 import kraftig.game.gui.Knob;
 
@@ -140,6 +141,16 @@ public class DSPUtil
 //        
 //        return 0.0f;
 //    }
+    
+    public static double blit(double freq, double bendedFreq, double time, double phase)
+    {
+        double n = Math.floor(Main.SAMPLE_RATE*0.5/bendedFreq);
+        double n2 = n*2.0 + 1.0;
+        double theta = Math.PI*(freq*time + phase);
+        double denom = Math.sin(theta);
+        if (Math.abs(denom) < 0.001) return (0.5/n)*(n2*Math.cos(n2*theta)/Math.cos(theta) - 1.0);
+        else return (0.5/n)*(Math.sin(n2*theta)/Math.sin(theta) - 1.0);
+    }
     
     private DSPUtil()
     {

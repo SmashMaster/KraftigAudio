@@ -19,6 +19,7 @@ import kraftig.game.gui.Label;
 import kraftig.game.gui.MidiInputJack;
 import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.gui.ToggleLabelButton;
 import kraftig.game.util.DSPUtil;
 
 public class AnalogSynth extends Panel
@@ -32,6 +33,7 @@ public class AnalogSynth extends Panel
     private final MidiInstrument<AnalogNote> instrument = new MidiInstrument(AnalogNote::new);
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
+    private boolean antiAliasing;
     private float amplitude, pitchBend, phase;
     private int waveform;
     
@@ -43,21 +45,26 @@ public class AnalogSynth extends Panel
                     waveRadio = new RadioButtons("Sine", "Triangle", "Sawtooth", "Square")
                         .onValueChanged(v -> waveform = v)
                         .setValue(0),
-                    new ColumnLayout(8.0f, Alignment.C,
-                        new Label("Amplitude", 6.0f),
-                        ampKnob = new Knob(24.0f)
-                            .setValue(0.25f)
-                            .onValueChanged(v -> amplitude = v)),
-                    new ColumnLayout(8.0f, Alignment.C,
-                        new Label("Pitch", 6.0f),
-                        pitchKnob = new Knob(24.0f)
-                            .setValue(0.5f)
-                            .onValueChanged(v -> pitchBend = (float)(Math.pow(2.0, v*4.0 - 2.0) - 1.0))),
-                    new ColumnLayout(8.0f, Alignment.C,
-                        new Label("Phase", 6.0f),
-                        phaseKnob = new Knob(24.0f)
-                            .setValue(0.5f)
-                            .onValueChanged(v -> phase = v*4.0f - 2.0f)),
+                    new ColumnLayout(4.0f, Alignment.W,
+                        new RowLayout(8.0f, Alignment.C,
+                            new ColumnLayout(4.0f, Alignment.C,
+                                new Label("Amplitude", 6.0f),
+                                ampKnob = new Knob(24.0f)
+                                    .setValue(0.25f)
+                                    .onValueChanged(v -> amplitude = v)),
+                            new ColumnLayout(4.0f, Alignment.C,
+                                new Label("Pitch", 6.0f),
+                                pitchKnob = new Knob(24.0f)
+                                    .setValue(0.5f)
+                                    .onValueChanged(v -> pitchBend = (float)(Math.pow(2.0, v*4.0 - 2.0) - 1.0))),
+                            new ColumnLayout(4.0f, Alignment.C,
+                                new Label("Phase", 6.0f),
+                                phaseKnob = new Knob(24.0f)
+                                    .setValue(0.5f)
+                                    .onValueChanged(v -> phase = v*4.0f - 2.0f))),
+                        new ToggleLabelButton("Anti-aliasing", 12.0f, 2.0f)
+                                .setValue(true)
+                                .onValueChanged(v -> antiAliasing = v)),
                     outJack = new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
@@ -87,24 +94,59 @@ public class AnalogSynth extends Panel
             pitchKnob.updateValue(i);
             phaseKnob.updateValue(i);
             
-            for (AnalogNote note : notes)
+            if (waveform == 0) for (AnalogNote note : notes)
+            {
+                double freq = DSPUtil.freqFromMidi(note.midi);
+                double env = note.getEnvelope(instrument.envelope, time);
+                double noteTime = time - note.getStartTime();
+                double p = phase + note.bend*freq;
+                
+                if (antiAliasing && freq*(pitchBend + 1.0) > Main.SAMPLE_RATE*0.5) continue;
+
+                v += env*(Math.cos(Math.PI*2.0*(freq*noteTime + p)));
+            }
+            else if (antiAliasing) for (AnalogNote note : notes)
+            {
+                double freq = DSPUtil.freqFromMidi(note.midi);
+                double env = note.getEnvelope(instrument.envelope, time);
+                double noteTime = time - note.getStartTime();
+                double p = phase + note.bend*freq;
+                double bFreq = freq*(pitchBend + 1.0);
+                if (bFreq > Main.SAMPLE_RATE*0.5) continue; //Bandlimit to avoid undersampling.
+
+                double blit = DSPUtil.blit(freq, bFreq, noteTime, p);
+                double invBlit = -DSPUtil.blit(freq, bFreq, noteTime, p + 0.5);
+
+                switch (waveform)
+                {
+                    case 1: v += env*note.triangle; break; //Triangle wave
+                    case 2: v += env*note.sawtooth; break; //Sawtooth wave
+                    case 3: v += env*note.square; break; //Square wave
+                }
+
+                double leak = Math.pow(0.99999, bFreq);
+                note.sawtooth = note.sawtooth*leak + blit*2.0;
+                note.square = note.square*leak + (blit + invBlit)*2.0;
+                note.triangle = note.triangle*0.99 + note.square*4.0*bFreq/Main.SAMPLE_RATE;
+            }
+            else for (AnalogNote note : notes)
             {
                 double freq = DSPUtil.freqFromMidi(note.midi);
                 double len = 1.0/freq;
                 double env = note.getEnvelope(instrument.envelope, time);
                 double noteTime = time - note.getStartTime();
-                double p = phase + note.bendIntegral*freq;
-                
+                double p = phase + note.bend*freq;
+
                 switch (waveform)
                 {
                     case 0: v += env*(Math.sin(Math.PI*2.0*(freq*noteTime + p))); break; //Sine wave
                     case 1: v += env*(Math.abs(((noteTime + p*len) % len)/len - 0.5)*4.0 - 1.0); break; //Triangle wave
-                    case 2: v += env*((((noteTime + p*len) % len)/len)*2.0 - 1.0); break; //Sawtooth wave
+                    case 2: v += env*(1.0 - 2.0*(((noteTime + p*len) % len)/len)); break; //Sawtooth wave
                     case 3: v += env*(((noteTime + p*len) % len) > len*0.5 ? -1.0 : 1.0); break; //Square wave
                 }
-                
-                note.bendIntegral += pitchBend*Main.SAMPLE_WIDTH; //Euler integration.
             }
+            
+            for (AnalogNote note : notes) note.bend += pitchBend*Main.SAMPLE_WIDTH;
             
             v *= amplitude;
             buffer[0][i] = v;
@@ -116,7 +158,11 @@ public class AnalogSynth extends Panel
     
     private class AnalogNote extends MidiNote
     {
-        private double bendIntegral;
+        //Integrators.
+        private double triangle = -1.0;
+        private double sawtooth = -1.0;
+        private double square = -1.0;
+        private double bend;
         
         private AnalogNote(int midi, long sample)
         {
