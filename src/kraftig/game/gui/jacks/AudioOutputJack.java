@@ -1,4 +1,4 @@
-package kraftig.game.gui;
+package kraftig.game.gui.jacks;
 
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;

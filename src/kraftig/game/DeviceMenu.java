@@ -10,11 +10,11 @@ import kraftig.game.device.*;
 import kraftig.game.device.sequencer.MidiSequencer;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Label;
-import kraftig.game.gui.LabelButton;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.gui.ScrollBox;
 import kraftig.game.gui.UIElement;
 import kraftig.game.gui.UIFocusQuery;
+import kraftig.game.gui.buttons.LabelButton;
 import org.lwjgl.opengl.GL11;
 
 public class DeviceMenu implements UIElement

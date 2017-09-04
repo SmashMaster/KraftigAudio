@@ -1,4 +1,4 @@
-package kraftig.game.gui;
+package kraftig.game.gui.jacks;
 
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
@@ -8,6 +8,8 @@ import com.samrj.devil.ui.Alignment;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.Wire;
+import kraftig.game.gui.UIElement;
+import kraftig.game.gui.UIFocusQuery;
 import org.lwjgl.opengl.GL11;
 
 public abstract class Jack implements UIElement

@@ -6,9 +6,9 @@ import com.samrj.devil.math.Vec2i;
 import com.samrj.devil.ui.Alignment;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Label;
-import kraftig.game.gui.LabelButton;
 import kraftig.game.gui.UIElement;
 import kraftig.game.gui.UIFocusQuery;
+import kraftig.game.gui.buttons.LabelButton;
 import org.lwjgl.opengl.GL11;
 
 public class EscapeMenu implements UIElement

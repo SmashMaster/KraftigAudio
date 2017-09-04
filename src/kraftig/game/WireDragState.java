@@ -3,9 +3,9 @@ package kraftig.game;
 import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.math.Vec3;
 import kraftig.game.Wire.WireNode;
-import kraftig.game.gui.InputJack;
-import kraftig.game.gui.Jack;
-import kraftig.game.gui.OutputJack;
+import kraftig.game.gui.jacks.InputJack;
+import kraftig.game.gui.jacks.Jack;
+import kraftig.game.gui.jacks.OutputJack;
 import org.lwjgl.glfw.GLFW;
 
 public class WireDragState implements InteractionState

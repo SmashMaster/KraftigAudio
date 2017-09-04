@@ -1,4 +1,4 @@
-package kraftig.game.gui;
+package kraftig.game.gui.buttons;
 
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
@@ -10,6 +10,8 @@ import java.util.function.Consumer;
 import kraftig.game.FocusQuery;
 import kraftig.game.Main;
 import kraftig.game.Panel;
+import kraftig.game.gui.UIElement;
+import kraftig.game.gui.UIFocusQuery;
 import kraftig.game.util.Savable;
 import kraftig.game.util.VectorFont;
 import org.lwjgl.glfw.GLFW;

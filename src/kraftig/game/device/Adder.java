@@ -5,11 +5,11 @@ import com.samrj.devil.ui.Alignment;
 import java.util.List;
 import kraftig.game.Main;
 import kraftig.game.Panel;
-import kraftig.game.gui.AudioInputJack;
-import kraftig.game.gui.AudioOutputJack;
-import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.gui.jacks.AudioInputJack;
+import kraftig.game.gui.jacks.AudioOutputJack;
+import kraftig.game.gui.jacks.Jack;
 import kraftig.game.util.DSPUtil;
 
 public class Adder extends Panel

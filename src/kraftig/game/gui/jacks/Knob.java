@@ -1,4 +1,4 @@
-package kraftig.game.gui;
+package kraftig.game.gui.jacks;
 
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import kraftig.game.FocusQuery;
 import kraftig.game.InteractionState;
 import kraftig.game.Main;
+import kraftig.game.gui.UIElement;
 import kraftig.game.util.Savable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;

@@ -12,10 +12,10 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import kraftig.game.gui.AudioInputJack;
-import kraftig.game.gui.InputJack;
-import kraftig.game.gui.Jack;
-import kraftig.game.gui.OutputJack;
+import kraftig.game.gui.jacks.AudioInputJack;
+import kraftig.game.gui.jacks.InputJack;
+import kraftig.game.gui.jacks.Jack;
+import kraftig.game.gui.jacks.OutputJack;
 import kraftig.game.util.ConcatList;
 import kraftig.game.util.Savable;
 

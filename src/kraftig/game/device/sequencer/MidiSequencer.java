@@ -12,12 +12,12 @@ import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.ColumnLayout;
-import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
-import kraftig.game.gui.MidiInputJack;
-import kraftig.game.gui.MidiOutputJack;
 import kraftig.game.gui.RowLayout;
-import kraftig.game.gui.SymbolButton;
+import kraftig.game.gui.buttons.SymbolButton;
+import kraftig.game.gui.jacks.Jack;
+import kraftig.game.gui.jacks.MidiInputJack;
+import kraftig.game.gui.jacks.MidiOutputJack;
 import kraftig.game.util.DSPUtil;
 import org.lwjgl.opengl.GL11;
 
@@ -26,6 +26,7 @@ public class MidiSequencer extends Panel
     private static final float CONTROL_BUTTON_SIZE = 8.0f;
     
     private final MidiSeqCamera camera = new MidiSeqCamera(this);
+    private final Track track = new Track();
     
     private final MidiInputJack midiInJack;
     private final MidiSeqKeyboard keyboard;

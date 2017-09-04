@@ -11,15 +11,15 @@ import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.audio.BiquadFilterKernel;
-import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.ColumnLayout;
-import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
-import kraftig.game.gui.MidiInputJack;
 import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.gui.TextBox;
-import kraftig.game.gui.ToggleLabelButton;
+import kraftig.game.gui.buttons.ToggleLabelButton;
+import kraftig.game.gui.jacks.AudioOutputJack;
+import kraftig.game.gui.jacks.Jack;
+import kraftig.game.gui.jacks.MidiInputJack;
 import kraftig.game.util.DSPUtil;
 
 public class MidiDecoder extends Panel

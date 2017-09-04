@@ -14,11 +14,11 @@ import javax.sound.midi.Transmitter;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.audio.MidiReceiver;
-import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.ListBox;
-import kraftig.game.gui.MidiOutputJack;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.gui.jacks.Jack;
+import kraftig.game.gui.jacks.MidiOutputJack;
 import kraftig.game.util.DSPUtil;
 
 public class MidiInput extends Panel

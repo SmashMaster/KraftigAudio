@@ -7,13 +7,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
 import kraftig.game.Panel;
-import kraftig.game.gui.AudioInputJack;
 import kraftig.game.gui.ChromaticStarScreen;
 import kraftig.game.gui.ColumnLayout;
-import kraftig.game.gui.Jack;
-import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.gui.jacks.AudioInputJack;
+import kraftig.game.gui.jacks.Jack;
+import kraftig.game.gui.jacks.Knob;
 import kraftig.game.util.DSPUtil;
 
 public class ChromaticStar extends Panel

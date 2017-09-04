@@ -1,10 +1,12 @@
-package kraftig.game.gui;
+package kraftig.game.gui.buttons;
 
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import kraftig.game.FocusQuery;
 import kraftig.game.Panel;
+import kraftig.game.gui.UIElement;
+import kraftig.game.gui.UIFocusQuery;
 import org.lwjgl.glfw.GLFW;
 
 public abstract class Button implements UIElement

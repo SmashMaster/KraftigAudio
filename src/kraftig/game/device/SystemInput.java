@@ -10,11 +10,11 @@ import javax.sound.sampled.Mixer;
 import javax.sound.sampled.TargetDataLine;
 import kraftig.game.Main;
 import kraftig.game.Panel;
-import kraftig.game.gui.AudioOutputJack;
-import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.ListBox;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.gui.jacks.AudioOutputJack;
+import kraftig.game.gui.jacks.Jack;
 import kraftig.game.util.DSPUtil;
 
 public class SystemInput extends Panel

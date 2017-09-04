@@ -1,4 +1,4 @@
-package kraftig.game.gui;
+package kraftig.game.gui.buttons;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;

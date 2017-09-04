@@ -88,6 +88,7 @@ public final class Main extends Game
         }
     }
     
+    private final SongProperties properties;
     private final VectorFont font;
     private final Crosshair crosshair;
     private Camera3D camera;
@@ -118,6 +119,7 @@ public final class Main extends Game
         DGL.init();
         mouse.setGrabbed(!displayMouse());
         
+        properties = new SongProperties();
         font = new VectorFont("kraftig/res/fonts/DejaVuSans.ttf");
         crosshair = new Crosshair();
         camera = new Camera3D(Z_NEAR, Z_FAR, FOV, getResolution());
@@ -223,6 +225,11 @@ public final class Main extends Game
         return (menu != null) || (displayMouse && interactionState.isCursorVisible());
     }
     
+    public SongProperties getProperties()
+    {
+        return properties;
+    }
+    
     public VectorFont getFont()
     {
         return font;
@@ -305,6 +312,7 @@ public final class Main extends Game
         
         if (result)
         {
+            properties.init();
             space.delete();
             space = new ProjectSpace();
             closeMenu();
@@ -327,6 +335,7 @@ public final class Main extends Game
             try (DataOutputStream out = new DataOutputStream(new FileOutputStream(path)))
             {
                 out.writeUTF("Kr\u00E4ftig");
+                properties.save(out);
                 space.save(out);
                 closeMenu();
             }
@@ -361,9 +370,10 @@ public final class Main extends Game
                     throw new IOException("Corrupt/unknown file format.");
                 }
                 
+                properties.load(in);
+                
                 ProjectSpace newSpace = new ProjectSpace();
                 newSpace.load(in);
-                
                 space.delete();
                 space = newSpace;
                 

@@ -10,16 +10,16 @@ import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.audio.MidiInstrument;
 import kraftig.game.audio.MidiNote;
-import kraftig.game.gui.AudioOutputJack;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.EnvelopeEditor;
-import kraftig.game.gui.Jack;
-import kraftig.game.gui.Knob;
 import kraftig.game.gui.Label;
-import kraftig.game.gui.MidiInputJack;
 import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
-import kraftig.game.gui.ToggleLabelButton;
+import kraftig.game.gui.buttons.ToggleLabelButton;
+import kraftig.game.gui.jacks.AudioOutputJack;
+import kraftig.game.gui.jacks.Jack;
+import kraftig.game.gui.jacks.Knob;
+import kraftig.game.gui.jacks.MidiInputJack;
 import kraftig.game.util.DSPUtil;
 
 public class AnalogSynth extends Panel

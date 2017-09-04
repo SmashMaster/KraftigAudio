@@ -6,8 +6,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import kraftig.game.Main;
-import kraftig.game.gui.Jack;
-import kraftig.game.gui.Knob;
+import kraftig.game.gui.jacks.Jack;
+import kraftig.game.gui.jacks.Knob;
 
 public class DSPUtil
 {

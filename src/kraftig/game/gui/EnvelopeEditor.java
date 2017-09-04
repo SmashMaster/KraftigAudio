@@ -11,6 +11,8 @@ import java.util.List;
 import kraftig.game.FocusQuery;
 import kraftig.game.Panel;
 import kraftig.game.audio.Envelope;
+import kraftig.game.gui.jacks.Jack;
+import kraftig.game.gui.jacks.Knob;
 import kraftig.game.util.Savable;
 import org.lwjgl.opengl.GL11;
 

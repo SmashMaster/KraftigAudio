@@ -7,6 +7,7 @@ import com.samrj.devil.ui.Alignment;
 import kraftig.game.FocusQuery;
 import kraftig.game.Main;
 import kraftig.game.Panel;
+import kraftig.game.SongProperties;
 import kraftig.game.gui.UIElement;
 import kraftig.game.gui.UIFocusQuery;
 import org.lwjgl.glfw.GLFW;
@@ -14,6 +15,7 @@ import org.lwjgl.opengl.GL11;
 
 public class MidiSeqScreen implements UIElement
 {
+    private final SongProperties properties;
     private final MidiSeqCamera camera;
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
@@ -22,6 +24,7 @@ public class MidiSeqScreen implements UIElement
     
     public MidiSeqScreen(MidiSeqCamera camera, Vec2 radius)
     {
+        properties = Main.instance().getProperties();
         this.camera = camera;
         this.radius.set(radius);
     }
@@ -135,12 +138,22 @@ public class MidiSeqScreen implements UIElement
         AAB2 bounds = camera.getBounds();
         
         GL11.glLineWidth(1.0f);
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
         GL11.glBegin(GL11.GL_LINES);
         
         //Song start
-        GL11.glVertex2f(0.0f, 0);
-        GL11.glVertex2f(0.0f, 128);
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
+        GL11.glVertex2f(0.0f, 0.0f);
+        GL11.glVertex2f(0.0f, 128.0f);
+        
+        //Bar lines
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha*0.375f);
+        float barLength = (float)(properties.getSamplesPerBar()/Main.SAMPLE_RATE);
+        for (int i=1; i<properties.songLength; i++)
+        {
+            float x = barLength*i;
+            GL11.glVertex2f(x, 0.0f);
+            GL11.glVertex2f(x, 128.0f);
+        }
         
         //MIDI lines
         for (float y = 0.0f; y <= 128.0f; y++)

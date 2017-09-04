@@ -12,6 +12,7 @@ import kraftig.game.FocusQuery;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.gui.ListBox.Option;
+import kraftig.game.gui.buttons.LabelButton;
 import kraftig.game.util.VectorFont;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;

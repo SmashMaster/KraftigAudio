@@ -5,11 +5,11 @@ import com.samrj.devil.ui.Alignment;
 import java.util.List;
 import javax.sound.midi.MidiMessage;
 import kraftig.game.Panel;
-import kraftig.game.gui.Jack;
 import kraftig.game.gui.Label;
-import kraftig.game.gui.MidiInputJack;
-import kraftig.game.gui.MidiOutputJack;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.gui.jacks.Jack;
+import kraftig.game.gui.jacks.MidiInputJack;
+import kraftig.game.gui.jacks.MidiOutputJack;
 import kraftig.game.util.DSPUtil;
 
 public class MidiSplitter extends Panel

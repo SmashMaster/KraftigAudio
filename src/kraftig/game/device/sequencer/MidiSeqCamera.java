@@ -17,7 +17,7 @@ import org.lwjgl.opengl.GL11;
 public class MidiSeqCamera implements Savable
 {
     private final MidiSequencer seq;
-    private final Axis x = new Axis(1.0f/64.0f, 2.0f), y = new Axis(1.0f/256.0f, 1.0f/4.0f);
+    private final Axis x = new Axis(1.0f/256.0f, 2.0f), y = new Axis(1.0f/256.0f, 1.0f/4.0f);
     private final Deque<SmoothZoom> zooms = new ArrayDeque<>();
     
     public MidiSeqCamera(MidiSequencer seq)

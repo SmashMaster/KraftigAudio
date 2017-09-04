@@ -1,4 +1,4 @@
-package kraftig.game.gui;
+package kraftig.game.gui.jacks;
 
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
@@ -11,24 +11,28 @@ import kraftig.game.Wire.WireNode;
 import kraftig.game.WireDragState;
 import org.lwjgl.glfw.GLFW;
 
-public abstract class OutputJack extends Jack
+public abstract class InputJack extends Jack
 {
-    public OutputJack()
+    public InputJack()
     {
         super();
     }
     
-    public OutputJack(Vec2 pos, Alignment align)
+    public InputJack(float radius)
     {
-        this();
-        setPos(pos, align);
+        super(radius);
+    }
+    
+    public InputJack(Vec2 pos, Alignment align)
+    {
+        super(pos, align);
     }
     
     @Override
     public void updateMatrix(Mat4 matrix, Panel panel, boolean front)
     {
         super.updateMatrix(matrix, panel, front);
-        if (hasWire()) getWire().getFirst().pos.set(getWirePos());
+        if (hasWire()) getWire().getLast().pos.set(getWirePos());
     }
     
     @Override
@@ -38,9 +42,9 @@ public abstract class OutputJack extends Jack
         
         if (!hasWire())
         {
-            new Wire().connectIn(this);
+            new Wire().connectOut(this);
             Wire wire = getWire();
-            WireNode dragNode = wire.getLast();
+            WireNode dragNode = wire.getFirst();
             dragNode.pos.set(getWirePos());
             Main.instance().addWire(wire);
             Main.instance().setState(new WireDragState(dragNode));
@@ -50,6 +54,6 @@ public abstract class OutputJack extends Jack
     @Override
     public void delete()
     {
-        if (hasWire()) getWire().disconnectIn();
+        if (hasWire()) getWire().disconnectOut();
     }
 }
