@@ -28,6 +28,7 @@ public class AnalogSynth extends Panel
     private final EnvelopeEditor envEditor;
     private final RadioButtons waveRadio;
     private final Knob ampKnob, pitchKnob, phaseKnob;
+    private final ToggleLabelButton antiAliasButton;
     private final AudioOutputJack outJack;
     
     private final MidiInstrument<AnalogNote> instrument = new MidiInstrument(AnalogNote::new);
@@ -62,7 +63,7 @@ public class AnalogSynth extends Panel
                                 phaseKnob = new Knob(24.0f)
                                     .setValue(0.5f)
                                     .onValueChanged(v -> phase = v*4.0f - 2.0f))),
-                        new ToggleLabelButton("Anti-aliasing", 12.0f, 2.0f)
+                        antiAliasButton = new ToggleLabelButton("Anti-aliasing", 12.0f, 2.0f)
                                 .setValue(true)
                                 .onValueChanged(v -> antiAliasing = v)),
                     outJack = new AudioOutputJack(this, buffer))
@@ -180,6 +181,7 @@ public class AnalogSynth extends Panel
         ampKnob.save(out);
         pitchKnob.save(out);
         phaseKnob.save(out);
+        antiAliasButton.save(out);
     }
     
     @Override
@@ -191,6 +193,7 @@ public class AnalogSynth extends Panel
         ampKnob.load(in);
         pitchKnob.load(in);
         phaseKnob.load(in);
+        antiAliasButton.load(in);
     }
     // </editor-fold>
 }

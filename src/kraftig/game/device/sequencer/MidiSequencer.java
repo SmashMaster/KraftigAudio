@@ -3,6 +3,9 @@ package kraftig.game.device.sequencer;
 import com.samrj.devil.graphics.GraphicsUtil;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.List;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
@@ -149,4 +152,20 @@ public class MidiSequencer extends Panel
     {
         camera.step((float)Main.SAMPLE_WIDTH*samples);
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        super.save(out);
+        camera.save(out);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        super.load(in);
+        camera.load(in);
+    }
+    // </editor-fold>
 }

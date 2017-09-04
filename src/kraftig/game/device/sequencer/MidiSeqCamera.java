@@ -1,15 +1,20 @@
 package kraftig.game.device.sequencer;
 
+import com.samrj.devil.geo2d.AAB2;
 import com.samrj.devil.io.MemStack;
 import com.samrj.devil.math.Vec2;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import kraftig.game.InteractionState;
 import kraftig.game.Main;
+import kraftig.game.util.Savable;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
-public class MidiSeqCamera
+public class MidiSeqCamera implements Savable
 {
     private final MidiSequencer seq;
     private final Axis x = new Axis(1.0f/64.0f, 2.0f), y = new Axis(1.0f/256.0f, 1.0f/4.0f);
@@ -19,6 +24,7 @@ public class MidiSeqCamera
     {
         this.seq = seq;
         
+        y.pos = 60.5f;
         x.scale = 1.0f/8.0f; x.tgtScale = x.scale;
         y.scale = 1.0f/16.0f; y.tgtScale = y.scale;
     }
@@ -41,6 +47,22 @@ public class MidiSeqCamera
     public void zoomY(float factor)
     {
         zooms.add(new SmoothZoom(y, factor, 0.25f));
+    }
+    
+    public Vec2 getScale()
+    {
+        return new Vec2(x.scale, y.scale);
+    }
+    
+    public Vec2 getPos()
+    {
+        return new Vec2(x.pos, y.pos);
+    }
+    
+    public AAB2 getBounds()
+    {
+        return new AAB2(x.pos - 1.0f/x.scale, x.pos + 1.0f/x.scale,
+                        y.pos - 1.0f/y.scale, y.pos + 1.0f/y.scale);
     }
     
     public void drag(boolean dragX, boolean dragY)
@@ -135,6 +157,28 @@ public class MidiSeqCamera
             y.tgtScale = y.scale;
         }
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        out.writeFloat(x.pos);
+        out.writeFloat(x.scale);
+        out.writeFloat(y.pos);
+        out.writeFloat(y.scale);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        x.pos = in.readFloat();
+        x.scale = in.readFloat();
+        x.tgtScale = x.scale;
+        y.pos = in.readFloat();
+        y.scale = in.readFloat();
+        y.tgtScale = y.scale;
+    }
+    // </editor-fold>
     
     private class Axis
     {

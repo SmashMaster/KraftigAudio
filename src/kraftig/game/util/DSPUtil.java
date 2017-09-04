@@ -83,9 +83,15 @@ public class DSPUtil
         return Math.log(freq*(32.0/440.0))/Math.log(2.0)*12.0 + 9.0;
     }
     
+    private static final String[] NAMES = {"C", "C\u266F", "D", "D\u266F", "E", "F", "F\u266F", "G", "G\u266F", "A", "A\u266F", "B"};
     private static final boolean[] MIDI_BLACK = {false, true, false, true, false, false, true, false, true, false, true, false};
     
-    public static boolean isMidiKeyBlack(int midi)
+    public static String getMidiName(int midi)
+    {
+        return NAMES[midi%12] + Integer.toString(midi/12 - 1);
+    }
+    
+    public static boolean isMidiBlack(int midi)
     {
         return MIDI_BLACK[midi%12];
     }

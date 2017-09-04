@@ -4,8 +4,6 @@ import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.ShortMessage;
 import kraftig.game.FocusQuery;
@@ -17,11 +15,13 @@ import kraftig.game.audio.MidiReceiver;
 import kraftig.game.gui.UIElement;
 import kraftig.game.gui.UIFocusQuery;
 import kraftig.game.util.DSPUtil;
+import kraftig.game.util.VectorFont;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 public class MidiSeqKeyboard implements UIElement
 {
+    private final VectorFont font;
     private final MidiSeqCamera camera;
     private final MidiReceiver receiver;
     private final Key[] keys = new Key[128];
@@ -29,9 +29,9 @@ public class MidiSeqKeyboard implements UIElement
     private final Vec2 radius = new Vec2();
     
     
-    
     public MidiSeqKeyboard(MidiSeqCamera camera, MidiReceiver receiver, Vec2 radius)
     {
+        font = Main.instance().getFont();
         this.camera = camera;
         this.receiver = receiver;
         for (int i=0; i<128; i++) keys[i] = new Key(i);
@@ -153,12 +153,14 @@ public class MidiSeqKeyboard implements UIElement
     private class Key implements Focusable
     {
         private final int midi;
+        private final String name;
         private final boolean isBlack;
         
         private Key(int midi)
         {
             this.midi = midi;
-            isBlack = DSPUtil.isMidiKeyBlack(midi);
+            name = DSPUtil.getMidiName(midi);
+            isBlack = DSPUtil.isMidiBlack(midi);
         }
         
         @Override
@@ -252,6 +254,13 @@ public class MidiSeqKeyboard implements UIElement
                 GL11.glVertex2f(1.0f, y1);
                 GL11.glEnd();
             }
+            
+            GL11.glPushMatrix();
+            GL11.glTranslatef(-1.0f, 0.0f, 0.0f);
+            GL11.glScalef(camera.getScale().y*6.0f, 1.0f, 0.0f);
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
+            font.render(name, new Vec2(0.0f, y0 + 0.5f), 0.875f, Alignment.E);
+            GL11.glPopMatrix();
         }
     }
 }

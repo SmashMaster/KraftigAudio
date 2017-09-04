@@ -1,5 +1,6 @@
 package kraftig.game.device.sequencer;
 
+import com.samrj.devil.geo2d.AAB2;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
@@ -131,20 +132,23 @@ public class MidiSeqScreen implements UIElement
         //Draw masked stuff here.
         GL11.glPushMatrix();
         camera.multMatrix();
+        AAB2 bounds = camera.getBounds();
         
         GL11.glLineWidth(1.0f);
         GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
         GL11.glBegin(GL11.GL_LINES);
-        for (float x = -8.0f; x <= 8.0f; x++)
-        {
-            GL11.glVertex2f(x, 0.0f);
-            GL11.glVertex2f(x, 128.0f);
-        }
         
+        //Song start
+        GL11.glVertex2f(0.0f, 0);
+        GL11.glVertex2f(0.0f, 128);
+        
+        //MIDI lines
         for (float y = 0.0f; y <= 128.0f; y++)
         {
-            GL11.glVertex2f(-8.0f, y);
-            GL11.glVertex2f(8.0f, y);
+            if (y%12 == 0) GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha*0.375f);
+            else GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha*0.125f);
+            GL11.glVertex2f(bounds.x0, y);
+            GL11.glVertex2f(bounds.x1, y);
         }
         GL11.glEnd();
         
