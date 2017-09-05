@@ -12,7 +12,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import kraftig.game.gui.jacks.AudioInputJack;
 import kraftig.game.gui.jacks.InputJack;
 import kraftig.game.gui.jacks.Jack;
 import kraftig.game.gui.jacks.OutputJack;
@@ -74,9 +73,9 @@ public class ProjectSpace implements Savable
         for (Panel panel : panels)
         {
             dag.add(panel);
-            for (Jack jack : panel.getJacks()) if (jack instanceof AudioInputJack)
+            for (Jack jack : panel.getJacks()) if (jack instanceof InputJack)
             {
-                Panel inPanel = ((AudioInputJack)jack).getPanel();
+                Panel inPanel = ((InputJack)jack).getPanel();
                 
                 if (inPanel != null)
                 {

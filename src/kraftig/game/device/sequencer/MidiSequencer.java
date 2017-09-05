@@ -27,7 +27,6 @@ import org.lwjgl.opengl.GL11;
 
 public class MidiSequencer extends Panel
 {
-    private static final int MIDI_EARLY = Main.BUFFER_SIZE;
     private static final float CONTROL_BUTTON_SIZE = 8.0f;
     
     private final SongProperties properties = Main.instance().getProperties();
@@ -39,7 +38,7 @@ public class MidiSequencer extends Panel
     private final MidiSeqKeyboard keyboard;
     private final MidiSeqTimeline timeline;
     private final MidiSeqScreen screen;
-    private final MidiOutputJack midiOutJack = new MidiOutputJack();
+    private final MidiOutputJack midiOutJack = new MidiOutputJack(this);
     
     private final Note[] activeNotes = new Note[128];
     private boolean recording;

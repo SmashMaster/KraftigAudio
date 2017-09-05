@@ -52,7 +52,7 @@ public class MidiInput extends Panel
         else USAGE.put(device, i - 1);
     }
     
-    private final MidiOutputJack outJack = new MidiOutputJack();
+    private final MidiOutputJack outJack = new MidiOutputJack(this);
     
     private MidiDevice inputDevice;
     private Transmitter inputTransmitter;

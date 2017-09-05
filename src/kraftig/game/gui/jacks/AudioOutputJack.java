@@ -9,14 +9,12 @@ import org.lwjgl.opengl.GL11;
 
 public class AudioOutputJack extends OutputJack
 {
-    private final Panel panel;
     private final Supplier<float[][]> bufferSupplier;
     
     public AudioOutputJack(Panel panel, Supplier<float[][]> bufferSupplier)
     {
-        super();
+        super(panel);
         if (panel == null || bufferSupplier == null) throw new NullPointerException();
-        this.panel = panel;
         this.bufferSupplier = bufferSupplier;
     }
     
@@ -34,11 +32,6 @@ public class AudioOutputJack extends OutputJack
     public AudioOutputJack(Panel panel, float[][] buffer, Vec2 pos, Alignment align)
     {
         this(panel, () -> buffer, pos, align);
-    }
-    
-    public Panel getPanel()
-    {
-        return panel;
     }
     
     public float[][] getBuffer()

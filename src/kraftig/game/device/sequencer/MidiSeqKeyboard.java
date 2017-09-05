@@ -258,7 +258,7 @@ public class MidiSeqKeyboard implements UIElement
             
             GL11.glPushMatrix();
             GL11.glTranslatef(-1.0f, 0.0f, 0.0f);
-            GL11.glScalef(camera.getScale().y*6.0f, 1.0f, 0.0f);
+            GL11.glScalef(camera.getScale().y*8.0f, 1.0f, 0.0f);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
             font.render(name, new Vec2(0.0f, y0 + 0.5f), 0.875f, Alignment.E);
             GL11.glPopMatrix();

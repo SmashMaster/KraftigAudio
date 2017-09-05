@@ -28,6 +28,17 @@ public abstract class InputJack extends Jack
         super(pos, align);
     }
     
+    private OutputJack getIn()
+    {
+        return (OutputJack)getWire().getIn();
+    }
+    
+    public Panel getPanel()
+    {
+        if (hasLiveWire()) return getIn().getPanel();
+        else return null;
+    }
+    
     @Override
     public void updateMatrix(Mat4 matrix, Panel panel, boolean front)
     {

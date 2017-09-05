@@ -4,19 +4,20 @@ import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
 import javax.sound.midi.MidiMessage;
 import kraftig.game.Main;
+import kraftig.game.Panel;
 import kraftig.game.audio.MidiReceiver;
 import kraftig.game.util.VectorFont;
 
 public class MidiOutputJack extends OutputJack implements MidiReceiver
 {
-    public MidiOutputJack()
+    public MidiOutputJack(Panel panel)
     {
-        super();
+        super(panel);
     }
     
-    public MidiOutputJack(Vec2 pos, Alignment align)
+    public MidiOutputJack(Panel panel, Vec2 pos, Alignment align)
     {
-        super(pos, align);
+        super(panel, pos, align);
     }
     
     @Override

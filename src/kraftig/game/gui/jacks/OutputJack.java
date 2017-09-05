@@ -13,15 +13,23 @@ import org.lwjgl.glfw.GLFW;
 
 public abstract class OutputJack extends Jack
 {
-    public OutputJack()
+    private final Panel panel;
+    
+    public OutputJack(Panel panel)
     {
         super();
+        this.panel = panel;
     }
     
-    public OutputJack(Vec2 pos, Alignment align)
+    public OutputJack(Panel panel, Vec2 pos, Alignment align)
     {
-        this();
+        this(panel);
         setPos(pos, align);
+    }
+    
+    public Panel getPanel()
+    {
+        return panel;
     }
     
     @Override

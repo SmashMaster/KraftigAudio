@@ -22,10 +22,10 @@ public class MidiSplitter extends Panel
         frontInterface.add(new RowLayout(4.0f, Alignment.C,
                     inJack = new MidiInputJack(this::receive),
                     new Label("\u2192", 48.0f),
-                    outJacks[0] = new MidiOutputJack(),
-                    outJacks[1] = new MidiOutputJack(),
-                    outJacks[2] = new MidiOutputJack(),
-                    outJacks[3] = new MidiOutputJack())
+                    outJacks[0] = new MidiOutputJack(this),
+                    outJacks[1] = new MidiOutputJack(this),
+                    outJacks[2] = new MidiOutputJack(this),
+                    outJacks[3] = new MidiOutputJack(this))
                 .setPos(new Vec2(), Alignment.C));
         
         rearInterface.add(new Label("MIDI Splitter", 48.0f, new Vec2(), Alignment.C));

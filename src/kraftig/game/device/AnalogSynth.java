@@ -99,12 +99,14 @@ public class AnalogSynth extends Panel
             if (waveform == 0) for (AnalogNote note : notes)
             {
                 double freq = DSPUtil.freqFromMidi(note.midi);
+                if (antiAliasing && freq*(pitchBend + 1.0) > Main.SAMPLE_RATE*0.5) continue;
+                
                 double env = note.getEnvelope(instrument.envelope, time);
                 double noteTime = time - note.getStartTime();
+                if (noteTime < 0.0) continue;
+                
                 double p = phase + note.bend*freq;
                 
-                if (antiAliasing && freq*(pitchBend + 1.0) > Main.SAMPLE_RATE*0.5) continue;
-
                 v += env*(Math.cos(Math.PI*2.0*(freq*noteTime + p)));
             }
             else if (antiAliasing) for (AnalogNote note : notes)
@@ -112,6 +114,8 @@ public class AnalogSynth extends Panel
                 double freq = DSPUtil.freqFromMidi(note.midi);
                 double env = note.getEnvelope(instrument.envelope, time);
                 double noteTime = time - note.getStartTime();
+                if (noteTime < 0.0) continue;
+                
                 double p = phase + note.bend*freq;
                 double bFreq = freq*(pitchBend + 1.0);
                 if (bFreq > Main.SAMPLE_RATE*0.5) continue; //Bandlimit to avoid undersampling.
@@ -137,11 +141,12 @@ public class AnalogSynth extends Panel
                 double len = 1.0/freq;
                 double env = note.getEnvelope(instrument.envelope, time);
                 double noteTime = time - note.getStartTime();
+                if (noteTime < 0.0) continue;
+                
                 double p = phase + note.bend*freq;
 
                 switch (waveform)
                 {
-                    case 0: v += env*(Math.sin(Math.PI*2.0*(freq*noteTime + p))); break; //Sine wave
                     case 1: v += env*(Math.abs(((noteTime + p*len) % len)/len - 0.5)*4.0 - 1.0); break; //Triangle wave
                     case 2: v += env*(1.0 - 2.0*(((noteTime + p*len) % len)/len)); break; //Sawtooth wave
                     case 3: v += env*(((noteTime + p*len) % len) > len*0.5 ? -1.0 : 1.0); break; //Square wave

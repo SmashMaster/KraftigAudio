@@ -136,17 +136,16 @@ public class MidiSeqScreen implements UIElement
         GL11.glLineWidth(1.0f);
         GL11.glBegin(GL11.GL_LINES);
         
-        //Song start
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
-        GL11.glVertex2f(0.0f, 0.0f);
-        GL11.glVertex2f(0.0f, 128.0f);
-        
-        //Bar lines
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha*0.375f);
-        float barLength = (float)(properties.getSamplesPerBar()/Main.SAMPLE_RATE);
-        for (int i=1; i<properties.songLength; i++)
+        //Song bars/beats
+        int songBeats = properties.tsBeatsPerBar*properties.songLength;
+        float beatLen = (float)(properties.getSamplesPerBeat()/Main.SAMPLE_RATE);
+        for (int i=0; i<songBeats; i++)
         {
-            float x = barLength*i;
+            if (i == 0) GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
+            else if (i%properties.tsBeatsPerBar == 0) GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha*0.375f);
+            else GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha*0.125f);
+            
+            float x = beatLen*i;
             GL11.glVertex2f(x, 0.0f);
             GL11.glVertex2f(x, 128.0f);
         }
@@ -160,6 +159,7 @@ public class MidiSeqScreen implements UIElement
             GL11.glVertex2f(bounds.x1, y);
         }
         
+        //Notes
         GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
         for (Note note : track.notes)
         {
