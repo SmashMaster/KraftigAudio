@@ -3,33 +3,50 @@ package kraftig.game.gui.buttons;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.function.Consumer;
 import kraftig.game.FocusQuery;
 import kraftig.game.Panel;
 import kraftig.game.gui.UIElement;
 import kraftig.game.gui.UIFocusQuery;
+import kraftig.game.util.Savable;
 import org.lwjgl.glfw.GLFW;
 
-public abstract class ToggleButton implements UIElement
+public abstract class ToggleButton implements UIElement, Savable
 {
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
-    private Runnable callback;
+    
+    private Consumer<Boolean> callback;
+    private boolean value;
     
     public ToggleButton(Vec2 radius)
     {
         this.radius.set(radius);
     }
     
-    public ToggleButton onClick(Runnable callback)
+    public ToggleButton onValueChanged(Consumer<Boolean> callback)
     {
         this.callback = callback;
+        callback.accept(value);
         return this;
     }
     
-    public ToggleButton click()
+    public ToggleButton setValue(boolean value)
     {
-        if (callback != null) callback.run();
+        if (this.value != value)
+        {
+            this.value = value;
+            if (callback != null) callback.accept(this.value);
+        }
         return this;
+    }
+    
+    public boolean getValue()
+    {
+        return value;
     }
     
     @Override
@@ -67,11 +84,27 @@ public abstract class ToggleButton implements UIElement
     @Override
     public void onMouseButton(FocusQuery query, int button, int action, int mods)
     {
-        if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_LEFT) click();
+        if (action != GLFW.GLFW_PRESS || button != GLFW.GLFW_MOUSE_BUTTON_LEFT) return;
+        
+        setValue(!value);
     }
     
     @Override
     public void delete()
     {
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        out.writeBoolean(value);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        setValue(in.readBoolean());
+    }
+    // </editor-fold>
 }

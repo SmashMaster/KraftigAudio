@@ -16,6 +16,7 @@ import kraftig.game.gui.Label;
 import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.gui.TextBox;
+import kraftig.game.gui.buttons.ToggleButton;
 import kraftig.game.gui.buttons.ToggleLabelButton;
 import kraftig.game.gui.jacks.AudioOutputJack;
 import kraftig.game.gui.jacks.Jack;
@@ -27,7 +28,7 @@ public class MidiDecoder extends Panel
     private final MidiInputJack midiInJack;
     private final RadioButtons typeSelect;
     private final TextBox controllerBox;
-    private final ToggleLabelButton listenButton;
+    private final ToggleButton listenButton;
     private final AudioOutputJack outJack;
     
     private final BiquadFilterKernel smoother = new BiquadFilterKernel();

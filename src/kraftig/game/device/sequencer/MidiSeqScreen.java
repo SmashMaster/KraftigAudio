@@ -17,22 +17,18 @@ public class MidiSeqScreen implements UIElement
 {
     private final SongProperties properties;
     private final MidiSeqCamera camera;
+    private final Track track;
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
     
     private Panel panel;
     
-    public MidiSeqScreen(MidiSeqCamera camera, Vec2 radius)
+    public MidiSeqScreen(MidiSeqCamera camera, Track track, Vec2 radius)
     {
         properties = Main.instance().getProperties();
         this.camera = camera;
+        this.track = track;
         this.radius.set(radius);
-    }
-    
-    public MidiSeqScreen(MidiSeqCamera camera, Vec2 radius, Vec2 pos, Alignment align)
-    {
-        this(camera, radius);
-        setPos(pos, align);
     }
     
     @Override
@@ -163,6 +159,21 @@ public class MidiSeqScreen implements UIElement
             GL11.glVertex2f(bounds.x0, y);
             GL11.glVertex2f(bounds.x1, y);
         }
+        
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
+        for (Note note : track.notes)
+        {
+            float y = note.midi + 0.5f;
+            GL11.glVertex2f((float)((double)note.start/Main.SAMPLE_RATE), y);
+            GL11.glVertex2f((float)((double)note.end/Main.SAMPLE_RATE), y);
+        }
+        
+        //Song position
+        float songPos = (float)((double)properties.position/Main.SAMPLE_RATE);
+        GL11.glColor4f(0.75f, 0.75f, 1.0f, alpha*0.75f);
+        GL11.glVertex2f(songPos, 0.0f);
+        GL11.glVertex2f(songPos, 128.0f);
+        
         GL11.glEnd();
         
         //Return to normal stencil state.

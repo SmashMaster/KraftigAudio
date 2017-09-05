@@ -181,6 +181,7 @@ public class MidiSeqKeyboard implements UIElement
                 }
                 catch (InvalidMidiDataException ex)
                 {
+                    throw new RuntimeException(ex);
                 }
                     
                 Main.instance().setState(new InteractionState()

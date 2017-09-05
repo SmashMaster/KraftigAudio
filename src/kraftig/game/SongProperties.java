@@ -8,7 +8,8 @@ import kraftig.game.util.Savable;
 public class SongProperties implements Savable
 {
     public boolean playing = false;
-    public long playStartSample = 0L;
+    public long playStartTime = 0L;
+    public long position = 0L;
     public double tempo = 120.0;
     public int tsBeatsPerBar = 4, tsBeatNoteValue = 4;
     public int songLength = 64;
@@ -16,11 +17,27 @@ public class SongProperties implements Savable
     public void init()
     {
         playing = false;
-        playStartSample = 0L;
+        position = 0L;
         tempo = 120.0;
         tsBeatsPerBar = 4;
         tsBeatNoteValue = 4;
         songLength = 64;
+    }
+    
+    public void play()
+    {
+        playing = true;
+        playStartTime = Main.instance().getTime() - position;
+    }
+    
+    public void stop()
+    {
+        if (playing)
+        {
+            playing = false;
+            playStartTime = 0L;
+        }
+        else position = 0L;
     }
     
     public double getSamplesPerBeat()
@@ -50,7 +67,7 @@ public class SongProperties implements Savable
     public void load(DataInputStream in) throws IOException
     {
         playing = false;
-        playStartSample = 0L;
+        position = 0L;
         tempo = in.readDouble();
         tsBeatsPerBar = in.readInt();
         tsBeatNoteValue = in.readInt();

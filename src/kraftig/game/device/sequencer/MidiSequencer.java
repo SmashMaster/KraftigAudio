@@ -7,14 +7,18 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
+import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
 import kraftig.game.Panel;
+import kraftig.game.SongProperties;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.gui.buttons.SymbolButton;
+import kraftig.game.gui.buttons.ToggleButton;
+import kraftig.game.gui.buttons.ToggleSymbolButton;
 import kraftig.game.gui.jacks.Jack;
 import kraftig.game.gui.jacks.MidiInputJack;
 import kraftig.game.gui.jacks.MidiOutputJack;
@@ -23,16 +27,22 @@ import org.lwjgl.opengl.GL11;
 
 public class MidiSequencer extends Panel
 {
+    private static final int MIDI_EARLY = Main.BUFFER_SIZE;
     private static final float CONTROL_BUTTON_SIZE = 8.0f;
     
+    private final SongProperties properties = Main.instance().getProperties();
     private final MidiSeqCamera camera = new MidiSeqCamera(this);
     private final Track track = new Track();
     
     private final MidiInputJack midiInJack;
+    private final ToggleButton recordButton;
     private final MidiSeqKeyboard keyboard;
     private final MidiSeqTimeline timeline;
     private final MidiSeqScreen screen;
     private final MidiOutputJack midiOutJack = new MidiOutputJack();
+    
+    private final Note[] activeNotes = new Note[128];
+    private boolean recording;
     
     public MidiSequencer()
     {
@@ -42,14 +52,18 @@ public class MidiSequencer extends Panel
                         new RowLayout(1.0f, Alignment.C,
                             new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawBackSymbol),
                             new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawFwdSymbol),
-                            new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawPlaySymbol),
-                            new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawStopSymbol),
-                            new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawRecordSymbol)),
+                            new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawPlaySymbol)
+                                .onClick(properties::play),
+                            new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawStopSymbol)
+                                .onClick(properties::stop),
+                            recordButton = new ToggleSymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawRecordSymbol)
+                                .onValueChanged(v -> recording = v)
+                                .setValue(false)),
                         new RowLayout(0.0f, Alignment.S,
-                            keyboard = new MidiSeqKeyboard(camera, midiOutJack, new Vec2(12.0f, 64.0f)),
+                            keyboard = new MidiSeqKeyboard(camera, this::receive, new Vec2(12.0f, 64.0f)),
                             new ColumnLayout(0.0f, Alignment.C,
                                 timeline = new MidiSeqTimeline(camera, new Vec2(128.0f, 6.0f)),
-                                screen = new MidiSeqScreen(camera, new Vec2(128.0f, 64.0f))))),
+                                screen = new MidiSeqScreen(camera, track, new Vec2(128.0f, 64.0f))))),
                     midiOutJack)
                 .setPos(new Vec2(), Alignment.C));
         
@@ -120,7 +134,7 @@ public class MidiSequencer extends Panel
     
     private void receive(MidiMessage message, long sample)
     {
-        if (message instanceof ShortMessage)
+        if (properties.playing && recording && message instanceof ShortMessage)
         {
             ShortMessage msg = (ShortMessage)message;
             
@@ -128,12 +142,23 @@ public class MidiSequencer extends Panel
             {
                 case ShortMessage.NOTE_ON:
                 {
-                    int midi = msg.getData1();
+                    Note note = new Note();
+                    note.midi = msg.getData1();
+                    note.start = properties.position;
+                    note.end = properties.position;
+                    activeNotes[note.midi] = note;
                 }
                 break;
                 case ShortMessage.NOTE_OFF:
                 {
                     int midi = msg.getData1();
+                    Note note = activeNotes[midi];
+                    if (note != null)
+                    {
+                        note.end = properties.position;
+                        activeNotes[midi] = null;
+                        track.notes.add(note);
+                    }
                 }
                 break;
             }
@@ -151,6 +176,33 @@ public class MidiSequencer extends Panel
     @Override
     public void process(int samples)
     {
+        if (properties.playing)
+        {
+            if (recording) for (Note note : activeNotes) if (note != null)
+                note.end = properties.position + samples;
+            
+            long frameStart = properties.position;
+            long frameEnd = frameStart + samples;
+            
+            for (Note note : track.notes)
+            {
+                if (note.start >= frameStart && note.start < frameEnd)
+                {
+                    try
+                    {
+                        ShortMessage on = new ShortMessage(ShortMessage.NOTE_ON, 0, note.midi, 0);
+                        ShortMessage off = new ShortMessage(ShortMessage.NOTE_OFF, 0, note.midi, 0);
+                        midiOutJack.send(on, properties.playStartTime + note.start);
+                        midiOutJack.send(off, properties.playStartTime + note.end);
+                    }
+                    catch (InvalidMidiDataException ex)
+                    {
+                        throw new RuntimeException(ex);
+                    }
+                }
+            }
+        }
+        
         camera.step((float)Main.SAMPLE_WIDTH*samples);
     }
     
@@ -160,6 +212,7 @@ public class MidiSequencer extends Panel
     {
         super.save(out);
         camera.save(out);
+        recordButton.save(out);
     }
     
     @Override
@@ -167,6 +220,7 @@ public class MidiSequencer extends Panel
     {
         super.load(in);
         camera.load(in);
+        recordButton.load(in);
     }
     // </editor-fold>
 }

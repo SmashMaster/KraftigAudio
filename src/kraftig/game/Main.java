@@ -489,6 +489,9 @@ public final class Main extends Game
         //Update all devices in topological order.
         for (Panel panel : space.sortPanels()) panel.process(samples);
         time += samples;
+        
+        //Update song position if playing.
+        if (properties.playing) properties.position += samples;
     }
     
     @Override
