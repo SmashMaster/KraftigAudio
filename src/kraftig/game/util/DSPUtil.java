@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
+import kraftig.game.audio.MidiReceiver;
 import kraftig.game.gui.jacks.Jack;
 import kraftig.game.gui.jacks.Knob;
 
@@ -156,6 +159,34 @@ public class DSPUtil
         double denom = Math.sin(theta);
         if (Math.abs(denom) < 0.001) return (0.5/n)*(n2*Math.cos(n2*theta)/Math.cos(theta) - 1.0);
         else return (0.5/n)*(Math.sin(n2*theta)/Math.sin(theta) - 1.0);
+    }
+    
+    public static void midi(MidiReceiver receiver, int command, int channel, int data1, int data2)
+    {
+        try
+        {
+            ShortMessage msg = new ShortMessage(command, channel, data1, data2);
+            receiver.send(msg, Main.instance().getTime());
+        }
+        catch (InvalidMidiDataException ex)
+        {
+            throw new RuntimeException(ex);
+        }
+    }
+    
+    public static void midiOn(MidiReceiver receiver, int note)
+    {
+        midi(receiver, ShortMessage.NOTE_ON, 0, note, 0);
+    }
+    
+    public static void midiOff(MidiReceiver receiver, int note)
+    {
+        midi(receiver, ShortMessage.NOTE_OFF, 0, note, 0);
+    }
+    
+    public static int clampMidi(int note)
+    {
+        return Math.min(Math.max(0, note), 127);
     }
     
     private DSPUtil()

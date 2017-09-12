@@ -17,16 +17,10 @@ public class MidiSeqTimeline implements UIElement
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
     
-    public MidiSeqTimeline(MidiSeqCamera camera, Vec2 radius)
+    public MidiSeqTimeline(MidiSequencer sequencer, Vec2 radius)
     {
-        this.camera = camera;
+        camera = sequencer.getCamera();
         this.radius.set(radius);
-    }
-    
-    public MidiSeqTimeline(MidiSeqCamera camera, Vec2 radius, Vec2 pos, Alignment align)
-    {
-        this(camera, radius);
-        setPos(pos, align);
     }
     
     @Override

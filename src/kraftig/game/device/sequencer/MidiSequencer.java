@@ -13,6 +13,7 @@ import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
 import kraftig.game.Panel;
 import kraftig.game.SongProperties;
+import kraftig.game.audio.MidiReceiver;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
@@ -25,7 +26,7 @@ import kraftig.game.gui.jacks.MidiOutputJack;
 import kraftig.game.util.DSPUtil;
 import org.lwjgl.opengl.GL11;
 
-public class MidiSequencer extends Panel
+public class MidiSequencer extends Panel implements MidiReceiver
 {
     private static final float CONTROL_BUTTON_SIZE = 8.0f;
     
@@ -46,11 +47,13 @@ public class MidiSequencer extends Panel
     public MidiSequencer()
     {
         frontInterface.add(new RowLayout(8.0f, Alignment.C,
-                    midiInJack = new MidiInputJack(this::receive),
+                    midiInJack = new MidiInputJack(this),
                     new ColumnLayout(4.0f, Alignment.W,
                         new RowLayout(1.0f, Alignment.C,
-                            new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawBackSymbol),
-                            new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawFwdSymbol),
+                            new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawBackSymbol)
+                                .onClick(properties::back),
+                            new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawFwdSymbol)
+                                .onClick(properties::forward),
                             new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawPlaySymbol)
                                 .onClick(properties::play),
                             new SymbolButton(new Vec2(CONTROL_BUTTON_SIZE), this::drawStopSymbol)
@@ -59,10 +62,10 @@ public class MidiSequencer extends Panel
                                 .onValueChanged(v -> recording = v)
                                 .setValue(false)),
                         new RowLayout(0.0f, Alignment.S,
-                            keyboard = new MidiSeqKeyboard(camera, this::receive, new Vec2(12.0f, 64.0f)),
+                            keyboard = new MidiSeqKeyboard(this, new Vec2(12.0f, 64.0f)),
                             new ColumnLayout(0.0f, Alignment.C,
-                                timeline = new MidiSeqTimeline(camera, new Vec2(128.0f, 6.0f)),
-                                screen = new MidiSeqScreen(camera, track, new Vec2(128.0f, 64.0f))))),
+                                timeline = new MidiSeqTimeline(this, new Vec2(128.0f, 6.0f)),
+                                screen = new MidiSeqScreen(this, new Vec2(128.0f, 64.0f))))),
                     midiOutJack)
                 .setPos(new Vec2(), Alignment.C));
         
@@ -72,6 +75,21 @@ public class MidiSequencer extends Panel
                 .setPos(new Vec2(), Alignment.C));
         
         setSizeFromContents(8.0f);
+    }
+    
+    public MidiSeqCamera getCamera()
+    {
+        return camera;
+    }
+    
+    public Track getTrack()
+    {
+        return track;
+    }
+    
+    public MidiReceiver getMidiOut()
+    {
+        return midiOutJack;
     }
     
     public Vec2 getMouse()
@@ -131,35 +149,40 @@ public class MidiSequencer extends Panel
         GraphicsUtil.drawCircle(new Vec2(), 0.75f, 16);
     }
     
-    private void receive(MidiMessage message, long sample)
+    @Override
+    public void send(MidiMessage message, long sample)
     {
-        if (properties.playing && recording && message instanceof ShortMessage)
+        if (message instanceof ShortMessage)
         {
             ShortMessage msg = (ShortMessage)message;
+            int command = msg.getCommand();
             
-            switch (msg.getCommand())
+            if (properties.playing && recording)
             {
-                case ShortMessage.NOTE_ON:
+                switch (command)
                 {
-                    Note note = new Note();
-                    note.midi = msg.getData1();
-                    note.start = properties.position;
-                    note.end = properties.position;
-                    activeNotes[note.midi] = note;
-                }
-                break;
-                case ShortMessage.NOTE_OFF:
-                {
-                    int midi = msg.getData1();
-                    Note note = activeNotes[midi];
-                    if (note != null)
+                    case ShortMessage.NOTE_ON:
                     {
+                        Note note = new Note();
+                        note.midi = msg.getData1();
+                        note.start = properties.position;
                         note.end = properties.position;
-                        activeNotes[midi] = null;
-                        track.notes.add(note);
+                        activeNotes[note.midi] = note;
                     }
+                    break;
+                    case ShortMessage.NOTE_OFF:
+                    {
+                        int midi = msg.getData1();
+                        Note note = activeNotes[midi];
+                        if (note != null)
+                        {
+                            note.end = properties.position;
+                            activeNotes[midi] = null;
+                            track.notes.add(note);
+                        }
+                    }
+                    break;
                 }
-                break;
             }
         }
         

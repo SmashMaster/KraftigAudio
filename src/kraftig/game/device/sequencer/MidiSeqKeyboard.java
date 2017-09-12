@@ -4,14 +4,11 @@ import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.ShortMessage;
 import kraftig.game.FocusQuery;
 import kraftig.game.Focusable;
 import kraftig.game.InteractionState;
 import kraftig.game.Main;
 import kraftig.game.Panel;
-import kraftig.game.audio.MidiReceiver;
 import kraftig.game.gui.UIElement;
 import kraftig.game.gui.UIFocusQuery;
 import kraftig.game.util.DSPUtil;
@@ -22,18 +19,17 @@ import org.lwjgl.opengl.GL11;
 public class MidiSeqKeyboard implements UIElement
 {
     private final VectorFont font;
+    private final MidiSequencer sequencer;
     private final MidiSeqCamera camera;
-    private final MidiReceiver receiver;
     private final Key[] keys = new Key[128];
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
     
-    
-    public MidiSeqKeyboard(MidiSeqCamera camera, MidiReceiver receiver, Vec2 radius)
+    public MidiSeqKeyboard(MidiSequencer sequencer, Vec2 radius)
     {
         font = Main.instance().getFont();
-        this.camera = camera;
-        this.receiver = receiver;
+        this.sequencer = sequencer;
+        camera = sequencer.getCamera();
         for (int i=0; i<128; i++) keys[i] = new Key(i);
         this.radius.set(radius);
     }
@@ -174,16 +170,8 @@ public class MidiSeqKeyboard implements UIElement
             
             if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
             {
-                try
-                {
-                    ShortMessage msg = new ShortMessage(ShortMessage.NOTE_ON, 0, midi, 0);
-                    receiver.send(msg, Main.instance().getTime());
-                }
-                catch (InvalidMidiDataException ex)
-                {
-                    throw new RuntimeException(ex);
-                }
-                    
+                DSPUtil.midiOn(sequencer, midi);
+                
                 Main.instance().setState(new InteractionState()
                 {
                     @Override
@@ -197,15 +185,7 @@ public class MidiSeqKeyboard implements UIElement
                     {
                         if (action == GLFW.GLFW_RELEASE && button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
                         {
-                            try
-                            {
-                                ShortMessage msg = new ShortMessage(ShortMessage.NOTE_OFF, 0, midi, 0);
-                                receiver.send(msg, Main.instance().getTime());
-                            }
-                            catch (InvalidMidiDataException ex)
-                            {
-                            }
-
+                            DSPUtil.midiOff(sequencer, midi);
                             Main.instance().setDefaultState();
                         }
                     }

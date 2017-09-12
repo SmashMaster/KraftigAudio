@@ -24,6 +24,44 @@ public class SongProperties implements Savable
         songLength = 64;
     }
     
+    public double getSamplesPerBeat()
+    {
+        return Main.SAMPLE_RATE*tsBeatNoteValue*15.0/tempo;
+    }
+    
+    public double getSamplesPerBar()
+    {
+        return getSamplesPerBeat()*tsBeatsPerBar;
+    }
+    
+    public double getSongSampleLength()
+    {
+        return getSamplesPerBar()*songLength;
+    }
+    
+    public double getPositionBar()
+    {
+        return position/getSamplesPerBar();
+    }
+    
+    public void back()
+    {
+        double samplesPerBar = getSamplesPerBar();
+        int bar = (int)Math.ceil(position/samplesPerBar);
+        long newPos = Math.round((bar - 1)*samplesPerBar);
+        playStartTime += position - newPos;
+        position = newPos;
+    }
+    
+    public void forward()
+    {
+        double samplesPerBar = getSamplesPerBar();
+        int bar = (int)Math.floor(position/samplesPerBar);
+        long newPos = Math.round((bar + 1)*samplesPerBar);
+        playStartTime += position - newPos;
+        position = newPos;
+    }
+    
     public void play()
     {
         playing = true;
@@ -40,20 +78,7 @@ public class SongProperties implements Savable
         else position = 0L;
     }
     
-    public double getSamplesPerBeat()
-    {
-        return Main.SAMPLE_RATE*tsBeatNoteValue*15.0/tempo;
-    }
     
-    public double getSamplesPerBar()
-    {
-        return getSamplesPerBeat()*tsBeatsPerBar;
-    }
-    
-    public double getSongSampleLength()
-    {
-        return getSamplesPerBar()*songLength;
-    }
 
     @Override
     public void save(DataOutputStream out) throws IOException
