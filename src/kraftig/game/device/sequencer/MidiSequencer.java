@@ -234,6 +234,7 @@ public class MidiSequencer extends Panel implements MidiReceiver
     {
         super.save(out);
         camera.save(out);
+        track.save(out);
         recordButton.save(out);
     }
     
@@ -242,6 +243,7 @@ public class MidiSequencer extends Panel implements MidiReceiver
     {
         super.load(in);
         camera.load(in);
+        track.load(in);
         recordButton.load(in);
     }
     // </editor-fold>
