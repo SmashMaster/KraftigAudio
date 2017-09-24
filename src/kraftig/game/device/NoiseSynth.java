@@ -128,6 +128,7 @@ public class NoiseSynth extends Panel
     public void save(DataOutputStream out) throws IOException
     {
         super.save(out);
+        envEditor.save(out);
         colorRadio.save(out);
         ampKnob.save(out);
     }
@@ -136,6 +137,7 @@ public class NoiseSynth extends Panel
     public void load(DataInputStream in) throws IOException
     {
         super.load(in);
+        envEditor.load(in);
         colorRadio.load(in);
         ampKnob.load(in);
     }

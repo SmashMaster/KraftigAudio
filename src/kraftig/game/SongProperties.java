@@ -3,6 +3,9 @@ package kraftig.game;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
 import kraftig.game.util.Savable;
 
 public class SongProperties implements Savable
@@ -13,6 +16,8 @@ public class SongProperties implements Savable
     public double tempo = 120.0;
     public int tsBeatsPerBar = 4, tsBeatNoteValue = 4;
     public int songLength = 64;
+    
+    private final Set<UpdateCallback> callbacks = Collections.newSetFromMap(new IdentityHashMap<>());
 
     public void init()
     {
@@ -26,7 +31,7 @@ public class SongProperties implements Savable
     
     public double getSamplesPerBeat()
     {
-        return Main.SAMPLE_RATE*tsBeatNoteValue*15.0/tempo;
+        return Main.SAMPLE_RATE/((tempo/60.0)*(tsBeatNoteValue/4.0));
     }
     
     public double getSamplesPerBar()
@@ -42,6 +47,31 @@ public class SongProperties implements Savable
     public double getPositionBar()
     {
         return position/getSamplesPerBar();
+    }
+    
+    //Update callbacks only happen upon tempo or time signature changes.
+    public UpdateCallback onUpdate(Runnable action)
+    {
+        UpdateCallback callback = new UpdateCallback(action);
+        callbacks.add(callback);
+        return callback;
+    }
+    
+    public void update()
+    {
+        for (UpdateCallback callback : callbacks) callback.action.run();
+    }
+    
+    public void setTimeSignature(int beatsPerBar, int beatNoteValue)
+    {
+        if (beatsPerBar < 1) beatsPerBar = 1;
+        if (beatsPerBar > 32) beatsPerBar = 32;
+        if (beatNoteValue < 1) beatNoteValue = 1;
+        if (beatNoteValue > 256) beatNoteValue = 256;
+        
+        tsBeatsPerBar = beatsPerBar;
+        tsBeatNoteValue = beatNoteValue;
+        update();
     }
     
     public void back()
@@ -78,8 +108,6 @@ public class SongProperties implements Savable
         else position = 0L;
     }
     
-    
-
     @Override
     public void save(DataOutputStream out) throws IOException
     {
@@ -96,5 +124,20 @@ public class SongProperties implements Savable
         tempo = in.readDouble();
         tsBeatsPerBar = in.readInt();
         tsBeatNoteValue = in.readInt();
+    }
+    
+    public class UpdateCallback
+    {
+        private final Runnable action;
+        
+        private UpdateCallback(Runnable action)
+        {
+            this.action = action;
+        }
+        
+        public void delete()
+        {
+            callbacks.remove(this);
+        }
     }
 }

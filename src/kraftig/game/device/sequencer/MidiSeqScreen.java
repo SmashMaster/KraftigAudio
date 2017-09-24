@@ -23,6 +23,7 @@ public class MidiSeqScreen implements UIElement
     private static final float END_MARGIN = 1.0f/64.0f;
     
     private final SongProperties properties;
+    private final MidiSequencer seq;
     private final MidiReceiver midiOut;
     private final MidiSeqCamera camera;
     private final Track track;
@@ -34,6 +35,7 @@ public class MidiSeqScreen implements UIElement
     public MidiSeqScreen(MidiSequencer sequencer, Vec2 radius)
     {
         properties = Main.instance().getProperties();
+        seq = sequencer;
         midiOut = sequencer.getMidiOut();
         camera = sequencer.getCamera();
         track = sequencer.getTrack();
@@ -152,7 +154,7 @@ public class MidiSeqScreen implements UIElement
         {
             Vec2 mouse = camera.toWorld(getMouse());
             Note note = new Note();
-            note.start = Math.round(mouse.x*Main.SAMPLE_RATE);
+            note.start = seq.snapToGrid(mouse.x);
             note.end = note.start;
             note.midi = Util.floor(mouse.y);
             if (note.midi < 0 || note.midi > 127) return;
@@ -164,7 +166,7 @@ public class MidiSeqScreen implements UIElement
             {
                 private void update()
                 {
-                    long end = Math.round(camera.toWorld(getMouse()).x*Main.SAMPLE_RATE);
+                    long end = seq.snapToGrid(camera.toWorld(getMouse()).x);
                     note.end = Math.max(note.start, end);
                 }
                 
@@ -413,7 +415,7 @@ public class MidiSeqScreen implements UIElement
             return () ->
             {
                 Vec2 mouse = camera.toWorld(getMouse()).add(offset);
-                note.start = Math.round(mouse.x*Main.SAMPLE_RATE);
+                note.start = seq.snapToGrid(mouse.x);
             };
         }
     }
@@ -431,7 +433,7 @@ public class MidiSeqScreen implements UIElement
             return () ->
             {
                 Vec2 mouse = camera.toWorld(getMouse()).add(offset);
-                note.end = Math.round(mouse.x*Main.SAMPLE_RATE);
+                note.end = seq.snapToGrid(mouse.x);
             };
         }
     }
@@ -456,7 +458,7 @@ public class MidiSeqScreen implements UIElement
                     Vec2 mouse = camera.toWorld(getMouse());
                     mouse.x += offset.x;
                     long length = note.end - note.start;
-                    note.start = Math.round(mouse.x*Main.SAMPLE_RATE);
+                    note.start = seq.snapToGrid(mouse.x);
                     note.end = note.start + length;
 
                     int oldMidi = note.midi;

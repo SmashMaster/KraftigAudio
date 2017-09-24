@@ -17,8 +17,10 @@ import kraftig.game.audio.MidiReceiver;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RowLayout;
+import kraftig.game.gui.TimeSignature;
 import kraftig.game.gui.buttons.SymbolButton;
 import kraftig.game.gui.buttons.ToggleButton;
+import kraftig.game.gui.buttons.ToggleLabelButton;
 import kraftig.game.gui.buttons.ToggleSymbolButton;
 import kraftig.game.gui.jacks.Jack;
 import kraftig.game.gui.jacks.MidiInputJack;
@@ -39,10 +41,11 @@ public class MidiSequencer extends Panel implements MidiReceiver
     private final MidiSeqKeyboard keyboard;
     private final MidiSeqTimeline timeline;
     private final MidiSeqScreen screen;
+    private final ToggleButton snapToGridButton;
     private final MidiOutputJack midiOutJack = new MidiOutputJack(this);
     
     private final Note[] activeNotes = new Note[128];
-    private boolean recording;
+    private boolean recording, snapToGrid;
     
     public MidiSequencer()
     {
@@ -65,7 +68,12 @@ public class MidiSequencer extends Panel implements MidiReceiver
                             keyboard = new MidiSeqKeyboard(this, new Vec2(12.0f, 64.0f)),
                             new ColumnLayout(0.0f, Alignment.C,
                                 timeline = new MidiSeqTimeline(this, new Vec2(128.0f, 6.0f)),
-                                screen = new MidiSeqScreen(this, new Vec2(128.0f, 64.0f))))),
+                                screen = new MidiSeqScreen(this, new Vec2(128.0f, 64.0f)))),
+                        new RowLayout(2.0f, Alignment.C, 
+                            snapToGridButton = new ToggleLabelButton("Snap to Grid", 8.0f, 2.0f)
+                                .onValueChanged(v -> snapToGrid = v)
+                                .setValue(true),
+                            new TimeSignature(Main.instance().getProperties()))),
                     midiOutJack)
                 .setPos(new Vec2(), Alignment.C));
         
@@ -75,6 +83,17 @@ public class MidiSequencer extends Panel implements MidiReceiver
                 .setPos(new Vec2(), Alignment.C));
         
         setSizeFromContents(8.0f);
+    }
+    
+    public long snapToGrid(double timeInSeconds)
+    {
+        if (snapToGrid)
+        {
+            double beat = properties.getSamplesPerBeat();
+            double samples = timeInSeconds*Main.SAMPLE_RATE;
+            return Math.round(Math.round(samples/beat)*beat);
+        }
+        else return Math.round(timeInSeconds*Main.SAMPLE_RATE);
     }
     
     public MidiSeqCamera getCamera()
@@ -236,6 +255,7 @@ public class MidiSequencer extends Panel implements MidiReceiver
         camera.save(out);
         track.save(out);
         recordButton.save(out);
+        snapToGridButton.save(out);
     }
     
     @Override
@@ -245,6 +265,7 @@ public class MidiSequencer extends Panel implements MidiReceiver
         camera.load(in);
         track.load(in);
         recordButton.load(in);
+        snapToGridButton.load(in);
     }
     // </editor-fold>
 }
