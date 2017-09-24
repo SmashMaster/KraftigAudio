@@ -48,9 +48,9 @@ public class TimeSignature implements UIElement
             textBox = new TextBox(new Vec2(WIDTH - BUTTON_SIZE, HEIGHT), Alignment.C, 8.0f),
             new ColumnLayout(0.0f, Alignment.C,
                 new SymbolButton(new Vec2(BUTTON_SIZE), TimeSignature::drawUpSymbol)
-                    .onClick(() -> props.setTimeSignature(props.tsBeatsPerBar, props.tsBeatNoteValue*2)),
+                    .onClick(() -> props.setTimeSignature(props.tsBeatsPerBar, props.tsBeatNoteValue + 1)),
                 new SymbolButton(new Vec2(BUTTON_SIZE), TimeSignature::drawDownSymbol)
-                    .onClick(() -> props.setTimeSignature(props.tsBeatsPerBar, props.tsBeatNoteValue/2))));
+                    .onClick(() -> props.setTimeSignature(props.tsBeatsPerBar, props.tsBeatNoteValue - 1))));
         
         callback = props.onUpdate(() -> textBox.setText(props.tsBeatsPerBar + "/" + props.tsBeatNoteValue));
         props.update();
