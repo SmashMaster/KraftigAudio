@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 import kraftig.game.gui.jacks.InputJack;
 import kraftig.game.gui.jacks.Jack;
 import kraftig.game.gui.jacks.OutputJack;
-import kraftig.game.util.ConcatList;
 import kraftig.game.util.Savable;
 
 public class ProjectSpace implements Savable
@@ -96,8 +95,9 @@ public class ProjectSpace implements Savable
         for (Panel p : panels) p.updateEdge();
         
         //Calculate wire splits.
-        List<? extends Drawable> drawList = panels;
-        for (Wire w : wires) drawList = new ConcatList<>(drawList, w.updateSplits(panels));
+        List<Drawable> drawList = new ArrayList<>(1024);
+        drawList.addAll(panels);
+        for (Wire w : wires) drawList.addAll(w.updateSplits(panels));
         
         //Sort and draw world objects.
         DAG<Drawable> overlapGraph = new DAG<>();
