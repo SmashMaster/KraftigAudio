@@ -130,6 +130,8 @@ public class MidiSeqKeyboard implements UIElement
         //Draw masked stuff here.
         camera.multYMatrix();
         
+        //OPTIMIZE - cull invisible keys.
+        
         GL11.glLineWidth(1.0f);
         Key focus = null;
         for (Key key : keys)

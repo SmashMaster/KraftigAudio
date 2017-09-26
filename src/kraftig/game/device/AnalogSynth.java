@@ -96,6 +96,8 @@ public class AnalogSynth extends Panel
             pitchKnob.updateValue(i);
             phaseKnob.updateValue(i);
             
+            //OPTIMIZE - collection iteration.
+            
             if (waveform == 0) for (AnalogNote note : notes)
             {
                 double freq = DSPUtil.freqFromMidi(note.midi);

@@ -103,6 +103,8 @@ public class ProjectSpace implements Savable
         DAG<Drawable> overlapGraph = new DAG<>();
         for (Drawable draw : drawList) overlapGraph.add(draw);
         
+        //OPTIMIZE - Remove cyclic check on each edge add.
+        
         for (int i=0; i<drawList.size(); i++) for (int j=i+1; j<drawList.size(); j++)
         {
             Drawable a = drawList.get(i), b = drawList.get(j);
