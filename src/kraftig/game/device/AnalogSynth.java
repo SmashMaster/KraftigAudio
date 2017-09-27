@@ -84,7 +84,7 @@ public class AnalogSynth extends Panel
     @Override
     public synchronized void process(int samples)
     {
-        List<AnalogNote> notes = instrument.getNotes();
+        AnalogNote[] notes = instrument.getNotes(AnalogNote.class);
         
         for (int i=0; i<samples; i++)
         {
@@ -95,8 +95,6 @@ public class AnalogSynth extends Panel
             ampKnob.updateValue(i);
             pitchKnob.updateValue(i);
             phaseKnob.updateValue(i);
-            
-            //OPTIMIZE - collection iteration.
             
             if (waveform == 0) for (AnalogNote note : notes)
             {

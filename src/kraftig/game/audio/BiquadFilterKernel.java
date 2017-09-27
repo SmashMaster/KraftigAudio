@@ -22,7 +22,7 @@ public class BiquadFilterKernel
         output[index] = apply(x);
     }
     
-    public class Settings
+    public static class Settings
     {
         public double b0, b1, b2, a1, a2;
         

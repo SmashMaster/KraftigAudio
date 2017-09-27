@@ -1,9 +1,8 @@
 package kraftig.game.audio;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.ShortMessage;
 import kraftig.game.Main;
@@ -50,13 +49,15 @@ public class MidiInstrument<T extends MidiNote> implements MidiReceiver
         }
     }
     
-    public synchronized List<T> getNotes()
+    public synchronized T[] getNotes(Class<T> noteClass)
     {
         for (T note : newNotes) note.ensureNotInPast();
         notes.addAll(newNotes);
         newNotes.clear();
         
-        return Collections.unmodifiableList(notes);
+        T[] out = (T[])Array.newInstance(noteClass, notes.size());
+        notes.toArray(out);
+        return out;
     }
     
     public synchronized void update(int samples)

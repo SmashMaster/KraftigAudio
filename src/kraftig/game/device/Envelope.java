@@ -50,12 +50,12 @@ public class Envelope extends Panel
     @Override
     public synchronized void process(int samples)
     {
-        List<MidiNote> notes = instrument.getNotes();
+        MidiNote[] notes = instrument.getNotes(MidiNote.class);
         
-        if (!notes.isEmpty()) for (int i=0; i<samples; i++)
+        if (notes.length > 0) for (int i=0; i<samples; i++)
         {
             double time = (Main.instance().getTime() + i)*Main.SAMPLE_WIDTH;
-            MidiNote note = notes.get(notes.size() - 1);
+            MidiNote note = notes[notes.length - 1];
             float v = (float)(note.getEnvelope(instrument.envelope, time)*2.0 - 1.0);
             buffer[0][i] = v;
             buffer[1][i] = v;

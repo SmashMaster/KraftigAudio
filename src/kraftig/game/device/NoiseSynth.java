@@ -70,7 +70,7 @@ public class NoiseSynth extends Panel
     @Override
     public void process(int samples)
     {
-        List<NoiseNote> notes = instrument.getNotes();
+        NoiseNote[] notes = instrument.getNotes(NoiseNote.class);
         
         for (int i=0; i<samples; i++)
         {
