@@ -1,5 +1,6 @@
 package kraftig.game.device.sequencer;
 
+import com.samrj.devil.geo2d.AAB2;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
 import com.samrj.devil.math.Vec2;
@@ -18,6 +19,8 @@ import org.lwjgl.opengl.GL11;
 
 public class MidiSeqKeyboard implements UIElement
 {
+    private static final float MAX_TEXT_RENDER_SCALE = 1.0f/64.0f;
+    
     private final VectorFont font;
     private final MidiSequencer sequencer;
     private final MidiSeqCamera camera;
@@ -130,12 +133,15 @@ public class MidiSeqKeyboard implements UIElement
         //Draw masked stuff here.
         camera.multYMatrix();
         
-        //OPTIMIZE - cull invisible keys.
+        AAB2 bounds = camera.getBounds();
+        int bottom = Math.max(Util.floor(bounds.y0), 0);
+        int top = Math.min(Util.ceil(bounds.y1), keys.length);
         
         GL11.glLineWidth(1.0f);
         Key focus = null;
-        for (Key key : keys)
+        for (int i=bottom; i<top; i++)
         {
+            Key key = keys[i];
             if (key == Main.instance().getFocus()) focus = key;
             else key.render(alpha);
         }
@@ -238,12 +244,16 @@ public class MidiSeqKeyboard implements UIElement
                 GL11.glEnd();
             }
             
-            GL11.glPushMatrix();
-            GL11.glTranslatef(-1.0f, 0.0f, 0.0f);
-            GL11.glScalef(camera.getScale().y*8.0f, 1.0f, 0.0f);
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
-            font.render(name, new Vec2(0.0f, y0 + 0.5f), 0.875f, Alignment.E);
-            GL11.glPopMatrix();
+            float yScale = camera.getScale().y;
+            if (yScale >= MAX_TEXT_RENDER_SCALE)
+            {
+                GL11.glPushMatrix();
+                GL11.glTranslatef(-1.0f, 0.0f, 0.0f);
+                GL11.glScalef(camera.getScale().y*8.0f, 1.0f, 0.0f);
+                GL11.glColor4f(1.0f, 1.0f, 1.0f, alpha);
+                font.render(name, new Vec2(0.0f, y0 + 0.5f), 0.875f, Alignment.E);
+                GL11.glPopMatrix();
+            }
         }
     }
 }

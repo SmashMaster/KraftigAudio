@@ -61,8 +61,8 @@ public class MidiSeqCamera implements Savable
     
     public AAB2 getBounds()
     {
-        return new AAB2(x.pos - 1.0f/x.scale, x.pos + 1.0f/x.scale,
-                        y.pos - 1.0f/y.scale, y.pos + 1.0f/y.scale);
+        return new AAB2(x.pos - 0.5f/x.scale, x.pos + 0.5f/x.scale,
+                        y.pos - 0.5f/y.scale, y.pos + 0.5f/y.scale);
     }
     
     public void drag(boolean dragX, boolean dragY)

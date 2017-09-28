@@ -2,6 +2,9 @@ package kraftig.game.device;
 
 import com.samrj.devil.math.Vec2;
 import com.samrj.devil.ui.Alignment;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.List;
 import kraftig.game.Main;
 import kraftig.game.Panel;
@@ -9,6 +12,7 @@ import kraftig.game.audio.BiquadFilterKernel;
 import kraftig.game.audio.BiquadFilterKernel.Settings;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Label;
+import kraftig.game.gui.RadioButtons;
 import kraftig.game.gui.RowLayout;
 import kraftig.game.gui.jacks.AudioInputJack;
 import kraftig.game.gui.jacks.AudioOutputJack;
@@ -22,7 +26,7 @@ public class Vocoder extends Panel
     private final Settings ENV_FOLLOWER = new Settings().lowPass(60.0, 1.0);
     
     private final AudioInputJack carrierJack, modulatorJack;
-    private final Knob resolutionKnob;
+    private final RadioButtons bandRadio;
     private final Knob qFactorKnob;
     private final AudioOutputJack outJack;
     
@@ -40,11 +44,10 @@ public class Vocoder extends Panel
                         carrierJack = new AudioInputJack(),
                         new Label("Modulator", 6.0f),
                         modulatorJack = new AudioInputJack()),
+                    bandRadio = new RadioButtons("32 bands", "16 bands", "8 bands", "4 bands")
+                        .onValueChanged(v -> set(4 << (3 - v), qFactor))
+                        .setValue(3),
                     new ColumnLayout(8.0f, Alignment.C,
-                        new Label("Resolution", 6.0f),
-                        resolutionKnob = new Knob(24.0f)
-                            .onValueChanged(v -> set(32, qFactor))
-                            .setValue(0.5f),
                         new Label("Q factor", 6.0f),
                         qFactorKnob = new Knob(24.0f)
                             .onValueChanged(v -> set(resolution, Math.pow(64.0, v)))
@@ -60,7 +63,7 @@ public class Vocoder extends Panel
     @Override
     public List<Jack> getJacks()
     {
-        return DSPUtil.jacks(carrierJack, modulatorJack, resolutionKnob, qFactorKnob, outJack);
+        return DSPUtil.jacks(carrierJack, modulatorJack, qFactorKnob, outJack);
     }
     
     private void set(int resolution, double qFactor)
@@ -82,7 +85,6 @@ public class Vocoder extends Panel
             bands[1][b] = right;
             t += dt;
         }
-        
     }
     
     @Override
@@ -91,7 +93,7 @@ public class Vocoder extends Panel
         float[][] carrier = carrierJack.getBuffer();
         float[][] modulator = modulatorJack.getBuffer();
         
-        DSPUtil.updateKnobs(samples, resolutionKnob, qFactorKnob);
+        DSPUtil.updateKnobs(samples, qFactorKnob);
         
         if (carrier == null || modulator == null) DSPUtil.zero(buffer, samples);
         else for (int chan=0; chan<2; chan++)
@@ -112,6 +114,24 @@ public class Vocoder extends Panel
             buffer[chan][i] = sum;
         }
     }
+    
+    // <editor-fold defaultstate="collapsed" desc="Serialization">
+    @Override
+    public void save(DataOutputStream out) throws IOException
+    {
+        super.save(out);
+        bandRadio.save(out);
+        qFactorKnob.save(out);
+    }
+    
+    @Override
+    public void load(DataInputStream in) throws IOException
+    {
+        super.load(in);
+        bandRadio.load(in);
+        qFactorKnob.load(in);
+    }
+    // </editor-fold>
     
     private class Band
     {
