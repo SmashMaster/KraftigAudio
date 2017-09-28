@@ -1,6 +1,7 @@
 package kraftig.game;
 
 import com.samrj.devil.geo2d.AAB2;
+import com.samrj.devil.geo3d.Box3;
 import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Util;
@@ -217,6 +218,19 @@ public abstract class Panel implements Savable, Drawable, Focusable
     public void process(int samples)
     {
         
+    }
+    
+    @Override
+    public boolean isVisible(Box3 viewBox)
+    {
+        Box3 box = new Box3(pos, pos);
+        box.min.x -= width;
+        box.max.x += width;
+        box.min.y -= height;
+        box.max.y += height;
+        box.min.z -= width;
+        box.max.z += width;
+        return box.touching(viewBox);
     }
     
     @Override

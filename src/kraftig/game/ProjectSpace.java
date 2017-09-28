@@ -1,6 +1,8 @@
 package kraftig.game;
 
+import com.samrj.devil.geo3d.Box3;
 import com.samrj.devil.graphics.Camera3D;
+import com.samrj.devil.math.Mat4;
 import com.samrj.devil.math.Vec3;
 import com.samrj.devil.math.topo.DAG;
 import java.io.DataInputStream;
@@ -94,10 +96,20 @@ public class ProjectSpace implements Savable
         //Update panel positions.
         for (Panel p : panels) p.updateEdge();
         
-        //Calculate wire splits.
+        //Calculate camera frustum.
+        Vec3[] frustum = camera.getFrustum();
+        Box3 viewBox = Box3.empty();
+        Mat4 invViewMat = Mat4.translation(camera.pos);
+        invViewMat.rotate(camera.dir);
+        for (Vec3 corner : frustum) viewBox.expand(corner.mult(invViewMat));
+        
+        //Add potentially visible geometry.
         List<Drawable> drawList = new ArrayList<>(1024);
-        drawList.addAll(panels);
-        for (Wire w : wires) drawList.addAll(w.updateSplits(panels));
+        for (Panel panel : panels) if (panel.isVisible(viewBox))
+                drawList.add(panel);
+        
+        for (Wire w : wires) for (Drawable d : w.updateSplits(panels))
+            if (d.isVisible(viewBox)) drawList.add(d);
         
         //Sort and draw world objects.
         DAG<Drawable> overlapGraph = new DAG<>();

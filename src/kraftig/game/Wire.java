@@ -1,5 +1,6 @@
 package kraftig.game;
 
+import com.samrj.devil.geo3d.Box3;
 import com.samrj.devil.graphics.Camera3D;
 import com.samrj.devil.graphics.GraphicsUtil;
 import com.samrj.devil.math.Util;
@@ -278,6 +279,15 @@ public class Wire implements Savable
         public float getHeight()
         {
             return (b.pos.y - a.pos.y)*0.5f;
+        }
+        
+        @Override
+        public boolean isVisible(Box3 viewBox)
+        {
+            Box3 box = Box3.empty();
+            box.expand(a.pos);
+            box.expand(b.pos);
+            return box.touching(viewBox);
         }
         
         @Override
