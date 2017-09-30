@@ -104,7 +104,8 @@ public class FFT
     
     public static final float[][] fft(float[] input, float[][] twiddle)
     {
-        return fft(new float[][]{input, input}, twiddle);
+        float[][] complex = new float[][]{input, new float[input.length]};
+        return fft(complex, twiddle);
     }
     
     public static final float[][] fft(float[] input, float[] window, float[][] twiddle)
@@ -112,6 +113,43 @@ public class FFT
         float[] windowed = new float[input.length];
         for (int i=0; i<input.length; i++) windowed[i] = input[i]*window[i];
         return fft(windowed, twiddle);
+    }
+    
+    public static final float[][] ifft(float[][] input, float[][] twiddle)
+    {
+        float[][] swapped = {input[IMAG], input[REAL]};
+        float[][] swapResult = fft(swapped, twiddle);
+        float[][] result = {swapResult[IMAG], swapResult[REAL]};
+        
+        int len = result[REAL].length;
+        float normalize = 1.0f/len;
+        for (int i=0; i<len; i++)
+        {
+            result[REAL][i] *= normalize;
+            result[IMAG][i] *= normalize;
+        }
+        
+        return result;
+    }
+    
+    public static final float[][] mult(float[][] a, float[][] b)
+    {
+        int len = a[REAL].length;
+        if (b[REAL].length != len) throw new IllegalArgumentException();
+        
+        float[][] result = new float[2][len];
+        
+        for (int i=0; i<len; i++)
+        {
+            float realA = a[REAL][i];
+            float imagA = a[IMAG][i];
+            float realB = b[REAL][i];
+            float imagB = b[IMAG][i];
+            result[REAL][i] = realA*realB - imagA*imagB;
+            result[IMAG][i] = realA*imagB + realB*imagA;
+        }
+        
+        return result;
     }
     
     private FFT()
