@@ -186,14 +186,14 @@ public class ProjectSpace implements Savable
             {
                 Panel panel = panels.get(pIn);
                 Jack jack = panel.getJacks().get(jIn);
-                wire.connectIn((OutputJack)jack);
+                if (jack instanceof OutputJack) wire.connectIn((OutputJack)jack);
             }
             
             if (pOut >= 0)
             {
                 Panel panel = panels.get(pOut);
                 Jack jack = panel.getJacks().get(jOut);
-                wire.connectOut((InputJack)jack);
+                if (jack instanceof InputJack) wire.connectOut((InputJack)jack);
             }
             
             wire.load(in);

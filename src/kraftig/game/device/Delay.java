@@ -28,7 +28,7 @@ public class Delay extends Panel
     private final RadioButtons displayRadio;
     private final Knob delayKnob;
     private final TextBox textBox = new TextBox(new Vec2(48.0f, 16.0f), Alignment.E, 24.0f);
-    private final Knob feedbackKnob;
+    private final Knob feedbackKnob, dryKnob, wetKnob;
     private final AudioOutputJack outJack;
     
     private final CircularBuffer left = new CircularBuffer(MAX_DELAY + 8);
@@ -38,6 +38,7 @@ public class Delay extends Panel
     private int delay;
     private int displayMode;
     private float feedback;
+    private float dry, wet;
     
     public Delay()
     {
@@ -46,17 +47,27 @@ public class Delay extends Panel
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Delay", 6.0f),
                         delayKnob = new Knob(24.0f)
-                            .onValueChanged(v -> set((int)Math.round(Math.pow(v, 3.0)*MAX_DELAY), displayMode, feedback))
+                            .onValueChanged(v -> delay = (int)Math.round(Math.pow(v, 3.0)*MAX_DELAY))
                             .setValue(0.5f)),
                     displayRadio = new RadioButtons("N", "ms")
-                        .onValueChanged(v -> set(delay, v, feedback))
+                        .onValueChanged(v -> displayMode = v)
                         .setValue(0),
                     textBox,
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Feedback", 6.0f),
                         feedbackKnob = new Knob(24.0f)
-                            .onValueChanged(v -> set(delay, displayMode, v))
+                            .onValueChanged(v -> feedback = v)
                             .setValue(0.0f)),
+                    new ColumnLayout(8.0f, Alignment.C,
+                        new Label("Dry", 6.0f),
+                        dryKnob = new Knob(24.0f)
+                            .onValueChanged(v -> dry = v)
+                            .setValue(0.75f)),
+                    new ColumnLayout(8.0f, Alignment.C,
+                        new Label("Wet", 6.0f),
+                        wetKnob = new Knob(24.0f)
+                            .onValueChanged(v -> wet = v)
+                            .setValue(0.75f)),
                     outJack = new AudioOutputJack(this, buffer))
                 .setPos(new Vec2(), Alignment.C));
         
@@ -65,17 +76,10 @@ public class Delay extends Panel
         setSizeFromContents(8.0f);
     }
     
-    private void set(int delay, int displayMode, float feedback)
-    {
-        this.delay = delay;
-        this.displayMode = displayMode;
-        this.feedback = feedback;
-    }
-    
     @Override
     public List<Jack> getJacks()
     {
-        return DSPUtil.jacks(inJack, delayKnob, feedbackKnob, outJack);
+        return DSPUtil.jacks(inJack, delayKnob, feedbackKnob, dryKnob, wetKnob, outJack);
     }
     
     @Override
@@ -85,7 +89,7 @@ public class Delay extends Panel
         
         if (in == null)
         {
-            DSPUtil.updateKnobs(samples, delayKnob, feedbackKnob);
+            DSPUtil.updateKnobs(samples, delayKnob, feedbackKnob, dryKnob, wetKnob);
             DSPUtil.zero(buffer, samples);
             left.clear();
             right.clear();
@@ -94,6 +98,8 @@ public class Delay extends Panel
         {
             delayKnob.updateValue(i);
             feedbackKnob.updateValue(i);
+            dryKnob.updateValue(i);
+            wetKnob.updateValue(i);
             
             if (delay == 0)
             {
@@ -110,8 +116,8 @@ public class Delay extends Panel
             
             if (size < delay)
             {
-                buffer[0][i] = 0.0f;
-                buffer[1][i] = 0.0f;
+                buffer[0][i] = in[0][i]*dry;
+                buffer[1][i] = in[1][i]*dry;
                 left.push(l);
                 right.push(r);
             }
@@ -127,8 +133,8 @@ public class Delay extends Panel
                 float fbl = left.poll();
                 float fbr = right.poll();
                 
-                buffer[0][i] = fbl;
-                buffer[1][i] = fbr;
+                buffer[0][i] = in[0][i]*dry + fbl*wet;
+                buffer[1][i] = in[1][i]*dry + fbr*wet;
                 
                 left.push(l + fbl*feedback);
                 right.push(r + fbr*feedback);
@@ -152,6 +158,8 @@ public class Delay extends Panel
         delayKnob.save(out);
         displayRadio.save(out);
         feedbackKnob.save(out);
+        dryKnob.save(out);
+        wetKnob.save(out);
     }
     
     @Override
@@ -161,6 +169,8 @@ public class Delay extends Panel
         delayKnob.load(in);
         displayRadio.load(in);
         feedbackKnob.load(in);
+        dryKnob.load(in);
+        wetKnob.load(in);
     }
     // </editor-fold>
 }
