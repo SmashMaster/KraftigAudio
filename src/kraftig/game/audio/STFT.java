@@ -38,15 +38,12 @@ public class STFT
         this(frame, array -> array);
     }
     
-    public void apply(float[] in, float[] out, int samples)
+    public void apply(float[] in, float[] out, int sample)
     {
-        for (int i=0; i<samples; i++)
-        {
-            float val = in[i];
-            float output = 0.0f;
-            for (Segment segment : segments) output += segment.sample(val);
-            out[i] = output;
-        }
+        float val = in[sample];
+        float output = 0.0f;
+        for (Segment segment : segments) output += segment.sample(val);
+        out[sample] = output;
     }
     
     private class Segment

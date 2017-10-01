@@ -33,8 +33,7 @@ public class DeviceMenu implements UIElement
                 new SpawnButton("System Input", SystemInput::new),
                 new SpawnButton("Analog Synth", AnalogSynth::new),
                 new SpawnButton("Noise Synth", NoiseSynth::new),
-                new SpawnButton("Envelope", Envelope::new),
-                new SpawnButton("Vocoder", Vocoder::new));
+                new SpawnButton("Envelope", Envelope::new));
         
         ColumnLayout effectCat = new ColumnLayout(2.0f, Alignment.C,
                 new Label("Effects", 24.0f),
@@ -42,7 +41,9 @@ public class DeviceMenu implements UIElement
                 new SpawnButton("Biquad Filter", BiquadFilter::new),
                 new SpawnButton("Delay", Delay::new),
                 new SpawnButton("Negate", Negate::new),
-                new SpawnButton("Absolute Value", AbsoluteValue::new));
+                new SpawnButton("Absolute Value", AbsoluteValue::new),
+                new SpawnButton("Vocoder", Vocoder::new),
+                new SpawnButton("Pitch Shift", PitchShift::new));
         
         ColumnLayout utilityCat = new ColumnLayout(2.0f, Alignment.C,
                 new Label("Utility", 24.0f),

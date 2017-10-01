@@ -23,7 +23,7 @@ import kraftig.game.util.DSPUtil;
 public class Vocoder extends Panel
 {
     private final double MIN_FREQ = 20.0, MAX_FREQ = 20000.0;
-    private final Settings ENV_FOLLOWER = new Settings().lowPass(60.0, 1.0);
+    private final Settings ENV_FOLLOWER = new Settings().lowPass(100.0, 1.0);
     
     private final AudioInputJack carrierJack, modulatorJack;
     private final RadioButtons bandRadio;
@@ -44,9 +44,9 @@ public class Vocoder extends Panel
                         carrierJack = new AudioInputJack(),
                         new Label("Modulator", 6.0f),
                         modulatorJack = new AudioInputJack()),
-                    bandRadio = new RadioButtons("32 bands", "16 bands", "8 bands", "4 bands")
-                        .onValueChanged(v -> set(4 << (3 - v), qFactor))
-                        .setValue(3),
+                    bandRadio = new RadioButtons("64 bands", "32 bands", "16 bands", "8 bands", "4 bands")
+                        .onValueChanged(v -> set(4 << (4 - v), qFactor))
+                        .setValue(4),
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Q factor", 6.0f),
                         qFactorKnob = new Knob(24.0f)

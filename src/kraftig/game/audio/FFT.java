@@ -152,6 +152,16 @@ public class FFT
         return result;
     }
     
+    public static final float binFromFreq(float freq, int length, float sampleRate)
+    {
+        return freq*length/sampleRate;
+    }
+    
+    public static final float freqFromBin(float bin, int length, float sampleRate)
+    {
+        return bin*sampleRate/length;
+    }
+    
     private FFT()
     {
     }

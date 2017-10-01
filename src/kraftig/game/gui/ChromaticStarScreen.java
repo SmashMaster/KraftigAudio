@@ -153,7 +153,7 @@ public class ChromaticStarScreen implements UIElement
             float dy = (float)Math.cos(angle);
             
             float index = freq/BIN_RESOLUTION;
-            float amplitude = DSPUtil.cubicSamp(fftAmps, index);
+            float amplitude = DSPUtil.lanczosSamp(fftAmps, index);
             
             float colorF = Util.linstep(36, 108, midi);
             float r = 1.0f - Util.saturate(Util.linstep(0.0f, 0.5f, colorF));

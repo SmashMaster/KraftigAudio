@@ -139,17 +139,28 @@ public class DSPUtil
         return hp0*p0 + hm0*m0 + hp1*p1 + hm1*m1;
     }
     
-//    //Lanczos A=3 sampling
-//    public static float sincSamp(float[] array, float index)
-//    {
-//        int i0 = Util.floor(index);
-//        int i1 = Util.ceil(index);
-//        if (i0 == i1) return samp(array, i0);
-//        
-//        //Do shit here
-//        
-//        return 0.0f;
-//    }
+    private static float sinc(float x)
+    {
+        if (Math.abs(x) < 0.001f) return 1.0f;
+        double pix = Math.PI*x;
+        return (float)(Math.sin(pix)/pix);
+    }
+    
+    public static float lanczosSamp(float[] array, float index)
+    {
+        int middle = Util.floor(index);
+        float sum = 0.0f;
+        
+        for (int i=middle-2; i<=middle+3; i++)
+        {
+            float x = index - i;
+            float lanczos = sinc(x)*sinc(x/3.0f);
+            float val = samp(array, i);
+            sum += val*lanczos;
+        }
+        
+        return sum;
+    }
     
     public static double blit(double freq, double bendedFreq, double time, double phase)
     {
