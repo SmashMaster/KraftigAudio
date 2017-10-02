@@ -6,6 +6,7 @@ import com.samrj.devil.ui.Alignment;
 import kraftig.game.FocusQuery;
 import kraftig.game.Main;
 import kraftig.game.Panel;
+import kraftig.game.SongProperties;
 import kraftig.game.gui.UIElement;
 import kraftig.game.gui.UIFocusQuery;
 import org.lwjgl.glfw.GLFW;
@@ -13,12 +14,14 @@ import org.lwjgl.opengl.GL11;
 
 public class MidiSeqTimeline implements UIElement
 {
+    private final MidiSequencer seq;
     private final MidiSeqCamera camera;
     private final Vec2 pos = new Vec2();
     private final Vec2 radius = new Vec2();
     
     public MidiSeqTimeline(MidiSequencer sequencer, Vec2 radius)
     {
+        seq = sequencer;
         camera = sequencer.getCamera();
         this.radius.set(radius);
     }
@@ -58,7 +61,17 @@ public class MidiSeqTimeline implements UIElement
     @Override
     public void onMouseButton(FocusQuery query, int button, int action, int mods)
     {
-        if (action == GLFW.GLFW_PRESS && button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) camera.drag(true, false);
+        if (action != GLFW.GLFW_PRESS) return;
+        
+        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT)
+        {
+            Vec2 p = camera.toWorld(seq.getMouse());
+            int newPos = Math.round(p.x*Main.SAMPLE_RATE);
+            SongProperties props = seq.getProperties();
+            props.playStartTime += props.position - newPos;
+            props.position = newPos;
+        }
+        else if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE) camera.drag(true, false);
     }
     
     @Override

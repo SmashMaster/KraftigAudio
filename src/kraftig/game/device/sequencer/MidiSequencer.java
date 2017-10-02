@@ -96,6 +96,11 @@ public class MidiSequencer extends Panel implements MidiReceiver
         else return Math.round(timeInSeconds*Main.SAMPLE_RATE);
     }
     
+    public SongProperties getProperties()
+    {
+        return properties;
+    }
+    
     public MidiSeqCamera getCamera()
     {
         return camera;
