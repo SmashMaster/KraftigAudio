@@ -77,6 +77,7 @@ public class NoiseSynth extends Panel
             float v = 0.0f;
             double time = (Main.instance().getTime() + i)*Main.SAMPLE_WIDTH;
             
+            envEditor.updateValues(i);
             ampKnob.updateValue(i);
             
             for (NoiseNote note : notes)

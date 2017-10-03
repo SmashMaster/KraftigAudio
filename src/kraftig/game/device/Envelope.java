@@ -54,6 +54,7 @@ public class Envelope extends Panel
         
         if (notes.length > 0) for (int i=0; i<samples; i++)
         {
+            envEditor.updateValues(i);
             double time = (Main.instance().getTime() + i)*Main.SAMPLE_WIDTH;
             MidiNote note = notes[notes.length - 1];
             float v = (float)(note.getEnvelope(instrument.envelope, time)*2.0 - 1.0);

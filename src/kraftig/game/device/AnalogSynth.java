@@ -92,6 +92,7 @@ public class AnalogSynth extends Panel
             
             double time = (Main.instance().getTime() + i)*Main.SAMPLE_WIDTH;
             
+            envEditor.updateValues(i);
             ampKnob.updateValue(i);
             pitchKnob.updateValue(i);
             phaseKnob.updateValue(i);
