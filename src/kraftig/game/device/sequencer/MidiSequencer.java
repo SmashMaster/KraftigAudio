@@ -181,6 +181,18 @@ public class MidiSequencer extends Panel implements MidiReceiver
             ShortMessage msg = (ShortMessage)message;
             int command = msg.getCommand();
             
+            if (command == ShortMessage.CONTROL_CHANGE)
+            {
+                switch (msg.getData1())
+                {
+                    case 115: properties.back(); break;
+                    case 116: properties.forward(); break;
+                    case 117: properties.stop(); break;
+                    case 118: properties.play(); break;
+                    case 119: recordButton.setValue(!recordButton.getValue()); break;
+                }
+            }
+            
             if (properties.playing && recording)
             {
                 switch (command)
