@@ -12,6 +12,15 @@ public class CircularBuffer
         array = new float[capacity];
     }
     
+    public CircularBuffer(CircularBuffer buffer, int capacity)
+    {
+        this(capacity);
+        
+        size = buffer.getSize();
+        write = size;
+        buffer.read(array, 0, size);
+    }
+    
     public int getCapacity()
     {
         return array.length;

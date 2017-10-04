@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import kraftig.game.Main;
 import kraftig.game.Panel;
+import kraftig.game.audio.DelayLine;
 import kraftig.game.gui.ColumnLayout;
 import kraftig.game.gui.Label;
 import kraftig.game.gui.RadioButtons;
@@ -17,7 +18,6 @@ import kraftig.game.gui.jacks.AudioInputJack;
 import kraftig.game.gui.jacks.AudioOutputJack;
 import kraftig.game.gui.jacks.Jack;
 import kraftig.game.gui.jacks.Knob;
-import kraftig.game.util.CircularBuffer;
 import kraftig.game.util.DSPUtil;
 
 public class Delay extends Panel
@@ -31,8 +31,8 @@ public class Delay extends Panel
     private final Knob feedbackKnob, dryKnob, wetKnob;
     private final AudioOutputJack outJack;
     
-    private final CircularBuffer left = new CircularBuffer(MAX_DELAY + 8);
-    private final CircularBuffer right = new CircularBuffer(MAX_DELAY + 8);
+    private final DelayLine left = new DelayLine();
+    private final DelayLine right = new DelayLine();
     private final float[][] buffer = new float[2][Main.BUFFER_SIZE];
     
     private int delay;
@@ -47,7 +47,7 @@ public class Delay extends Panel
                     new ColumnLayout(8.0f, Alignment.C,
                         new Label("Delay", 6.0f),
                         delayKnob = new Knob(24.0f)
-                            .onValueChanged(v -> delay = (int)Math.round(Math.pow(v, 3.0)*MAX_DELAY))
+                            .onValueChanged(v -> setDelay((int)Math.round(Math.pow(v, 3.0)*MAX_DELAY)))
                             .setValue(0.5f)),
                     displayRadio = new RadioButtons("N", "ms")
                         .onValueChanged(v -> displayMode = v)
@@ -74,6 +74,21 @@ public class Delay extends Panel
         rearInterface.add(new Label("Delay", 48.0f, new Vec2(), Alignment.C));
         
         setSizeFromContents(8.0f);
+        
+        left.setFeedback(this::feedback);
+        right.setFeedback(this::feedback);
+    }
+    
+    private void setDelay(int delay)
+    {
+        left.setLength(delay);
+        right.setLength(delay);
+        this.delay = delay;
+    }
+    
+    private float feedback(float value)
+    {
+        return value*feedback;
     }
     
     @Override
@@ -101,44 +116,11 @@ public class Delay extends Panel
             dryKnob.updateValue(i);
             wetKnob.updateValue(i);
             
-            if (delay == 0)
-            {
-                buffer[0][i] = in[0][i];
-                buffer[1][i] = in[1][i];
-                left.clear();
-                right.clear();
-                continue;
-            }
+            float leftDry = in[0][i];
+            float rightDry = in[1][i];
             
-            float l = in[0][i];
-            float r = in[1][i];
-            int size = left.getSize();
-            
-            if (size < delay)
-            {
-                buffer[0][i] = in[0][i]*dry;
-                buffer[1][i] = in[1][i]*dry;
-                left.push(l);
-                right.push(r);
-            }
-            else
-            {
-                while (size > delay)
-                {
-                    left.poll();
-                    right.poll();
-                    size = left.getSize();
-                }
-                
-                float fbl = left.poll();
-                float fbr = right.poll();
-                
-                buffer[0][i] = in[0][i]*dry + fbl*wet;
-                buffer[1][i] = in[1][i]*dry + fbr*wet;
-                
-                left.push(l + fbl*feedback);
-                right.push(r + fbr*feedback);
-            }
+            buffer[0][i] = leftDry*dry + left.apply(leftDry)*wet;
+            buffer[1][i] = rightDry*dry + right.apply(rightDry)*wet;
         }
     }
     
