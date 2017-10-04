@@ -179,7 +179,7 @@ public final class Main extends Game
             {
                 if (action != GLFW.GLFW_PRESS) return;
                 
-                if (key == GLFW.GLFW_KEY_SPACE)
+                if (key == GLFW.GLFW_KEY_SPACE || key == GLFW.GLFW_KEY_ENTER)
                 {
                     if (menu instanceof DeviceMenu) closeMenu();
                     else if (menu == null) openMenu(new DeviceMenu());
