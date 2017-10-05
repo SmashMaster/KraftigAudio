@@ -40,6 +40,7 @@ public class DeviceMenu implements UIElement
                 new SpawnButton("Gain", Gain::new),
                 new SpawnButton("Biquad Filter", BiquadFilter::new),
                 new SpawnButton("Delay", Delay::new),
+                new SpawnButton("Reverb", ReverbDevice::new),
                 new SpawnButton("Negate", Negate::new),
                 new SpawnButton("Absolute Value", AbsoluteValue::new),
                 new SpawnButton("Vocoder", Vocoder::new),

@@ -9,6 +9,15 @@ public class DelayLine
     private int length;
     private FloatFunction feedbackFunc = null;
     
+    public DelayLine()
+    {
+    }
+    
+    public DelayLine(FloatFunction feedbackFunc)
+    {
+        this.feedbackFunc = feedbackFunc;
+    }
+    
     public void setLength(int length)
     {
         if (buffer.getCapacity() < length)
