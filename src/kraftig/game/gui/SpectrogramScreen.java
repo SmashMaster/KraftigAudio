@@ -122,7 +122,7 @@ public class SpectrogramScreen implements UIElement
             float real = fft[0][i];
             float imag = fft[1][i];
             float amplitude = (float)Math.sqrt(real*real + imag*imag);
-            float y = amplitude*8.0f/HALF_WINDOW - 1.0f;
+            float y = amplitude*16.0f/HALF_WINDOW - 1.0f;
             
             GL11.glVertex2f(x, clamp(y));
         }
